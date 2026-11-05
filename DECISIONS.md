@@ -25,3 +25,20 @@
 - Whether advanced CAM needs only UX integrations over native FreeCAD CAM or a substantial dedicated interface.
 
 For each new accepted decision record date, rationale, alternatives and compatibility/test impact. A design idea is not a decision until grounded in implementation or user instruction.
+
+## Engineering rationale from the implementation session — 2026-11-05
+
+- Stable Az FeaturePython identity allows Join/Cut/Intersect edits without swapping
+  object classes. Geometry remains exact native Pad/Pocket/OCCT; keep the add-on
+  installed to recompute. This is a compatibility tradeoff, not pure-native Pad storage.
+- Reuse an Undo-disabled, hidden temporary GUI calculation document. Closing one
+  per preview committed FreeCAD's application-wide edit transaction and broke Cancel.
+  Keep the user transaction persistent until OK/Cancel and cancel it on workbench exit.
+- Transfer exact geometry through BREP to remove calculation-document topology IDs;
+  this fixed native downstream Fillet on dimension changes. Topology changes can
+  still require native face/edge reselection; no full topology-repair claim is made.
+- Coin owns native viewport dragging; a Qt timer transfers its field values. The
+  shipped Pivy remove*Callback path reproducibly segfaulted, so that API is avoided.
+- Supported Q edits preserve recognized driving dimensions and refuse unsafe
+  arbitrary surface offsets. History insertion preserves explicit source references
+  and rejects branching rather than silently changing downstream design intent.

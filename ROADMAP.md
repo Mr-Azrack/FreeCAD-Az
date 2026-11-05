@@ -9,7 +9,8 @@
 - [x] v0.2 selected exact sketch regions, compound sketch geometry, interactive preview, Join/Cut/Intersect/New body, viewport distance handles and multiple extents.
 - [x] v0.2 supported Press/Pull, parameters via native spreadsheet, Body Tip rollback and suppression, saved parametric Az features.
 - [x] Recorded Linux FreeCAD 1.0.0 geometry and GUI validation for v0.2.
-- [ ] Confirm CI status, owner acceptance, and full Windows on-machine integration and document round-trip.
+- [x] Confirm add-on native modeling and package CI for v0.2 (run 42100114683).
+- [ ] Owner acceptance and full Windows on-machine integration and document round-trip.
 
 **Gate:** reproduce a representative shop part on the intended Windows machine and confirm save/reopen, Undo/Redo, export, Az/native feature interoperability, cancellation and install/upgrade/rollback.
 

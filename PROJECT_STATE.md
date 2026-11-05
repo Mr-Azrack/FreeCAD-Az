@@ -21,11 +21,11 @@ Build an independently maintainable FreeCAD-based CAD workflow approaching Fusio
 - Real Body Tip rollback, suppression and insertion for supported feature histories; reversible native transactions, mixed native/Az operations and saved geometric references.
 - v0.2 Az custom parametric features use FreeCAD Pad/Pocket and OCCT evaluation, and require Az Design present for editing/recomputation. Cached geometry is preserved in saved FCStd; v0.1 native Pad/Pocket features remain native without migration.
 
-## Test evidence in repository (not newly rerun here)
+## Validation provenance
 
 - addons/AzDesign/tests/validation-v02-linux.json records **26 passing modeling tests**, **4 passing installer tests**, passing v0.2 GUI workflow checks, passing original 30-item navigation/native workflow checks, and a recorded manual mouse-drag diagnostic.
 - Environment evidenced: FreeCAD 1.0.0, Linux / Qt5 / PySide2.
-- The current documentation session inspected these records and code changes but **did not independently execute FreeCAD or validate the Windows installation**.
+- The continuity-only checkpoint at f500e727 inspected these records without executing FreeCAD. The implementation session separately executed the tests summarized below; neither session validated Windows.
 - Existing CI workflow in .github/workflows/az-design.yml includes packaging and modeling checks; current check-run status must be fetched before calling CI green.
 
 ## Unresolved gaps and restrictions
@@ -42,3 +42,20 @@ Build an independently maintainable FreeCAD-based CAD workflow approaching Fusio
 Install Az Design 0.2 on the intended Windows workstation and complete a representative fabrication part: multi-region sketch, parametric extrusion, Press/Pull edit, rollback/recompute, undo/redo, save/reopen, STEP export, and native-workbench switch. Record exact OS/FreeCAD/Qt version and pass/fail per step. Do not claim this checkpoint complete before it is actually run.
 
 This file is a **dated snapshot**, not a replacement for inspecting the current branch HEAD, diffs, tests and PR. Read AGENTS.md and SESSION_HANDOFF.md before changing code.
+
+## Implementation-session verification — 2026-11-05
+
+For code commit `dac67fee9cebb9cb7e342a45098fd913510f10f6`, the implementation
+session personally ran **26** native modeling tests, **27** desktop workflow
+checks, **30** original modeling/navigation checks and **4** installer tests;
+all passed on FreeCAD 1.0.0 / Linux / Qt5/PySide2. A real mouse drag from 2 mm to
+11.6486 mm updated the solid; Cancel restored geometry and transaction state.
+Mixed native/Az Fillet history survives upstream dimensional edits and reopening.
+Cached FCStd solids were separately opened without importing the Az module.
+
+[Az add-on CI run 42100114683](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42100114683)
+passed both native modeling and package jobs. The inherited Dependency Review
+workflow failed because this fork's Dependency graph is disabled/unsupported;
+no repository settings were changed. Do not call repository-wide upstream CI all
+green. Formatting, source/XML and ZIP integrity checks passed. Installer SHA256:
+`b7cc3ac7c97cfe8a26b29085e7efd230c0cf92fbf507e9e7f75ce5cca765579e`.

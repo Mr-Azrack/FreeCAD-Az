@@ -38,3 +38,27 @@ This is a checkpoint, **not a pinned current HEAD**. Always fetch branch HEAD an
 Record: date/time; actual branch and HEAD; exact files/commits; tests run and results; CI/PR status; uncommitted changes; open risks; next reproducible action; any local-only artifacts or tool/environment limits.
 
 **Rule:** Git is the authoritative memory, and this handoff points to it.
+
+## Implementation-session completion update — 2026-11-05
+
+**Tested code:** `dac67fee9cebb9cb7e342a45098fd913510f10f6`. **Inspected docs parent:**
+`f500e7271468a21ff3e7b9d3ad8a8fe1c9c400d2`. This update preserves the concurrent
+continuity edits and adds fresh implementation/CI facts; query Git for the new tip.
+
+The implementation session ran and passed 26 native tests, 27 desktop workflow
+checks, 30 original modeling/navigation checks and 4 installer tests on FreeCAD
+1.0/Linux/Qt5. Manual mouse dragging and cross-call Cancel passed. Native Fillet
+survives upstream Az dimension edits; mixed native/Az history reopens. The checked-in
+`validation-v02-linux.json` contains the evidence. Windows remains untested.
+
+[CI run 42100114683](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42100114683)
+passed package and native modeling jobs. Inherited Dependency Review is blocked by
+this fork's disabled/unsupported Dependency graph; repository-wide CI is not all green.
+PR #1 remains draft. No merge to main or repository setting change was performed.
+
+Source, installer and evidence are committed; no CAD implementation changes remain
+uncommitted. Local launchers, fault probes and generated example FCStd files were
+transient diagnostics outside the checkout and are not needed for recovery. Next:
+perform the Windows shop-part acceptance workflow listed above, record actual
+versions/results, then choose the next measured usability gap. Do not duplicate the
+already implemented profile selection, parameters, Q or rollback from stale notes.
