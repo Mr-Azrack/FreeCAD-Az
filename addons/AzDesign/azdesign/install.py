@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Local-only installer. Existing installations are kept as dated backups."""
+
 import os
 import shutil
 import tempfile

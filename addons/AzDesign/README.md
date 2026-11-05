@@ -1,111 +1,167 @@
-# Az Design
+# Az Design 0.2
 
-A Fusion-inspired modeling workbench for **FreeCAD-Az**, installable in standard
-FreeCAD without compiling the application. Independent of Autodesk; it uses
-FreeCAD's geometry engine, native commands and native document format.
+A Fusion-inspired modeling workspace for **FreeCAD-Az**. Install it in standard
+**FreeCAD 1.0 or newer** without compiling the fork. All code is in this repository
+and can be changed as our shop workflow develops. This is an independent project;
+Autodesk code and artwork are not included.
 
-## Install
+## Install or update
 
-1. Download the **AzDesign-0.1.0.zip** package and extract it.
+1. Download **[AzDesign-0.2.0.zip](../releases/AzDesign-0.2.0.zip)** and extract it.
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
-3. Confirm the installation, restart FreeCAD, and select **Az Design** from the
-   workbench selector.
+3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
+   the workbench selector.
 
-The installer runs locally, needs no administrator rights, and backs up an
-existing installation before replacing it. Backups live in `AzDesign-backups`
-beside FreeCAD's `Mod` folder, so FreeCAD will not load a second copy.
+The installer needs no administrator rights. An existing installation is backed
+up in `AzDesign-backups` beside FreeCAD's `Mod` directory before replacement.
+For manual installation, copy the **AzDesign** folder into the `Mod` folder under
+`App.getUserAppDataDir()` and restart FreeCAD.
 
-For manual installation, copy the **AzDesign** folder into the `Mod` folder
-inside FreeCAD's user data directory, then restart. The exact directory can be
-printed in FreeCAD's Python console with `App.getUserAppDataDir()`.
+## Build a part
 
-## First part
+1. **Create Sketch** on XY, XZ, YZ or a selected planar face.
+2. Draw geometry. **D** starts native Smart Dimension for the selected line,
+   circle, points or angle. Finish Sketch returns to the Solid ribbon.
+3. Press **E**. A single region is selected automatically. For a sketch with
+   several regions, click its shaded areas in the view or tick the profile list.
+   Nested loops, crossing dividers and overlapping closed profiles form separate
+   selectable regions. Curves stay exact; they are not converted to polygons.
+4. Type a distance (`6 mm`, `1/4 in`, `10 mm + 2 mm`, `Parameters.Thickness`) or
+   drag the blue arrow in the viewport. Choose **Auto**, **Join**, **Cut**,
+   **Intersect** or **New body** and inspect the live solid before choosing OK.
+5. Select edges for native Fillet or Chamfer. Sketch on another face for a boss,
+   pocket or hole. Native Part Design features can follow Az extrusion features.
 
-1. **Create Sketch**. Choose XY, XZ or YZ, or select a flat solid face first.
-2. Draw a closed rectangle or circle, add dimensions, then **Finish Sketch**.
-3. **Extrude**, enter a distance such as `6 mm` or `1/4 in`, and choose **OK**.
-4. Select a face, make another sketch, finish it and choose **Cut**.
-5. Select solid edges to apply **Fillet** or **Chamfer**.
+**Auto** cuts when the extruded volume overlaps the target, joins when it touches,
+and creates a new body when it is separate. Select a target Body explicitly when
+working with several bodies. Negative distances reverse direction. Explicit Cut
+uses FreeCAD Pocket's inward direction; Flip reverses it.
 
-Extrude and Cut have live previews. Cancel discards the entire preview; accepting
-creates a native `PartDesign::Pad` or `PartDesign::Pocket`. Each operation is one
-undoable document transaction. A part saved as `.FCStd` remains editable without
-Az Design installed.
+Disconnected regions in **New body** become separate Bodies. A Body contains one
+connected solid. Distance supports **One side**, **Symmetric** (total distance) and
+**Two sides** (independent distances and handles). **Through all** is available for
+Cut. **To face** picks an existing planar end face. Those two extents use One side.
+Expand **Start offset and taper** for signed offsets and draft angles.
 
-## Interface
+Cancel restores the model, Body Tips, visibility and preview objects. OK commits
+one undoable edit. Leaving Az Design cancels an unfinished Az modeling task.
 
-- **Solid / Sketch / Utilities ribbon:** grouped tools with familiar names.
-- **Browser on the left, Tasks on the right:** native FreeCAD trees, properties
-  and editing dialogs.
-- **Feature history along the bottom:** click to select, double-click to edit,
-  right-click for rename and visibility. This is a creation-order feature list,
-  not a rollback or drag-to-reorder timeline.
-- **S:** search tools by familiar name or their FreeCAD command ID.
-- **Mouse:** middle button pans, Shift + middle button orbits, wheel zooms.
-  Native Fusion navigation is used when available; otherwise Az temporarily
-  adapts FreeCAD's Blender navigation while this workbench is active.
-- **Utilities → Native CAD:** return to Part Design and restore the prior dock,
-  toolbar and camera-navigation setup. **Manufacture** opens the installed CAM
-  workbench.
+## Q: Press / Pull
 
-Shortcuts apply in the modeling workspace, not while typing in text fields,
-task controls, the Python console or modal dialogs. Existing FreeCAD shortcuts
-are not rewritten.
+| Selection | Behavior |
+| --- | --- |
+| Sketch or no selection | Open the profile extrusion workflow |
+| End cap of a supported one-sided Az extrusion or native Pad | Offset its driving Length, preserving tapered walls and parameter expressions |
+| Other planar face with prismatic side walls | Preview an outward Join or inward Cut from that face |
+| Cylinder generated by a unique editable sketch circle | Edit its driving diameter; an unconstrained circle receives a driving dimension |
+| Native Cylinder or Hole's main cylindrical face | Edit its Radius or Diameter parameter |
+| Solid edge | Open native Fillet |
+
+End-face offsets are signed changes from the original length. Cylinder edits are
+absolute diameters. Unsupported curved/imported surfaces and ambiguous source
+circles produce an explanation instead of creating an unrelated solid. General
+surface offsets and healing of arbitrary imported models remain future work.
+
+## Parameters
+
+Choose **Utilities → Parameters** (also under Solid → Modify → More). Add named
+user parameters, edit model dimensions and choose **Update model** to inspect the
+result. OK commits; Cancel restores the original model.
+
+User parameters live in a native `Parameters` Spreadsheet. A value can be `8 mm`,
+`1/4 in` or a spreadsheet formula such as `=Thickness / 2`. Model dimensions use
+native expressions such as `Parameters.Thickness`. Driving sketch constraints and
+common feature lengths, radii and angles appear in the same task. Existing alias
+names are fixed in this editor; use the native Spreadsheet for structural edits.
+
+## Editable history
+
+The bottom strip follows each Body's native feature order. Click to select and
+double-click to edit. Right-click a solid feature for **Roll back here**,
+**Suppress / Unsuppress**, **Resume latest history**, visibility or rename.
+
+Rollback changes the real Body Tip and shows that stage of the solid. New Az
+extrusions insert at that position and rebase the next unique feature. Resume
+Latest restores the saved end of that Body. Explicit sketch/face references stay
+anchored to their original features; insertion does not rewrite design intent.
+Branched histories and edits that break downstream features are rejected.
+
+This is not a drag-to-reorder Fusion timeline. Topology-changing edits may require
+reselecting native downstream face/edge references. Az region and planar-face
+references record geometric intent and ask for reselection when ambiguous.
+
+## Interface and navigation
+
+- **Solid / Sketch / Utilities ribbon**, native Browser on the left and Tasks on
+  the right. Context follows sketch editing without changing workbenches.
+- **S** searches tools by familiar name or native command ID.
+- Middle button pans, **Shift + middle button** orbits, wheel zooms. Native Fusion
+  navigation is used when available; otherwise Az adapts Blender navigation.
+- **Native CAD** restores the prior layout, toolbars and camera navigation.
+  **Manufacture** opens the installed native CAM workbench.
 
 | Context | Shortcuts |
 | --- | --- |
-| Solid | E / Q Extrude; F Fillet; H Hole; M Move; S Find a Tool |
-| Sketch | L Line; R Rectangle; C Circle; D Distance; T Trim; P Project; X Construction; S Find a Tool |
+| Solid | E Extrude; Q Press/Pull; F Fillet; H Hole; M Move; S Find a Tool |
+| Sketch | L Line; R Rectangle; C Circle; D Smart Dimension; T Trim; P Project; X Construction; S Find a Tool |
 
-## Current scope
+Shortcuts do not intercept typing in task controls, text fields, the Python
+console or modal dialogs. Existing FreeCAD shortcuts are not rewritten.
 
-Version 0.1 provides the interface and a practical sketch-to-solid workflow.
-It uses whole closed sketches as extrusion profiles and supports a single
-connected solid per Body. Choosing individual sketch regions, a Fusion-style
-Press/Pull face offset, feature rollback/reordering, assembly redesign and CAM
-interface changes are not implemented. Q currently opens Extrude. D is a
-distance constraint; circle diameters are in the Constraints menu. Fillet,
-Revolve, Shell and the remaining native tools still use FreeCAD task dialogs.
+## Saved models and compatibility
 
-Verified in **FreeCAD 1.0.0 on Linux with Qt 5 / PySide2**. The binding adapter
-also supports PySide6, but Windows, macOS and FreeCAD 1.1 have not been tested.
+**Version 0.2 extrusion results are parametric Az features**, evaluated with
+FreeCAD's native Pad/Pocket and exact OCCT boolean algorithms. Keep Az Design
+installed to edit/recompute those features. Their cached shapes remain available
+in `.FCStd`; export STEP for an independent solid exchange file. The v0.1 native
+Pad/Pocket models remain native and are not migrated or rewritten.
 
-## Improve it
+Verified on **FreeCAD 1.0.0, Linux, Qt 5 / PySide2**. Windows, macOS, PySide6 and
+FreeCAD 1.1 have not been verified. Native Revolve, Loft, Sweep, Fillet, Hole,
+Shell, patterns and CAM still use FreeCAD dialogs. Assembly/joint workflows,
+Fusion-style CAM setup and arbitrary direct surface modeling are not redesigned.
 
-All new work lives in `addons/AzDesign` in **Mr-Azrack/FreeCAD-Az**.
-No changes to FreeCAD's C++ core are required for this version.
+## Develop and verify
 
-| File | Responsibility |
+| Module | Responsibility |
 | --- | --- |
-| `azdesign/catalog.py` | Tool labels, ribbon groups and shortcut maps |
-| `azdesign/ui.py` | Ribbon, command palette and feature history |
-| `azdesign/modeling.py` | Body/sketch workflow, native feature previews and transactions |
-| `azdesign/session.py` | Temporary layout, input routing and restoration |
-| `azdesign/commands.py` | FreeCAD command registration and adapters |
-| `azdesign/install.py` | Local installer and backup behavior |
+| `catalog.py`, `commands.py` | Editable ribbon, shortcuts and command adapters |
+| `profiles.py`, `references.py` | Exact planar regions and saved geometric references |
+| `features.py`, `operations.py` | Parametric solids, body frames, previews and transactions |
+| `tasks.py`, `manipulator.py`, `presspull.py` | Profile/face picking, viewport arrows and Q workflows |
+| `parameters.py`, `history.py` | Native expressions, user parameters, rollback and insertion |
+| `modeling.py` | Body/sketch setup and retained v0.1 native adapters |
+| `ui.py`, `session.py` | Ribbon, palette, history and scoped layout/navigation |
+| `install.py` | Local installer, backup and recovery |
 
-Run `python3 addons/AzDesign/tests/test_install.py` for installer regression tests.
-Run `python3 tools/package_azdesign.py` from the repository root to build a ZIP.
-The package does not require a full FreeCAD source build.
+Run from the repository root:
 
-For the geometry and UI integration checks, load the workbench in FreeCAD, then
-run this in **View → Panels → Python console**, substituting local paths:
+```sh
+python3 addons/AzDesign/tests/test_install.py
+/usr/bin/python3 addons/AzDesign/tests/run_workflow.py
+python3 tools/package_azdesign.py
+```
+
+The modeling runner uses a packaged FreeCAD runtime and its matching Python.
+Set `FREECAD_LIB_DIR` for other installations. GitHub CI installs Debian's native
+runtime and runs the geometry/parameter/history tests in addition to packaging.
+
+For desktop tests, load Az Design and run in **View → Panels → Python console**:
 
 ```python
 import runpy
-suite = runpy.run_path('/path/to/AzDesign/tests/integration.py')
-suite['run']('/path/to/results.json', '/path/to/test_plate.FCStd')
+suite = runpy.run_path('/path/to/AzDesign/tests/integration_v02.py')
+suite['run']('/path/to/results.json', '/path/to/test_part.FCStd')
 ```
 
-The checks exercise exact extrusion and cut volumes, unit conversion, input
-rejection, Undo/Redo, Cancel restoration, sketch editing without a workbench
-jump, repeated activation, layout/navigation cleanup and native file reopening.
-They create a separate test document and leave it open for visual inspection.
+The native Smart Dimension tool may wait for Escape before the test continues.
+`integration.py` also retains the original native-feature, navigation and layout
+regressions. Test reports are checked into `tests/validation-v02-linux.json`.
+These tests create separate test documents and leave results open for inspection.
 
 ## License and provenance
 
-New code is LGPL-2.1-or-later, compatible with the parent project. FreeCAD icons
-are accessed from the installed application; Autodesk code, icons and artwork
-are not included. This work was produced with OpenAI Codex assistance for the
-FreeCAD-Az fork and requires owner review before any upstream submission.
+New code is **LGPL-2.1-or-later**. FreeCAD icons are resolved from the installed
+application. This fork's changes were produced with OpenAI Codex assistance and
+require owner review before an upstream submission.

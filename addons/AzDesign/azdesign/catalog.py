@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """The editable command layout. Labels never replace FreeCAD command IDs."""
+
 from dataclasses import dataclass
 
 
@@ -21,10 +22,30 @@ TOOLS = {
     "extrude": Tool(
         "Extrude",
         "Az_Extrude",
-        "E · Add material from a closed sketch. Enter mm, inches or a length expression.",
+        "E · Select sketch regions or a planar face. Preview Join, Cut, Intersect or New body.",
+        "extrude",
+    ),
+    "cut": Tool(
+        "Cut", "Az_Cut", "Remove selected sketch regions or a planar face.", "PartDesign_Pocket"
+    ),
+    "presspull": Tool(
+        "Press / Pull",
+        "Az_PressPull",
+        "Q · Offset an end face, resize an editable cylinder, extrude profiles or fillet an edge.",
         "PartDesign_Pad",
     ),
-    "cut": Tool("Cut", "Az_Cut", "Remove material from a closed sketch.", "PartDesign_Pocket"),
+    "parameters": Tool(
+        "Parameters",
+        "Az_Parameters",
+        "Edit user parameters and native model dimensions.",
+        "Spreadsheet_CreateSheet",
+    ),
+    "resume": Tool(
+        "Resume History",
+        "Az_ResumeHistory",
+        "Resume every Body at its saved latest feature.",
+        "Std_SkipRecompute",
+    ),
     "revolve": Tool("Revolve", "PartDesign_Revolution", "Revolve a selected sketch about an axis."),
     "loft": Tool("Loft", "PartDesign_AdditiveLoft", "Join sketch sections with a solid loft."),
     "sweep": Tool("Sweep", "PartDesign_AdditivePipe", "Sweep a profile along a selected path."),
@@ -77,8 +98,9 @@ TOOLS = {
     ),
     "dimension": Tool(
         "Dimension",
-        "Sketcher_ConstrainDistance",
-        "D · Set a length or distance between selected elements.",
+        "Az_Dimension",
+        "D · Smart dimension: length, distance, radius, diameter or angle from the selection.",
+        "Sketcher_Dimension",
     ),
     "horizontal": Tool(
         "Horizontal", "Sketcher_ConstrainHorizontal", "Constrain selected lines horizontally."
@@ -124,7 +146,16 @@ SOLID = [
         "CREATE",
         ["sketch", "extrude", "cut", "revolve", ("More", ["loft", "sweep", "hole", "body"])],
     ),
-    ("MODIFY", ["fillet", "chamfer", "shell", "mirror", ("Pattern", ["pattern", "polar"])]),
+    (
+        "MODIFY",
+        [
+            "presspull",
+            "fillet",
+            "chamfer",
+            "shell",
+            ("More", ["mirror", "pattern", "polar", "move", "parameters"]),
+        ],
+    ),
     ("CONSTRUCT", ["plane"]),
     ("INSPECT", ["measure", "home"]),
 ]
@@ -146,12 +177,12 @@ SKETCH = [
 UTILITIES = [
     ("DESIGN", ["new", "open", "save", "export"]),
     ("WORKFLOW", ["cam", "native"]),
-    ("SETTINGS", ["preferences", "help"]),
+    ("SETTINGS", ["parameters", "resume", "preferences", "help"]),
 ]
 
 SOLID_KEYS = {
     "E": "extrude",
-    "Q": "extrude",
+    "Q": "presspull",
     "F": "fillet",
     "H": "hole",
     "M": "move",

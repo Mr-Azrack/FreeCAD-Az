@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Temporary layout, contextual shortcuts and Fusion-style mouse navigation."""
+
 import traceback
 import FreeCAD as App
 import FreeCADGui as Gui
@@ -251,6 +252,9 @@ class Session:
                 self.last_problem = problem
 
     def deactivate(self):
+        from .tasks import cancel_active
+
+        cancel_active()
         self.active = False
         self.timer.stop()
         QtWidgets.QApplication.instance().removeEventFilter(self.filter)

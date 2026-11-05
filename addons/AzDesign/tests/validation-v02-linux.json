@@ -1,0 +1,202 @@
+{
+  "version": "0.2.0",
+  "date": "2026-11-05",
+  "platform": "Linux / Qt5 / PySide2",
+  "freecad_version": [
+    "1",
+    "0",
+    "0",
+    "",
+    "https://code.launchpad.net/~vcs-imports/freecad/trunk",
+    "2026/08/25 11:49:11"
+  ],
+  "modeling": {
+    "passed": true,
+    "count": 26,
+    "command": "/usr/bin/python3 addons/AzDesign/tests/run_workflow.py",
+    "output": "test_automatic_inward_cut_and_outward_join (test_workflow.WorkflowTest.test_automatic_inward_cut_and_outward_join) ... ok\ntest_cylinder_diameter_edits_its_driving_sketch (test_workflow.WorkflowTest.test_cylinder_diameter_edits_its_driving_sketch) ... ok\ntest_diagonal_and_grid_form_exact_regions (test_workflow.WorkflowTest.test_diagonal_and_grid_form_exact_regions) ... ok\ntest_disconnected_profiles_create_separate_bodies (test_workflow.WorkflowTest.test_disconnected_profiles_create_separate_bodies) ... ok\ntest_edit_operation_keeps_feature_identity (test_workflow.WorkflowTest.test_edit_operation_keeps_feature_identity) ... ok\ntest_feature_reopens_and_recomputes (test_workflow.WorkflowTest.test_feature_reopens_and_recomputes) ... ok\ntest_join_cut_and_intersect_switch_in_one_preview (test_workflow.WorkflowTest.test_join_cut_and_intersect_switch_in_one_preview) ... ok\ntest_native_fillet_recomputes_after_custom_extrude_edits (test_workflow.WorkflowTest.test_native_fillet_recomputes_after_custom_extrude_edits) ... ok\ntest_native_pad_can_follow_an_az_feature (test_workflow.WorkflowTest.test_native_pad_can_follow_an_az_feature) ... ok\ntest_new_body_reuses_empty_sketch_body (test_workflow.WorkflowTest.test_new_body_reuses_empty_sketch_body) ... ok\ntest_open_sketch_has_actionable_error (test_workflow.WorkflowTest.test_open_sketch_has_actionable_error) ... ok\ntest_overlap_and_nested_loops_are_separate_regions (test_workflow.WorkflowTest.test_overlap_and_nested_loops_are_separate_regions) ... ok\ntest_parameter_names_and_duplicate_aliases_are_validated (test_workflow.WorkflowTest.test_parameter_names_and_duplicate_aliases_are_validated) ... ok\ntest_presspull_rejects_unsafe_face_prisms (test_workflow.WorkflowTest.test_presspull_rejects_unsafe_face_prisms) ... ok\ntest_presspull_resizes_a_tapered_end_cap (test_workflow.WorkflowTest.test_presspull_resizes_a_tapered_end_cap) ... ok\ntest_profile_selection_and_expression_are_parametric (test_workflow.WorkflowTest.test_profile_selection_and_expression_are_parametric) ... ok\ntest_real_rollback_and_feature_insertion (test_workflow.WorkflowTest.test_real_rollback_and_feature_insertion) ... ok\ntest_region_tracks_dimension_changes (test_workflow.WorkflowTest.test_region_tracks_dimension_changes) ... ok\ntest_source_body_placement_recomputes_a_separate_body (test_workflow.WorkflowTest.test_source_body_placement_recomputes_a_separate_body) ... ok\ntest_suppression_passes_through_the_actual_base (test_workflow.WorkflowTest.test_suppression_passes_through_the_actual_base) ... ok\ntest_symmetric_two_sided_and_start_offset (test_workflow.WorkflowTest.test_symmetric_two_sided_and_start_offset) ... ok\ntest_taper_uses_native_algorithm (test_workflow.WorkflowTest.test_taper_uses_native_algorithm) ... ok\ntest_through_all_and_to_face (test_workflow.WorkflowTest.test_through_all_and_to_face) ... ok\ntest_unconstrained_circle_gets_a_cancellable_dimension (test_workflow.WorkflowTest.test_unconstrained_circle_gets_a_cancellable_dimension) ... ok\ntest_undo_redo_and_cancel_are_atomic (test_workflow.WorkflowTest.test_undo_redo_and_cancel_are_atomic) ... ok\ntest_user_parameters_drive_dimensions_and_cancel_atomically (test_workflow.WorkflowTest.test_user_parameters_drive_dimensions_and_cancel_atomically) ... ok\n\n----------------------------------------------------------------------\nRan 26 tests in 3.435s\n\nOK\n"
+  },
+  "installer": {
+    "passed": true,
+    "count": 4,
+    "command": "python3 addons/AzDesign/tests/test_install.py",
+    "output": "....\n----------------------------------------------------------------------\nRan 4 tests in 0.004s\n\nOK\n"
+  },
+  "workflow_gui": {
+    "freecad_version": [
+      "1",
+      "0",
+      "0",
+      "",
+      "https://code.launchpad.net/~vcs-imports/freecad/trunk",
+      "2026/08/25 11:49:11"
+    ],
+    "checks": [
+      "nested sketch exposes two independently selectable regions",
+      "multi-region sketch starts in canvas profile selection",
+      "canvas selection toggles the exact profile",
+      "live selected-region preview is an exact solid",
+      "native viewport distance dragger is installed",
+      "viewport dragger updates the distance and solid",
+      "Cancel restores all objects including preview overlays",
+      "OK commits the complete operation",
+      "accepted document has no presentation geometry",
+      "native file has one valid Body with exact geometry",
+      "one Undo removes the solid and retains source sketch",
+      "Redo restores the editable custom feature",
+      "face profile switches from Join to Cut in one task",
+      "two-sided operation creates two independent handles",
+      "face extrusion accepts",
+      "editing retains feature identity",
+      "rollback changes the Body Tip",
+      "resume restores the latest native history position",
+      "Q on an end face edits the originating length",
+      "Press/Pull Cancel restores its source dimension",
+      "Parameters updates exact geometry through native expressions",
+      "D starts native Smart Dimension without leaving Az Design",
+      "saved model reopens and recomputes feature proxies and face references",
+      "native downstream Fillet survives an upstream Az dimension edit",
+      "mixed native and Az feature history reopens correctly",
+      "leaving the workbench cancels an unfinished Az task",
+      "history omits all transient presentation objects"
+    ],
+    "passed": true,
+    "preview_diagnostic": {
+      "valid": true,
+      "status": "New body \u00b7 1 body \u00b7 23528.761 mm\u00b3",
+      "outputs": [
+        [
+          "Extrude",
+          6.0,
+          23528.761101961525,
+          ""
+        ]
+      ]
+    }
+  },
+  "native_navigation_gui": {
+    "freecad_version": [
+      "1",
+      "0",
+      "0",
+      "",
+      "https://code.launchpad.net/~vcs-imports/freecad/trunk",
+      "2026/08/25 11:49:11"
+    ],
+    "checks": [
+      "all catalog commands are registered",
+      "one ribbon is visible",
+      "base sketch is fully constrained",
+      "extrude preview creates an exact 80 x 50 x 6 solid",
+      "extrude creates a native Pad",
+      "one Undo removes the complete extrusion",
+      "Redo restores exact volume",
+      "cut preview removes the specified cylinder",
+      "cut creates a native Pocket",
+      "Cancel removes every preview object",
+      "Cancel restores the previous Body Tip",
+      "Cancel restores visibility",
+      "invalid dimensions are rejected",
+      "inch fractions convert exactly",
+      "history follows native features",
+      "editing a sketch stays in Az Design",
+      "sketch editing preference is immediately restored",
+      "native sketch editor opens",
+      "Finish Sketch stays in Az Design",
+      "compatible camera navigation exists",
+      "middle mouse pans without rotating",
+      "Shift plus middle mouse orbits",
+      "leaving restores camera navigation",
+      "leaving removes the ribbon",
+      "re-entry creates exactly one ribbon",
+      "saved objects require no custom proxies",
+      "temporary ribbon hiding preserves native toolbar preferences",
+      "switching to native CAD preserves its modeling toolbar",
+      "switching back restores the Az ribbon",
+      "native file reopens with exact cut geometry"
+    ],
+    "passed": true,
+    "viewport_class": "Gui::View3DInventorViewer",
+    "mouse_pan": {
+      "before": [
+        0.4247081321999479,
+        0.1759200437218226,
+        0.339851090706265,
+        0.8204732639190053
+      ],
+      "after": [
+        0.4247081321999479,
+        0.1759200437218226,
+        0.339851090706265,
+        0.8204732639190053
+      ],
+      "position_before": [
+        66.37660217285156,
+        -1.0179195404052734,
+        30.770530700683594
+      ],
+      "position_after": [
+        59.701446533203125,
+        -4.916677474975586,
+        33.54692840576172
+      ]
+    }
+  },
+  "manual_mouse_drag": {
+    "before": {
+      "names": [
+        "Body",
+        "Origin",
+        "X_Axis",
+        "Y_Axis",
+        "Z_Axis",
+        "XY_Plane",
+        "XZ_Plane",
+        "YZ_Plane",
+        "PlateSketch",
+        "Extrude",
+        "Extrude001",
+        "Parameters"
+      ],
+      "length": 2.0,
+      "volume": 43136.062020262805
+    },
+    "transaction": [
+      "Az: Edit Extrude",
+      10
+    ],
+    "status": "Join \u00b7 1 body \u00b7 43136.062 mm\u00b3",
+    "after": {
+      "names": [
+        "Body",
+        "Origin",
+        "X_Axis",
+        "Y_Axis",
+        "Z_Axis",
+        "XY_Plane",
+        "XZ_Plane",
+        "YZ_Plane",
+        "PlateSketch",
+        "Extrude",
+        "Extrude001",
+        "Parameters"
+      ],
+      "length": 2.0,
+      "volume": 43136.062020262805,
+      "transaction": null,
+      "closed": true
+    },
+    "cancel_passed": true,
+    "actual_mouse_drag": {
+      "distance_before_mm": 2,
+      "distance_after_mm": 11.6486,
+      "observed_live_volume_mm3": 80972.663
+    }
+  },
+  "unverified_platforms": [
+    "Windows",
+    "macOS",
+    "Qt6/PySide6",
+    "FreeCAD 1.1"
+  ]
+}

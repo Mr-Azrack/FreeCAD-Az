@@ -1,0 +1,458 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Exact geometry and parametric workflow tests; run with FreeCAD's Python."""
+
+import math
+import tempfile
+import unittest
+from pathlib import Path
+import FreeCAD as App
+import Part
+import PartDesign
+import Sketcher
+from azdesign import features, profiles, operations, history, presspull, parameters
+
+RECT = [(0, 0, 10, 0), (10, 0, 10, 10), (10, 10, 0, 10), (0, 10, 0, 0)]
+
+
+def sketch(doc, lines=RECT, body=None, name="Sketch", z=0):
+    obj = (
+        (body or doc).newObject("Sketcher::SketchObject", name)
+        if body
+        else doc.addObject("Sketcher::SketchObject", name)
+    )
+    for x, y, u, v in lines:
+        obj.addGeometry(Part.LineSegment(App.Vector(x, y, 0), App.Vector(u, v, 0)))
+    obj.Placement.Base.z = z
+    doc.recompute()
+    return obj
+
+
+def top_face(obj):
+    return next(
+        "Face" + str(i + 1)
+        for i, face in enumerate(obj.Shape.Faces)
+        if face.normalAt(0, 0).z > 0.99
+    )
+
+
+class WorkflowTest(unittest.TestCase):
+    def setUp(self):
+        self.doc = App.newDocument("AzWorkflowTest", hidden=True, temp=True)
+        self.doc.UndoMode = 1
+
+    def tearDown(self):
+        if self.doc.Name in App.listDocuments():
+            App.closeDocument(self.doc.Name)
+
+    def base(self, height=6):
+        body = self.doc.addObject("PartDesign::Body", "Body")
+        source = sketch(self.doc, body=body)
+        obj = features.create_extrude(body, (source, []), whole=True, operation="New body")
+        obj.Length = height
+        self.doc.recompute()
+        return body, source, obj
+
+    def test_diagonal_and_grid_form_exact_regions(self):
+        for lines, expected in (
+            (RECT + [(0, 0, 10, 10)], [50, 50]),
+            (RECT + [(5, 0, 5, 10), (0, 5, 10, 5)], [25] * 4),
+            (RECT + [(5, 5, 5, 10)], [100]),
+        ):
+            source = sketch(self.doc, lines)
+            result = profiles.regions(source)
+            self.assertEqual(len(result), len(expected))
+            for region, area in zip(result, expected):
+                self.assertAlmostEqual(region.face.Area, area, places=7)
+                self.assertTrue(region.face.isValid())
+
+    def test_overlap_and_nested_loops_are_separate_regions(self):
+        source = sketch(
+            self.doc, RECT + [(5, 0, 15, 0), (15, 0, 15, 10), (15, 10, 5, 10), (5, 10, 5, 0)]
+        )
+        self.assertEqual([round(r.face.Area, 6) for r in profiles.regions(source)], [50, 50, 50])
+        circles = sketch(self.doc, [])
+        for radius in (10, 5):
+            circles.addGeometry(Part.Circle(App.Vector(), App.Vector(0, 0, 1), radius))
+        self.doc.recompute()
+        regions = profiles.regions(circles)
+        self.assertAlmostEqual(regions[0].face.Area, 75 * math.pi)
+        self.assertAlmostEqual(regions[1].face.Area, 25 * math.pi)
+        self.assertEqual(len(profiles.resolve(circles, [r.descriptor() for r in regions])), 2)
+
+    def test_region_tracks_dimension_changes(self):
+        source = sketch(self.doc)
+        source.addGeometry(Part.Circle(App.Vector(5, 5, 0), App.Vector(0, 0, 1), 2))
+        constraint = source.addConstraint(Sketcher.Constraint("Radius", 4, 2.0))
+        self.doc.recompute()
+        region = profiles.regions(source)[0]
+        key = region.descriptor()
+        source.setDatum(constraint, App.Units.Quantity("3 mm"))
+        self.doc.recompute()
+        resolved = profiles.resolve(source, [key])[0]
+        self.assertAlmostEqual(resolved.face.Area, 100 - 9 * math.pi)
+
+    def test_open_sketch_has_actionable_error(self):
+        with self.assertRaisesRegex(profiles.ProfileError, "closed"):
+            profiles.regions(sketch(self.doc, RECT[:3]))
+
+    def test_profile_selection_and_expression_are_parametric(self):
+        source = sketch(self.doc)
+        source.addGeometry(Part.Circle(App.Vector(5, 5, 0), App.Vector(0, 0, 1), 2))
+        self.doc.recompute()
+        region = profiles.regions(source)[0]
+        op = operations.Operation(self.doc)
+        result = op.update(
+            {
+                "source": (source, []),
+                "regions": [region.descriptor()],
+                "operation": "New body",
+                "distance": "10 mm + 2 mm",
+            }
+        )[0]
+        op.accept()
+        self.assertAlmostEqual(result.Shape.Volume, (100 - 4 * math.pi) * 12)
+        result.Length = 9
+        result.setExpression("Length", None)
+        self.doc.recompute()
+        self.assertAlmostEqual(result.Shape.Volume, (100 - 4 * math.pi) * 9)
+
+    def test_join_cut_and_intersect_switch_in_one_preview(self):
+        body, source, base = self.base()
+        names = [o.Name for o in self.doc.Objects]
+        op = operations.Operation(self.doc)
+        spec = {
+            "source": (base, [top_face(base)]),
+            "target": body,
+            "distance": "2 mm",
+            "operation": "Join",
+        }
+        self.assertAlmostEqual(op.update(spec)[0].Shape.Volume, 800)
+        spec["operation"] = "Cut"
+        self.assertAlmostEqual(op.update(spec)[0].Shape.Volume, 400)
+        spec.update(operation="Intersect", reversed=True)
+        self.assertAlmostEqual(op.update(spec)[0].Shape.Volume, 200)
+        op.cancel()
+        self.assertEqual(names, [o.Name for o in self.doc.Objects])
+        self.assertEqual(body.Tip, base)
+
+    def test_edit_operation_keeps_feature_identity(self):
+        body, source, base = self.base()
+        op = operations.Operation(self.doc)
+        result = op.update(
+            {
+                "source": (base, [top_face(base)]),
+                "target": body,
+                "distance": "2 mm",
+                "operation": "Join",
+            }
+        )[0]
+        op.accept()
+        name = result.Name
+        edit = operations.Operation(self.doc, result)
+        spec = operations.spec_for(result)
+        spec["operation"] = "Cut"
+        edit.update(spec)
+        edit.accept()
+        self.assertEqual(result.Name, name)
+        self.assertAlmostEqual(result.Shape.Volume, 400)
+
+    def test_new_body_reuses_empty_sketch_body(self):
+        body = self.doc.addObject("PartDesign::Body", "Body")
+        source = sketch(self.doc, body=body)
+        op = operations.Operation(self.doc)
+        result = op.update(
+            {
+                "source": (source, []),
+                "whole": True,
+                "target": body,
+                "operation": "New body",
+                "distance": "2 mm",
+            }
+        )[0]
+        self.assertEqual(features.owner_body(result), body)
+        self.assertEqual(sum(o.isDerivedFrom("PartDesign::Body") for o in self.doc.Objects), 1)
+        op.accept()
+
+    def test_disconnected_profiles_create_separate_bodies(self):
+        source = sketch(
+            self.doc, RECT + [(20, 0, 30, 0), (30, 0, 30, 10), (30, 10, 20, 10), (20, 10, 20, 0)]
+        )
+        selected = [r.descriptor() for r in profiles.regions(source)]
+        op = operations.Operation(self.doc)
+        outputs = op.update(
+            {
+                "source": (source, []),
+                "regions": selected,
+                "operation": "New body",
+                "distance": "2 mm",
+            }
+        )
+        self.assertEqual(len(outputs), 2)
+        self.assertNotEqual(features.owner_body(outputs[0]), features.owner_body(outputs[1]))
+        self.assertEqual([round(o.Shape.Volume) for o in outputs], [200, 200])
+        op.accept()
+
+    def test_symmetric_two_sided_and_start_offset(self):
+        body, source, obj = self.base()
+        obj.Direction = "Symmetric"
+        self.doc.recompute()
+        self.assertAlmostEqual(obj.Shape.BoundBox.ZMin, -3)
+        self.assertAlmostEqual(obj.Shape.BoundBox.ZMax, 3)
+        obj.Direction = "Two sides"
+        obj.Length = 4
+        obj.Length2 = 2
+        self.doc.recompute()
+        self.assertAlmostEqual(obj.Shape.BoundBox.ZMin, -2)
+        self.assertAlmostEqual(obj.Shape.BoundBox.ZMax, 4)
+        obj.Direction = "One side"
+        obj.StartOffset = 3
+        self.doc.recompute()
+        self.assertAlmostEqual(obj.Shape.BoundBox.ZMin, 3)
+        self.assertAlmostEqual(obj.Shape.BoundBox.ZMax, 7)
+
+    def test_taper_uses_native_algorithm(self):
+        body, source, obj = self.base(height=2)
+        obj.TaperAngle = 5
+        self.doc.recompute()
+        self.assertTrue(obj.Shape.isValid())
+        self.assertNotAlmostEqual(obj.Shape.Volume, 200)
+        self.assertEqual(obj.Error, "")
+
+    def test_through_all_and_to_face(self):
+        body, source, base = self.base()
+        circle = sketch(self.doc, [], body=body, z=6)
+        circle.addGeometry(Part.Circle(App.Vector(5, 5, 0), App.Vector(0, 0, 1), 2))
+        self.doc.recompute()
+        obj = features.create_extrude(body, (circle, []), whole=True, base=base, operation="Cut")
+        obj.Extent = "Through all"
+        self.doc.recompute()
+        self.assertAlmostEqual(obj.Shape.Volume, 600 - 24 * math.pi)
+        target = self.doc.addObject("Part::Feature", "Limit")
+        target.Shape = Part.makePlane(100, 100, App.Vector(-20, -20, 10))
+        new_body = self.doc.addObject("PartDesign::Body", "NewBody")
+        result = features.create_extrude(new_body, (source, []), whole=True, operation="New body")
+        result.Extent = "To face"
+        result.UpToFace = (target, ["Face1"])
+        self.doc.recompute()
+        self.assertAlmostEqual(result.Shape.Volume, 1000)
+
+    def test_automatic_inward_cut_and_outward_join(self):
+        body, source, base = self.base()
+        op = operations.Operation(self.doc)
+        spec = {
+            "source": (base, [top_face(base)]),
+            "target": body,
+            "operation": "Auto",
+            "distance": "2 mm",
+        }
+        self.assertEqual(op.update(spec)[0].Operation, "Join")
+        spec["distance"] = "-2 mm"
+        result = op.update(spec)[0]
+        self.assertEqual(result.Operation, "Cut")
+        self.assertAlmostEqual(result.Shape.Volume, 400)
+        op.cancel()
+
+    def test_undo_redo_and_cancel_are_atomic(self):
+        source = sketch(self.doc)
+        before = [o.Name for o in self.doc.Objects]
+        op = operations.Operation(self.doc)
+        spec = {"source": (source, []), "whole": True, "operation": "New body", "distance": "2 mm"}
+        op.update(spec)
+        op.update(dict(spec, distance="3 mm"))
+        op.cancel()
+        self.assertEqual(before, [o.Name for o in self.doc.Objects])
+        op = operations.Operation(self.doc)
+        result = op.update(spec)[0]
+        name = result.Name
+        op.accept()
+        self.doc.undo()
+        self.assertIsNone(self.doc.getObject(name))
+        self.doc.redo()
+        self.doc.recompute()
+        self.assertAlmostEqual(self.doc.getObject(name).Shape.Volume, 200)
+
+    def test_feature_reopens_and_recomputes(self):
+        body, source, obj = self.base()
+        name = obj.Name
+        with tempfile.TemporaryDirectory() as directory:
+            path = str(Path(directory) / "parametric.FCStd")
+            self.doc.saveAs(path)
+            App.closeDocument(self.doc.Name)
+            self.doc = App.openDocument(path, hidden=True)
+            obj = self.doc.getObject(name)
+            obj.Length = 7
+            self.doc.recompute()
+            self.assertEqual(obj.Error, "")
+            self.assertAlmostEqual(obj.Shape.Volume, 700)
+            self.assertFalse(any(name.startswith("AzGeometry") for name in App.listDocuments()))
+
+    def test_real_rollback_and_feature_insertion(self):
+        body, source, base = self.base()
+        result = features.create_extrude(body, (base, [top_face(base)]), base=base)
+        result.Length = 2
+        self.doc.recompute()
+        history.rollback(base)
+        self.assertEqual(body.Tip, base)
+        self.assertAlmostEqual(body.Shape.Volume, 600)
+        op = operations.Operation(self.doc)
+        inserted = op.update(
+            {
+                "source": (base, [top_face(base)]),
+                "target": body,
+                "operation": "Join",
+                "distance": "1 mm",
+            }
+        )[0]
+        op.accept()
+        self.assertEqual(result.BaseFeature, inserted)
+        history.end(body)
+        self.assertEqual(body.Tip, result)
+        # The downstream face reference remains explicitly anchored to base.
+        self.assertAlmostEqual(body.Shape.Volume, 800)
+        base.Length = 7
+        self.doc.recompute()
+        self.assertAlmostEqual(body.Shape.Volume, 900)
+
+    def test_source_body_placement_recomputes_a_separate_body(self):
+        body, source, base = self.base()
+        body.Placement = App.Placement(
+            App.Vector(20, 30, 40), App.Rotation(App.Vector(0, 1, 0), 90)
+        )
+        self.doc.recompute()
+        other = self.doc.addObject("PartDesign::Body", "Other")
+        other.Placement.Base = App.Vector(-5, 0, 0)
+        obj = features.create_extrude(other, (source, []), whole=True, operation="New body")
+        obj.Length = 3
+        self.doc.recompute()
+        self.assertEqual(obj.Error, "")
+        self.assertAlmostEqual(obj.Shape.Volume, 300)
+        before = other.Shape.CenterOfMass + other.Placement.Base
+        body.Placement.Base.x += 7
+        self.doc.recompute()
+        after = other.Shape.CenterOfMass + other.Placement.Base
+        self.assertAlmostEqual(after.x - before.x, 7)
+
+    def test_presspull_resizes_a_tapered_end_cap(self):
+        body, source, obj = self.base()
+        obj.TaperAngle = 5
+        self.doc.recompute()
+        face = obj.Shape.getElement(top_face(obj))
+        edit = presspull.DimensionEdit(presspull.cap_binding(obj, face))
+        edit.update("2 mm")
+        edit.accept()
+        self.assertAlmostEqual(obj.Length.Value, 8)
+        self.assertEqual(obj.TaperAngle.Value, 5)
+        self.assertTrue(obj.Shape.isValid())
+        self.doc.undo()
+        self.doc.recompute()
+        self.assertAlmostEqual(obj.Length.Value, 6)
+
+    def test_presspull_rejects_unsafe_face_prisms(self):
+        body, source, obj = self.base()
+        presspull.require_prismatic(obj, obj.Shape.getElement(top_face(obj)))
+        obj.TaperAngle = 7
+        self.doc.recompute()
+        with self.assertRaisesRegex(features.DesignError, "sloped"):
+            presspull.require_prismatic(obj, obj.Shape.getElement(top_face(obj)))
+
+    def test_cylinder_diameter_edits_its_driving_sketch(self):
+        body = self.doc.addObject("PartDesign::Body", "Body")
+        source = sketch(self.doc, [], body=body)
+        source.addGeometry(Part.Circle(App.Vector(5, 5, 0), App.Vector(0, 0, 1), 2))
+        index = source.addConstraint(Sketcher.Constraint("Radius", 0, 2.0))
+        obj = features.create_extrude(body, (source, []), whole=True, operation="New body")
+        obj.Length = 5
+        self.doc.recompute()
+        face = next(f for f in obj.Shape.Faces if isinstance(f.Surface, Part.Cylinder))
+        binding = presspull.cylinder_binding(obj, face)
+        edit = presspull.DimensionEdit(binding)
+        edit.update("10 mm")
+        self.assertAlmostEqual(source.getDatum(index).Value, 5)
+        self.assertAlmostEqual(obj.Shape.Volume, 125 * math.pi)
+        edit.cancel()
+        self.assertAlmostEqual(source.getDatum(index).Value, 2)
+
+    def test_unconstrained_circle_gets_a_cancellable_dimension(self):
+        body = self.doc.addObject("PartDesign::Body", "Body")
+        source = sketch(self.doc, [], body=body)
+        source.addGeometry(Part.Circle(App.Vector(), App.Vector(0, 0, 1), 2))
+        obj = features.create_extrude(body, (source, []), whole=True, operation="New body")
+        self.doc.recompute()
+        face = next(f for f in obj.Shape.Faces if isinstance(f.Surface, Part.Cylinder))
+        edit = presspull.DimensionEdit(presspull.cylinder_binding(obj, face))
+        edit.update("6 mm")
+        self.assertEqual(source.ConstraintCount, 1)
+        edit.cancel()
+        self.assertEqual(source.ConstraintCount, 0)
+
+    def test_user_parameters_drive_dimensions_and_cancel_atomically(self):
+        body, source, obj = self.base()
+        edit = parameters.ParameterEdit(self.doc)
+        edit.update(
+            [("Thickness", "8 mm"), ("Half", "=Thickness / 2")],
+            [(obj, "Length", "Parameters.Half")],
+        )
+        self.assertAlmostEqual(obj.Length.Value, 4)
+        self.assertAlmostEqual(obj.Shape.Volume, 400)
+        edit.update([("Thickness", "12 mm"), ("Half", "=Thickness / 2")])
+        self.assertAlmostEqual(obj.Shape.Volume, 600)
+        edit.accept()
+        second = parameters.ParameterEdit(self.doc)
+        second.update([("Thickness", "20 mm")])
+        self.assertAlmostEqual(obj.Shape.Volume, 1000)
+        second.cancel()
+        self.assertAlmostEqual(obj.Shape.Volume, 600)
+        self.assertEqual(len(parameters.user_parameters(self.doc)), 2)
+
+    def test_parameter_names_and_duplicate_aliases_are_validated(self):
+        edit = parameters.ParameterEdit(self.doc)
+        for values in (("1Bad", "2 mm"), ("two words", "3 mm")):
+            with self.assertRaises(features.DesignError):
+                edit.update([values])
+        with self.assertRaisesRegex(features.DesignError, "unique"):
+            edit.update([("Width", "2 mm"), ("Width", "3 mm")])
+        edit.cancel()
+
+    def test_suppression_passes_through_the_actual_base(self):
+        body, source, base = self.base()
+        obj = features.create_extrude(body, (base, [top_face(base)]), base=base)
+        obj.Length = 2
+        self.doc.recompute()
+        obj.Suppressed = True
+        self.doc.recompute()
+        self.assertAlmostEqual(obj.Shape.Volume, 600)
+        obj.Suppressed = False
+        self.doc.recompute()
+        self.assertAlmostEqual(obj.Shape.Volume, 800)
+
+    def test_native_fillet_recomputes_after_custom_extrude_edits(self):
+        body, source, base = self.base()
+        fillet = body.newObject("PartDesign::Fillet", "Fillet")
+        fillet.Base = (base, ["Edge1"])
+        fillet.Radius = 0.5
+        self.doc.recompute()
+        self.assertFalse(fillet.Shape.isNull())
+        self.assertTrue(fillet.Shape.isValid())
+        self.assertLess(fillet.Shape.Volume, 600)
+        base.Length = 8
+        self.doc.recompute()
+        self.assertNotIn("Invalid", fillet.State)
+        self.assertTrue(fillet.Shape.isValid())
+        self.assertGreater(fillet.Shape.Volume, 700)
+
+    def test_native_pad_can_follow_an_az_feature(self):
+        body, source, base = self.base()
+        circle = sketch(self.doc, [], body=body, z=6)
+        circle.addGeometry(Part.Circle(App.Vector(5, 5, 0), App.Vector(0, 0, 1), 2))
+        self.doc.recompute()
+        pad = body.newObject("PartDesign::Pad", "Pad")
+        pad.Profile = circle
+        pad.Length = 3
+        self.doc.recompute()
+        self.assertTrue(pad.Shape.isValid())
+        self.assertEqual(pad.BaseFeature, base)
+        self.assertAlmostEqual(pad.Shape.Volume, 600 + 12 * math.pi)
+
+
+if __name__ == "__main__":
+    unittest.main()

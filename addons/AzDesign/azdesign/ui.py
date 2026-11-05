@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Qt ribbon, searchable palette and a selection-linked feature strip."""
+
 import os
 import FreeCAD as App
 import FreeCADGui as Gui
 from .qt import QtCore, QtGui, QtWidgets, QAction, menu_exec
 from .catalog import TOOLS, SOLID, SKETCH, UTILITIES
-from . import modeling, commands
+from . import modeling, commands, history as model_history
 
 STYLE = """
 QWidget#AzRibbon { background: #f8f9fa; color: #263746; }
@@ -50,7 +51,8 @@ def command_icon(name):
     # Sketcher commands may not yet have a QAction in this workbench. Resolve
     # their compiled resources through FreeCAD's icon factory in that case.
     try:
-        icon = Gui.getIcon(name)
+        info = Gui.Command.get(name).getInfo()
+        icon = Gui.getIcon(info.get("pixmap", "") or name)
         if not icon.isNull():
             return icon
     except (AttributeError, RuntimeError, TypeError):
@@ -188,12 +190,12 @@ class Ribbon(QtWidgets.QFrame):
             if self.tabs.currentIndex() != 1:
                 self.tabs.setCurrentIndex(1)
             self.hint.setText(
-                "Sketch: L line · R rectangle · C circle · D distance · T trim · P project · X construction. Finish Sketch returns to Solid."
+                "Sketch: L line · R rectangle · C circle · D smart dimension · T trim · P project · X construction. Finish Sketch returns to Solid."
             )
         elif self.tabs.currentIndex() == 1:
             self.tabs.setCurrentIndex(0)
             self.hint.setText(
-                "Select a profile for Extrude or Cut. Select solid edges for Fillet or Chamfer. S finds any tool."
+                "E extrudes selected profiles · Q edits faces and diameters · Right-click history to roll back · S finds any tool."
             )
 
     def update_enabled(self):
@@ -315,6 +317,10 @@ class FeatureButton(QtWidgets.QToolButton):
         try:
             if obj.isDerivedFrom("Sketcher::SketchObject"):
                 modeling.edit_sketch(obj)
+            elif getattr(obj, "AzType", "") == "AzExtrude":
+                from .tasks import edit_feature
+
+                edit_feature(obj)
             else:
                 Gui.activeDocument().setEdit(obj.Name)
         except RuntimeError:
@@ -331,9 +337,48 @@ class FeatureButton(QtWidgets.QToolButton):
         menu = QtWidgets.QMenu(self)
         menu.addAction("Edit feature", self.edit)
         menu.addAction("Select in model", self.select)
+        obj = self.object()
+        if obj and obj.isDerivedFrom("PartDesign::Feature"):
+            menu.addSeparator()
+            menu.addAction("Roll back here", self.roll_back)
+            menu.addAction("Resume latest history", lambda: commands.invoke("Az_ResumeHistory"))
+            if "Suppressed" in obj.PropertiesList:
+                menu.addAction("Unsuppress" if obj.Suppressed else "Suppress", self.suppress)
+            menu.addSeparator()
         menu.addAction("Toggle visibility", self.toggle_visibility)
         menu.addAction("Rename", self.rename)
         menu_exec(menu, self.mapToGlobal(position))
+
+    def roll_back(self):
+        if Gui.Control.activeDialog():
+            commands.notify("Finish or cancel the current operation first.", True)
+            return
+        try:
+            model_history.rollback(self.object())
+            commands.notify(
+                "History rolled back. New extrusions insert here. Use Resume Latest to restore the end."
+            )
+        except ValueError as exc:
+            commands.notify(str(exc), True)
+
+    def suppress(self):
+        obj = self.object()
+        if not obj or Gui.Control.activeDialog():
+            return
+        doc = obj.Document
+        doc.openTransaction("Az: Toggle suppression")
+        try:
+            obj.Suppressed = not obj.Suppressed
+            doc.recompute()
+            if any("Invalid" in o.State or getattr(o, "Error", "") for o in doc.Objects):
+                raise ValueError(
+                    "Suppression breaks a dependent feature. Edit those references first."
+                )
+            doc.commitTransaction()
+        except Exception as exc:
+            doc.abortTransaction()
+            doc.recompute()
+            commands.notify(str(exc), True)
 
     def toggle_visibility(self):
         obj = self.object()
@@ -363,9 +408,18 @@ class History(QtWidgets.QWidget):
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(10, 2, 10, 4)
         layout.setSpacing(2)
-        title = QtWidgets.QLabel("FEATURE HISTORY  ·  Double-click to edit")
+        heading = QtWidgets.QHBoxLayout()
+        title = QtWidgets.QLabel(
+            "FEATURE HISTORY  ·  Double-click to edit · Right-click to roll back"
+        )
         title.setStyleSheet("font-size: 10px;")
-        layout.addWidget(title)
+        heading.addWidget(title)
+        heading.addStretch()
+        self.resume = QtWidgets.QPushButton("Resume Latest")
+        self.resume.setObjectName("AzResumeHistory")
+        self.resume.clicked.connect(lambda *_: commands.invoke("Az_ResumeHistory"))
+        heading.addWidget(self.resume)
+        layout.addLayout(heading)
         self.scroll = QtWidgets.QScrollArea()
         self.scroll.setWidgetResizable(True)
         self.scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
@@ -379,17 +433,26 @@ class History(QtWidgets.QWidget):
         doc = App.ActiveDocument
         if not doc:
             return []
-        return [
-            o
-            for o in doc.Objects
-            if o.isDerivedFrom("Sketcher::SketchObject")
-            or (o.isDerivedFrom("Part::Feature") and not o.isDerivedFrom("PartDesign::Body"))
-        ]
+        return model_history.ordered(doc)
 
     def refresh(self):
         doc = App.ActiveDocument
         features = self.features()
-        signature = (doc.Name if doc else None, tuple((o.Name, o.Label) for o in features))
+        rolled = (
+            [
+                b
+                for b in doc.Objects
+                if b.isDerivedFrom("PartDesign::Body") and getattr(b, "AzHistoryEnd", "")
+            ]
+            if doc
+            else []
+        )
+        self.resume.setVisible(bool(rolled))
+        signature = (
+            doc.Name if doc else None,
+            tuple((o.Name, o.Label, getattr(o, "Suppressed", False)) for o in features),
+            tuple((b.Name, b.Tip.Name if b.Tip else "") for b in rolled),
+        )
         if signature != self.signature:
             self.signature = signature
             self.buttons = []
@@ -402,6 +465,15 @@ class History(QtWidgets.QWidget):
                 row.addWidget(empty)
             for obj in features:
                 button = FeatureButton(obj, self)
+                if getattr(obj, "Suppressed", False):
+                    button.setText(obj.Label + "\n(suppressed)")
+                for body in rolled:
+                    if (
+                        obj in body.Group
+                        and body.Tip in body.Group
+                        and body.Group.index(obj) > body.Group.index(body.Tip)
+                    ):
+                        button.setStyleSheet("color: #9099a0; background: #e9edf0;")
                 self.buttons.append(button)
                 row.addWidget(button)
             row.addStretch()

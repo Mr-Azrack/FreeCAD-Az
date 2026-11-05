@@ -10,6 +10,21 @@ on:
 permissions:
   contents: read
 jobs:
+  modeling:
+    runs-on: ubuntu-latest
+    container: debian:trixie-slim
+    steps:
+      - name: Install FreeCAD's native Python runtime
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends git ca-certificates python3 freecad-python3
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: addons/AzDesign
+      - name: Test exact geometry, parameters and history
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: /usr/bin/python3 addons/AzDesign/tests/run_workflow.py
   package:
     runs-on: ubuntu-latest
     steps:

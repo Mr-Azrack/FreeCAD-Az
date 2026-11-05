@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Model edits use native FreeCAD features, with one transaction per command."""
+
 import math
 import FreeCAD as App
 import FreeCADGui as Gui
