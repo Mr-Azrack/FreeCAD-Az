@@ -2,44 +2,39 @@
 
 **Updated:** 2026-11-05
 **Repository:** https://github.com/Mr-Azrack/FreeCAD-Az
-**Active implementation branch:** codex/az-design-workbench
-**HEAD examined before this continuity commit:** dac67fee9cebb9cb7e342a45098fd913510f10f6
+**Development branch:** codex/az-design-workbench
+**Reviewed implementation commit:** dac67fee9cebb9cb7e342a45098fd913510f10f6 (Az Design 0.2)
 **Draft PR:** https://github.com/Mr-Azrack/FreeCAD-Az/pull/1
-**Important:** The HEAD value above records the starting snapshot, not an eternal current HEAD. Always query git / GitHub again after reconnecting.
 
-## Last completed state observed
+This is a checkpoint, **not a pinned current HEAD**. Always fetch branch HEAD and inspect new commits before work. Other sessions may be pushing code simultaneously.
 
-- Version 0.1 of the Az Design workbench is present on the implementation branch, two commits ahead of main before this documentation commit.
-- The implementation includes a standalone installer/release ZIP, FreeCAD-native sketch-to-solid modeling and UI changes. Full details: addons/AzDesign/README.md.
-- Previous results: Linux FreeCAD 1.0.0 / Qt5 integration JSON records 30 passing checks; PR description reports more installer and packaging validation.
-- This continuity/checkpoint documentation is being installed as the next separate commit; it does not modify the CAD code or provide fresh test results.
-- Work branch PR #1 is draft, not merged into main.
+## Verified from repository inspection
 
-## Immediate next safe actions
+- Az Design 0.2 extends the earlier workbench with exact selectable sketch regions, live solid workflows, viewport handles, user parameters, supported Press/Pull, rollback and suppression, and native/parametric feature compatibility. Read addons/AzDesign/README.md for details.
+- v0.2 package is addons/releases/AzDesign-0.2.0.zip; installer macro is addons/Install_AzDesign.FCMacro.
+- addons/AzDesign/tests/validation-v02-linux.json records 26 passing modeling tests, four installer tests, passed v0.2 GUI and previous native/navigation checks, and manual viewport-drag observations. These are **recorded prior results**, not tests rerun by this handoff session.
+- Environment of recorded validation: Linux, FreeCAD 1.0.0, Qt5/PySide2. Windows/macOS/Qt6/FreeCAD 1.1 not verified.
+- While preparing this protocol, the active branch advanced from ab4a2ab3 to dac67fee. The continuity files were committed on top of that newer implementation rather than clobbering it.
+- This checkpoint only adds documentation. CAD code functionality was not modified by the continuity commits.
 
-1. Fetch current branch status, changed paths, HEAD, open PR, CI, and any local uncommitted changes. Avoid resets and force pushes.
-2. Review AGENTS.md, PROJECT_STATE.md, DECISIONS.md, and ROADMAP.md. Compare them to current code; correct any stale claims.
-3. Verify AzDesign installation and first-part modeling on the actual Windows shop machine. Capture FreeCAD version, OS, failure logs/screenshots, and regression evidence.
-4. Prioritize Stage 1 profile-region selection and the real sketch-to-solid interaction gaps; make an acceptance benchmark and implement on a dedicated reviewable feature branch or the current feature branch as appropriate.
-5. For each completed milestone: run meaningful tests, commit code and affected docs, and refresh this handoff with exact tested commit and remaining work.
+## Immediate actions
 
-## Required resume protocol after Work timeout, crash, or lost context
+1. Fetch current branch and verify HEAD, PR status, check runs, changed paths, and any uncommitted edits. Inspect new changes since the baseline above.
+2. Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md, and the latest addons/AzDesign/README.md.
+3. Run Windows shop-machine installation and a representative fabrication workflow; log exact versions and results. Be mindful v0.2 custom features require Az installed to recompute.
+4. Select next Stage 1 usability gap based on actual Windows modeling experience; define an acceptance test, implement in small commits, test, and advance the draft PR.
+5. Update the continuity docs with actual results and a specific next action before leaving the session.
 
-- **Do not rely on recovered conversational memory.** Re-read repository state.
-- Inspect: git remote -v; git branch --show-current; git rev-parse HEAD; git status --short; git log -5 --oneline; git diff; git diff --cached.
-- If git is not available, use GitHub branch HEAD, file history, PR and workflow results; do not claim a clean working tree.
-- Resolve disagreements between chat and repository in favor of verified files and commits.
-- Identify work in progress, last committed checkpoint, completed tests and unresolved failures. Do not duplicate, clobber, or silently discard edits.
-- Resume from the first uncompleted acceptance item, not from an imagined previous step.
-- After substantive progress write: timestamp, branch and commit, files changed, tests actually run and their results, blockers, immediate next action, and any non-reproducible local state.
+## Timeout/crash/compaction recovery checklist
 
-## Session end checklist
+- **Never trust a recovered Work session's recollection as authoritative.**
+- When local git exists: inspect git remote -v; git branch --show-current; git rev-parse HEAD; git status --short; git log -5 --oneline; git diff; git diff --cached.
+- If only GitHub tools are available, inspect branch HEAD, PR, commits and files. You cannot claim a clean worktree without checking the local environment.
+- Reconcile discrepancies with verified repository evidence. Preserve uncommitted changes, avoid blind resets, and do not retry a possibly completed operation without inspecting outcomes.
+- Resume from the first genuinely uncompleted work item and update this handoff at the next checkpoint.
 
-- [ ] Current branch and HEAD recorded.
-- [ ] Code committed in reviewable increments; uncommitted changes explicitly itemized.
-- [ ] Tests/evidence recorded without exaggeration.
-- [ ] State/decisions/roadmap updated as needed.
-- [ ] Exact next action and blockers stated.
-- [ ] No secrets, local credentials, or transient machine-specific data committed.
+## Required end-of-session entry
 
-**Operating principle:** Git is memory; the handoff is an index to that memory, not a replacement for verification.
+Record: date/time; actual branch and HEAD; exact files/commits; tests run and results; CI/PR status; uncommitted changes; open risks; next reproducible action; any local-only artifacts or tool/environment limits.
+
+**Rule:** Git is the authoritative memory, and this handoff points to it.

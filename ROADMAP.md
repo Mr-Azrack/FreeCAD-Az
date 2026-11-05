@@ -1,57 +1,55 @@
-# FreeCAD-Az — capability roadmap
+# FreeCAD-Az — workflow parity roadmap
 
-**Goal:** an independently developed, FreeCAD-based CAD workflow comparable to Fusion 360 in daily use, not a lookalike skin. Ordered below by user value and engineering dependencies. Scope is ambitious; a check is complete only with evidence.
+**Destination:** an independently maintained FreeCAD-based workflow comparable to Fusion 360 in real fabrication use. Incremental work must be shippable, reviewable and testable; the visual appearance alone is not the acceptance test.
 
-## Stage 0 — Functional foundation (implemented on feature branch; owner sign-off pending)
+## Stage 0 — Functional modeling foundation (implemented; platform sign-off pending)
 
-- [x] Az Design workbench, grouped modeling ribbon, search, contextual shortcuts.
-- [x] Browser/Tasks layout and creation-order history strip.
-- [x] Native sketch → Pad and sketch → Pocket with preview/cancel transactions.
-- [x] Installer, backup/recovery code, packaged v0.1 ZIP.
-- [x] Linux FreeCAD 1.0 integration test evidence recorded in repository.
-- [ ] Owner acceptance in real shop usage; Windows validation; CI state reconfirmed.
+- [x] Az Design ribbon, search, contextual shortcuts, Browser/Tasks UI and navigation restoration.
+- [x] Initial native Pad/Pocket sketch-to-solid and installer/backup with released v0.1 package.
+- [x] v0.2 selected exact sketch regions, compound sketch geometry, interactive preview, Join/Cut/Intersect/New body, viewport distance handles and multiple extents.
+- [x] v0.2 supported Press/Pull, parameters via native spreadsheet, Body Tip rollback and suppression, saved parametric Az features.
+- [x] Recorded Linux FreeCAD 1.0.0 geometry and GUI validation for v0.2.
+- [ ] Confirm CI status, owner acceptance, and full Windows on-machine integration and document round-trip.
 
-**Exit:** install on the intended Windows workstation, create/edit/save/reopen a parametric test part, undo/redo reliably, and retain native FreeCAD behavior after switching workbenches.
+**Gate:** reproduce a representative shop part on the intended Windows machine and confirm save/reopen, Undo/Redo, export, Az/native feature interoperability, cancellation and install/upgrade/rollback.
 
-## Stage 1 — Everyday modeling speed and correctness (next)
+## Stage 1 — Reliable everyday CAD speed (next active work)
 
-- [ ] Select individual closed profiles and multiple regions inside sketches for extrude/cut.
-- [ ] Unified sketch workflow: constraints, dimensions, projected geometry, construction geometry, trim, feedback, and dependable edit/finish behavior.
-- [ ] Context-aware selection and commands; predictable right-click and keyboard behavior.
-- [ ] Common solid tools with coherent Az UI: true Press/Pull, revolve, hole, patterns, mirror, shell, draft, fillet/chamfer, and Boolean operations.
-- [ ] Robust negative/edge cases: disconnected solids, invalid profiles, failed recomputes, and transaction recovery.
+- [ ] Expand sketch constraints/dimensions and context-aware profile selection; measure time and clicks versus familiar Fusion workflows.
+- [ ] Consistent Az task UI for key tools currently delegated to native dialogs: Revolve, Hole, Fillet/Chamfer, Shell, Loft, Sweep, patterns and mirror.
+- [ ] Improve selection feedback, failures, reference recovery, multi-body operations and ergonomics for real parts.
+- [ ] Extend Press/Pull to more safely identifiable solids and surfaces without silently changing design intent.
+- [ ] Test realistic design scenarios including feature edit propagation, unit conversion, invalid profiles, and repeated undo/redo.
 
-**Exit:** independently complete a documented representative shop-part benchmark without frequent workbench changes, preserving a fully editable native feature tree.
+**Gate:** a documented set of fabrication parts can be designed and revised without frequent workbench switching; failures are recoverable.
 
-## Stage 2 — Parametric feature history and UX parity
+## Stage 2 — Feature-tree and design management
 
-- [ ] Dependency-aware feature history with edit, rollback, suppression, and safe recompute semantics.
-- [ ] Selection breadcrumbs, context toolbar, component/body organization, visibility/isolate, and fast navigation.
-- [ ] Recovery/diagnostics for invalid references and broken downstream features; regression tests.
-- [ ] Measure workflow speed and interaction count against agreed reference tasks (not just visual resemblance).
+- [x] Supported Body Tip rollback, suppression, history insertion and restoration (v0.2).
+- [ ] Full dependency-aware edit/reorder behavior, clear rollback boundary, robust broken-reference diagnostics and repair.
+- [ ] Assembly/component/body organization, selection breadcrumbs, visibility/isolate and design-history usability at scale.
+- [ ] Performance tests on multi-component files and downstream reference stability.
 
-**Exit:** parametric edits propagate correctly through history, rollback is reversible, and round-trip native FreeCAD data survives.
+**Gate:** complex models update predictably without unintentional topology or history corruption.
 
-## Stage 3 — Production mechanical design
+## Stage 3 — Mechanical production capability
 
-- [ ] Multi-body/component workflows and assembly integration strategy.
-- [ ] Practical drawings/annotation, exports, stock/material conventions, and reuse of shop templates.
-- [ ] Performance and reliability testing on larger documents and repeated edit cycles.
-- [ ] Windows, Linux, macOS support strategy with CI and packaging coverage.
+- [ ] Validate drawings, annotations, dimensions/tolerances, templates and exports for shop use.
+- [ ] Assembly and joint workflows and reuse of common shop components.
+- [ ] Platform matrix: Windows, Linux, macOS / supported FreeCAD and Qt versions, release packaging and automated regression coverage.
 
-**Exit:** real fabrication parts and assemblies, documented tolerance/drawing/export workflow, release and regression evidence.
+**Gate:** repeatable fabrication workflow from editable design to usable production deliverables.
 
-## Stage 4 — Manufacturing/CAM workflow
+## Stage 4 — Manufacturing / CAM
 
-- [ ] Map current FreeCAD CAM capabilities and gaps against Fusion-style setup/toolpath/post workflow.
-- [ ] Add streamlined setup, operation parameters, simulation, post handling, tool libraries, and stock visualization as validated.
-- [ ] Add integration/safety tests for toolpath generation, machine limits, units, retracts, and post outputs.
+- [ ] Map native FreeCAD CAM versus target setup, operation, library, simulation, post and stock workflows.
+- [ ] Implement coherent Az manufacturing UI as needed, with post output inspection, limits, units and safe retract tests.
+- [ ] Verify representative parts from CAD through independently reviewed machine-compatible toolpaths.
 
-**Exit:** verified end-to-end example from design through simulation and machine-compatible output, with independent inspection before cutting metal.
+**Gate:** actual end-to-end CAD/CAM use case proven with simulation and independent toolpath review before machining.
 
-## Per-stage rules
+## Rules
 
-- Each feature requires an acceptance scenario, tests, expected environment, and commit/PR evidence.
-- Keep roadmap boxes unchecked until implementation and verification exist.
-- Reprioritize based on actual user workflows, not speculative visual polish.
-- Update PROJECT_STATE.md and SESSION_HANDOFF.md at each completed milestone.
+- A checked item means implemented with repository-backed evidence; it does not imply all edge cases are covered.
+- Do not mark Windows or future Fusion parity complete on Linux tests alone.
+- After each milestone update PROJECT_STATE.md, DECISIONS.md if relevant, and SESSION_HANDOFF.md with branch, commit, tests and remaining work.
