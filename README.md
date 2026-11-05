@@ -1,3 +1,12 @@
+# FreeCAD-Az
+
+This fork includes **Az Design**, an optional Fusion-inspired modeling workbench
+with a Solid/Sketch ribbon, familiar shortcuts, live Extrude/Cut previews and a
+feature history strip. It installs in standard FreeCAD without compiling this fork.
+
+[Az Design installation and guide](addons/AzDesign/README.md) ·
+[Download AzDesign-0.1.0.zip](addons/releases/AzDesign-0.1.0.zip)
+
 <a href="https://freecad.org"><img src="/src/Gui/Icons/freecad.svg" height="100px" width="100px"></a>
 
 ### Your own 3D Parametric Modeler

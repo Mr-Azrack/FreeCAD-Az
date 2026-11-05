@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package format="1">
+  <name>AzDesign</name>
+  <description>A familiar sketch-to-solid modeling workspace for FreeCAD.</description>
+  <version>0.1.0</version>
+  <date>2026-11-05</date>
+  <maintainer>FreeCAD-Az</maintainer>
+  <license file="LICENSE">LGPL-2.1-or-later</license>
+  <url type="repository">https://github.com/Mr-Azrack/FreeCAD-Az</url>
+  <icon>Resources/az.svg</icon>
+  <freecadmin>1.0</freecadmin>
+  <content>
+    <workbench>
+      <name>Az Design</name>
+      <classname>AzDesignWorkbench</classname>
+      <subdirectory>./</subdirectory>
+    </workbench>
+  </content>
+</package>

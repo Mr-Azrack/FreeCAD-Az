@@ -1,0 +1,33 @@
+name: Az Design add-on
+on:
+  pull_request:
+    paths:
+      - 'addons/AzDesign/**'
+      - 'addons/Install_AzDesign.FCMacro'
+      - 'tools/package_azdesign.py'
+      - '.github/workflows/az-design.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            addons/AzDesign
+            addons/Install_AzDesign.FCMacro
+            tools/package_azdesign.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Test installer backup and recovery
+        run: python addons/AzDesign/tests/test_install.py
+      - name: Validate Python and XML, then build installer ZIP
+        run: python tools/package_azdesign.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AzDesign-installer
+          path: dist/AzDesign-*.zip

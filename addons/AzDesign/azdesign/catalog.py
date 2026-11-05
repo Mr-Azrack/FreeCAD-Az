@@ -1,0 +1,169 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""The editable command layout. Labels never replace FreeCAD command IDs."""
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class Tool:
+    label: str
+    command: str
+    tip: str
+    icon: str = ""
+
+
+TOOLS = {
+    "sketch": Tool(
+        "Create Sketch",
+        "Az_Sketch",
+        "Select a flat face, or choose an origin plane.",
+        "PartDesign_NewSketch",
+    ),
+    "extrude": Tool(
+        "Extrude",
+        "Az_Extrude",
+        "E · Add material from a closed sketch. Enter mm, inches or a length expression.",
+        "PartDesign_Pad",
+    ),
+    "cut": Tool("Cut", "Az_Cut", "Remove material from a closed sketch.", "PartDesign_Pocket"),
+    "revolve": Tool("Revolve", "PartDesign_Revolution", "Revolve a selected sketch about an axis."),
+    "loft": Tool("Loft", "PartDesign_AdditiveLoft", "Join sketch sections with a solid loft."),
+    "sweep": Tool("Sweep", "PartDesign_AdditivePipe", "Sweep a profile along a selected path."),
+    "hole": Tool("Hole", "PartDesign_Hole", "H · Make a hole from a selected sketch."),
+    "fillet": Tool(
+        "Fillet", "PartDesign_Fillet", "F · Select solid edges and set a rounding radius."
+    ),
+    "chamfer": Tool("Chamfer", "PartDesign_Chamfer", "Bevel selected solid edges."),
+    "shell": Tool("Shell", "PartDesign_Thickness", "Hollow a solid; select the faces to remove."),
+    "mirror": Tool("Mirror", "PartDesign_Mirrored", "Mirror selected features across a plane."),
+    "pattern": Tool(
+        "Linear Pattern", "PartDesign_LinearPattern", "Repeat selected features in a line."
+    ),
+    "polar": Tool(
+        "Circular Pattern", "PartDesign_PolarPattern", "Repeat selected features around an axis."
+    ),
+    "body": Tool(
+        "New Body", "Az_Body", "Create and activate a separate solid body.", "PartDesign_Body"
+    ),
+    "plane": Tool(
+        "Offset Plane", "PartDesign_Plane", "Create a datum plane and set its attachment offset."
+    ),
+    "move": Tool("Move", "Std_TransformManip", "M · Transform the selected object."),
+    "measure": Tool("Measure", "Std_Measure", "Measure selected edges, faces or objects."),
+    "home": Tool(
+        "Home View", "Az_Home", "Isometric view and fit the whole model.", "Std_ViewIsometric"
+    ),
+    "fit": Tool("Fit", "Std_ViewFitAll", "Fit the model to the view."),
+    "finish": Tool(
+        "Finish Sketch",
+        "Az_FinishSketch",
+        "Close the sketch, return to Solid and select its profile.",
+        "Sketcher_LeaveSketch",
+    ),
+    "line": Tool("Line", "Sketcher_CreatePolyline", "L · Draw connected sketch lines."),
+    "rectangle": Tool("Rectangle", "Sketcher_CreateRectangle", "R · Draw a corner rectangle."),
+    "centerrect": Tool(
+        "Center Rectangle", "Sketcher_CreateRectangle_Center", "Draw a rectangle about its center."
+    ),
+    "circle": Tool("Circle", "Sketcher_CreateCircle", "C · Draw a center-and-radius circle."),
+    "arc": Tool("Arc", "Sketcher_Create3PointArc", "Draw an arc through three points."),
+    "slot": Tool("Slot", "Sketcher_CreateSlot", "Draw a straight slot."),
+    "trim": Tool("Trim", "Sketcher_Trimming", "T · Trim unwanted sketch segments."),
+    "offset": Tool("Offset", "Sketcher_Offset", "Offset selected sketch geometry."),
+    "project": Tool("Project", "Sketcher_External", "P · Reference edges from existing geometry."),
+    "construction": Tool(
+        "Construction",
+        "Sketcher_ToggleConstruction",
+        "X · Toggle selected sketch geometry to construction.",
+    ),
+    "dimension": Tool(
+        "Dimension",
+        "Sketcher_ConstrainDistance",
+        "D · Set a length or distance between selected elements.",
+    ),
+    "horizontal": Tool(
+        "Horizontal", "Sketcher_ConstrainHorizontal", "Constrain selected lines horizontally."
+    ),
+    "vertical": Tool(
+        "Vertical", "Sketcher_ConstrainVertical", "Constrain selected lines vertically."
+    ),
+    "coincident": Tool("Coincident", "Sketcher_ConstrainCoincident", "Join selected points."),
+    "tangent": Tool("Tangent", "Sketcher_ConstrainTangent", "Make selected geometry tangent."),
+    "equal": Tool("Equal", "Sketcher_ConstrainEqual", "Give selected geometry equal size."),
+    "diameter": Tool(
+        "Diameter", "Sketcher_ConstrainDiameter", "Dimension the diameter of a selected circle."
+    ),
+    "new": Tool("New Design", "Std_New", "Create an empty FreeCAD document."),
+    "open": Tool("Open", "Std_Open", "Open a native CAD document or supported exchange file."),
+    "save": Tool("Save", "Std_Save", "Save this design as an editable FreeCAD document."),
+    "export": Tool("Export", "Std_Export", "Export selected objects, for example STEP or STL."),
+    "undo": Tool("Undo", "Std_Undo", "Undo the last document operation."),
+    "redo": Tool("Redo", "Std_Redo", "Redo the last undone document operation."),
+    "palette": Tool(
+        "Find a Tool", "Az_Search", "S · Search the Az Design command palette.", "search"
+    ),
+    "preferences": Tool("Preferences", "Std_DlgPreferences", "Open FreeCAD preferences."),
+    "help": Tool(
+        "Quick Guide",
+        "Az_Help",
+        "Installation, shortcuts and first-part instructions.",
+        "Std_WhatsThis",
+    ),
+    "native": Tool(
+        "Native CAD",
+        "Az_Native",
+        "Return to FreeCAD Part Design and restore the previous layout.",
+        "PartDesign_Body",
+    ),
+    "cam": Tool(
+        "Manufacture", "Az_CAM", "Switch to FreeCAD's installed CAM workbench.", "Path_Job"
+    ),
+}
+
+SOLID = [
+    (
+        "CREATE",
+        ["sketch", "extrude", "cut", "revolve", ("More", ["loft", "sweep", "hole", "body"])],
+    ),
+    ("MODIFY", ["fillet", "chamfer", "shell", "mirror", ("Pattern", ["pattern", "polar"])]),
+    ("CONSTRUCT", ["plane"]),
+    ("INSPECT", ["measure", "home"]),
+]
+SKETCH = [
+    ("CREATE", ["line", "rectangle", "circle", ("More", ["centerrect", "arc", "slot"])]),
+    ("MODIFY", ["trim", "offset", "project", "construction"]),
+    (
+        "CONSTRAIN",
+        [
+            "dimension",
+            (
+                "Constraints",
+                ["diameter", "horizontal", "vertical", "coincident", "tangent", "equal"],
+            ),
+        ],
+    ),
+    ("COMPLETE", ["finish"]),
+]
+UTILITIES = [
+    ("DESIGN", ["new", "open", "save", "export"]),
+    ("WORKFLOW", ["cam", "native"]),
+    ("SETTINGS", ["preferences", "help"]),
+]
+
+SOLID_KEYS = {
+    "E": "extrude",
+    "Q": "extrude",
+    "F": "fillet",
+    "H": "hole",
+    "M": "move",
+    "S": "palette",
+}
+SKETCH_KEYS = {
+    "L": "line",
+    "R": "rectangle",
+    "C": "circle",
+    "D": "dimension",
+    "T": "trim",
+    "X": "construction",
+    "P": "project",
+    "S": "palette",
+}
