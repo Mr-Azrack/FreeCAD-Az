@@ -26,11 +26,9 @@ class HoleOperation:
                     "Editing a Hole with later features is not yet supported in Az. "
                     "Roll back to the Hole first or edit in Native CAD."
                 )
-            if editing.ModelThread:
-                raise features.DesignError(
-                    "This Hole contains geometric threads. Open it in Native CAD; "
-                    "Az will not recompute crash-prone thread geometry."
-                )
+            # Existing modeled threads are now editable through the same
+            # explicitly confirmed and instrumented preview as new holes.
+            # Merely opening the edit task must never recompute the feature.
         self.base = editing.BaseFeature if editing else features.body_tip(self.body)
         if not self.base or not hasattr(self.base, "Shape") or not self.base.Shape.Solids:
             raise features.DesignError("Create a solid first, then sketch hole centers on its face.")
@@ -48,6 +46,7 @@ class HoleOperation:
         self.valid = False
         self.last_spec = None
         self.last_diagnostic = None
+        self.original_model_thread = bool(editing.ModelThread) if editing else False
 
     def _start(self):
         if self.started:
@@ -110,7 +109,10 @@ class HoleOperation:
 
                 # Create and flush this file BEFORE touching the native model.
                 # Even an access violation inside OCCT leaves our last stage.
-                diagnostic = start_for_freecad(App, scenario="Az interactive Hole")
+                diagnostic = start_for_freecad(
+                    App, scenario="Az edit existing modeled Hole" if self.editing
+                    else "Az create modeled Hole"
+                )
                 self.last_diagnostic = str(diagnostic.path)
                 diagnostic.record_spec("before_transaction", spec)
                 App.Console.PrintWarning(
