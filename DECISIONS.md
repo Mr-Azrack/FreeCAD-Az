@@ -122,3 +122,15 @@ objects and the exact options used; capture C++ dumps separately if Python
 fault logs cannot reveal the native failure site. This is a diagnostic enable,
 not a verified kernel crash repair. Do not silently enable modelled threads on
 an existing part or merge the draft PR without owner testing.
+
+## 2026-11-06 — Restore editing for opted-in modeled holes
+
+After the owner's Windows Az Hole panel successfully generated real threads,
+editing failed because stale 0.3.2 guards explicitly rejected existing modeled
+holes. Editing must preserve the current `ModelThread` state, thread size and
+standard, not silently convert to cosmetic; unchanged edits should be true
+no-ops to avoid expensive or crash-prone recomputation. Actual geometric edits
+remain explicitly consented, transactionally reversible, and durably logged.
+Keep the restriction against editing holes with downstream features until
+history-aware downstream recompute can be validated. New 0.3.4 paths remain
+under owner Windows acceptance and draft PR review.
