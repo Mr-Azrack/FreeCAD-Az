@@ -1,6 +1,18 @@
 # Az Design installer packages
 
-## 0.3.3 modeled-thread crash-lab review build
+## 0.3.4 editable modeled-thread Hole review build
+
+This review build fixes the explicit edit prohibition left over from 0.3.2.
+Existing native modeled Holes now reopen with their geometric-thread setting
+preserved; opening or accepting without changes does not recompute native
+helical geometry. Intentional edits use the experimental warning and fsynced
+logging. Save your file before a modeled-thread edit.
+
+Download the `AzDesign-installer` artifact from the
+[latest passing Az Design CI](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)
+then extract `AzDesign-0.3.4.zip`. The ZIP in the repository remains 0.3.1.
+
+## 0.3.3 modeled-thread crash-lab review build (previous)
 
 A controlled experimental switch restores native `ModelThread=True` only
 after explicit warning/confirmation and writes durable diagnostic checkpoints.
