@@ -2,10 +2,11 @@
 """Az-owned Hole task with stable layout and explicit, safe native previews."""
 
 import FreeCADGui as Gui
-from .qt import QtWidgets
+from .qt import QtCore, QtWidgets
 from . import modeling, features
 from .hole_spec import HoleSpec, THREAD_TYPES, thread_sizes
 from .hole_operation import HoleOperation, hole_profile_sketch
+from .hole_ui_policy import can_live_preview
 
 
 def selected_sketch(doc):
@@ -35,92 +36,133 @@ class HoleTask:
             if selected not in self.sketches:
                 raise features.DesignError("This Hole has no usable source sketch.")
 
+        self._initializing = True
         self.form = QtWidgets.QWidget()
         self.form.setWindowTitle("Edit Hole" if editing else "Hole")
         self.form.setObjectName("AzHoleForm")
         layout = QtWidgets.QVBoxLayout(self.form)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(9)
+
         title = QtWidgets.QLabel("EDIT HOLE" if editing else "HOLE")
         title.setStyleSheet("font-size: 17px; font-weight: 600; color: #234b66;")
         layout.addWidget(title)
-        description = QtWidgets.QLabel(
-            "Choose a sketch containing hole centers (circle or arc centers)."
+        subtitle = QtWidgets.QLabel(
+            "Native, editable Part Design geometry · circle centers locate holes"
         )
-        description.setWordWrap(True)
-        layout.addWidget(description)
-        layout.addWidget(QtWidgets.QLabel("Hole-center sketch"))
+        subtitle.setWordWrap(True)
+        subtitle.setStyleSheet("color: #70808a;")
+        layout.addWidget(subtitle)
+
+        center_group = QtWidgets.QGroupBox("Placement")
+        center_form = QtWidgets.QFormLayout(center_group)
         self.source = QtWidgets.QComboBox()
+        self.source.setObjectName("AzHoleSource")
         self.source.addItem("Choose a sketch…", None)
         for obj in self.sketches:
             self.source.addItem(obj.Label, obj.Name)
         if selected in self.sketches:
             self.source.setCurrentIndex(self.sketches.index(selected) + 1)
+        elif len(self.sketches) == 1:
+            self.source.setCurrentIndex(1)
         self.source.setEnabled(not editing)
-        layout.addWidget(self.source)
+        center_form.addRow("Centers", self.source)
+        layout.addWidget(center_group)
 
-        layout.addWidget(QtWidgets.QLabel("Diameter"))
+        geometry_group = QtWidgets.QGroupBox("Geometry")
+        geometry_form = QtWidgets.QFormLayout(geometry_group)
         self.diameter = QtWidgets.QDoubleSpinBox()
+        self.diameter.setObjectName("AzHoleDiameter")
         self.diameter.setRange(0.01, 10000)
         self.diameter.setDecimals(3)
         self.diameter.setSuffix(" mm")
         self.diameter.setValue(mm(editing.Diameter) if editing else 6)
-        layout.addWidget(self.diameter)
-        layout.addWidget(QtWidgets.QLabel("Depth"))
+        geometry_form.addRow("Diameter", self.diameter)
         self.depth_type = QtWidgets.QComboBox()
         self.depth_type.addItems(["Distance", "Through all"])
         self.depth_type.setCurrentIndex(
             1 if editing and str(editing.DepthType) == "ThroughAll" else 0
         )
-        layout.addWidget(self.depth_type)
+        geometry_form.addRow("Extent", self.depth_type)
         self.depth = QtWidgets.QDoubleSpinBox()
+        self.depth.setObjectName("AzHoleDepth")
         self.depth.setRange(0.01, 10000)
         self.depth.setDecimals(3)
         self.depth.setSuffix(" mm")
         self.depth.setValue(mm(editing.Depth) if editing else 10)
-        layout.addWidget(self.depth)
+        geometry_form.addRow("Depth", self.depth)
         self.depth_type.currentIndexChanged.connect(
             lambda _i: self.depth.setEnabled(self.depth_type.currentIndex() == 0)
         )
         self.depth.setEnabled(self.depth_type.currentIndex() == 0)
+        layout.addWidget(geometry_group)
 
-        layout.addWidget(QtWidgets.QLabel("Thread standard"))
+        thread_group = QtWidgets.QGroupBox("Thread")
+        thread_form = QtWidgets.QFormLayout(thread_group)
         self.standard = QtWidgets.QComboBox()
+        self.standard.setObjectName("AzHoleThreadStandard")
         for value in THREAD_TYPES:
             self.standard.addItem(value, value)
         initial = str(editing.ThreadType) if editing and editing.Threaded else "None"
         self.standard.setCurrentIndex(
             THREAD_TYPES.index(initial) if initial in THREAD_TYPES else 0
         )
-        layout.addWidget(self.standard)
-        layout.addWidget(QtWidgets.QLabel("Thread size"))
+        thread_form.addRow("Standard", self.standard)
         self.size = QtWidgets.QComboBox()
-        layout.addWidget(self.size)
-        self.modeled = QtWidgets.QCheckBox("Actually model helical threads — EXPERIMENTAL")
+        self.size.setObjectName("AzHoleThreadSize")
+        thread_form.addRow("Size", self.size)
+        self.modeled = QtWidgets.QCheckBox("Model actual helical threads · experimental")
         self.modeled.setObjectName("AzExperimentalModelThread")
         self.modeled.setChecked(bool(editing.ModelThread) if editing else False)
         self.modeled.setEnabled(initial != "None")
-        layout.addWidget(self.modeled)
-        notice = QtWidgets.QLabel(
-            "Normal holes use native cosmetic threads. Experimental helical threads "
-            "may crash ALL of FreeCAD and lose unsaved work. For debugging, open "
-            "a separate FreeCAD instance and use a disposable document. "
-            "A diagnostic log is written before native recomputation."
+        thread_form.addRow("", self.modeled)
+        self.notice = QtWidgets.QLabel(
+            "Modeled threads can crash FreeCAD or lose unsaved changes. "
+            "Each geometric update requires confirmation and writes a diagnostic log."
         )
-        notice.setWordWrap(True)
-        notice.setStyleSheet("color: #80572b; padding: 6px 0;")
-        layout.addWidget(notice)
+        self.notice.setWordWrap(True)
+        self.notice.setStyleSheet("color: #976424;")
+        self.notice.setVisible(self.modeled.isChecked())
+        thread_form.addRow("", self.notice)
+        layout.addWidget(thread_group)
+
+        self.live = QtWidgets.QCheckBox("Automatically update plain and cosmetic holes")
+        self.live.setObjectName("AzHoleLivePreview")
+        self.live.setChecked(not bool(editing.ModelThread) if editing else True)
+        self.live.setEnabled(not bool(editing.ModelThread) if editing else True)
+        self.live.setToolTip(
+            "Changes appear after a short pause. Actual modeled threads always "
+            "require an explicit Update preview and confirmation."
+        )
+        layout.addWidget(self.live)
         buttons = QtWidgets.QHBoxLayout()
-        self.result_button = QtWidgets.QPushButton("Show result")
-        self.result_button.clicked.connect(self.preview)
-        self.base_button = QtWidgets.QPushButton("Show original solid")
+        self.result_button = QtWidgets.QPushButton("Update preview")
+        self.result_button.setObjectName("AzHolePreview")
+        self.result_button.clicked.connect(lambda _checked=False: self.preview())
+        self.base_button = QtWidgets.QPushButton("Show original")
         self.base_button.clicked.connect(self.show_base)
         buttons.addWidget(self.result_button)
         buttons.addWidget(self.base_button)
         layout.addLayout(buttons)
-        self.status = QtWidgets.QLabel("Choose a sketch and select Show result.")
+        self.status = QtWidgets.QLabel("Select a sketch to begin.")
+        self.status.setObjectName("AzHoleStatus")
         self.status.setWordWrap(True)
         layout.addWidget(self.status)
         layout.addStretch()
+
+        # Debounce cheap previews; never silently enter helical OCCT geometry.
+        self.preview_timer = QtCore.QTimer(self.form)
+        self.preview_timer.setSingleShot(True)
+        self.preview_timer.setInterval(350)
+        self.preview_timer.timeout.connect(self.auto_preview)
         self.standard.currentIndexChanged.connect(self.standard_changed)
+        self.source.currentIndexChanged.connect(self.source_changed)
+        self.diameter.valueChanged.connect(self.changed)
+        self.depth.valueChanged.connect(self.changed)
+        self.depth_type.currentIndexChanged.connect(self.changed)
+        self.size.currentIndexChanged.connect(self.changed)
+        self.modeled.toggled.connect(self.mode_changed)
+        self.live.toggled.connect(self.changed)
         self.populate_sizes(initial, editing)
         if editing and editing.Threaded:
             index = self.size.findData(str(editing.ThreadSize))
@@ -132,6 +174,13 @@ class HoleTask:
             self.settings(experimental=bool(editing.ModelThread)) if editing
             else None
         )
+        self._initializing = False
+        if not editing:
+            self.message(
+                "Adjust dimensions and thread options; valid simple holes preview automatically."
+            )
+        else:
+            self.message("Edit the settings. Unchanged geometry will not recompute.")
 
     def populate_sizes(self, standard, feature=None):
         self.size.blockSignals(True)
