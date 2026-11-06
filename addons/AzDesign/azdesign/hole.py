@@ -85,7 +85,7 @@ class HoleTask:
         )
         self.depth.setEnabled(self.depth_type.currentIndex() == 0)
 
-        layout.addWidget(QtWidgets.QLabel("Cosmetic thread standard"))
+        layout.addWidget(QtWidgets.QLabel("Thread standard"))
         self.standard = QtWidgets.QComboBox()
         for value in THREAD_TYPES:
             self.standard.addItem(value, value)
@@ -97,9 +97,16 @@ class HoleTask:
         layout.addWidget(QtWidgets.QLabel("Thread size"))
         self.size = QtWidgets.QComboBox()
         layout.addWidget(self.size)
+        self.modeled = QtWidgets.QCheckBox("Actually model helical threads — EXPERIMENTAL")
+        self.modeled.setObjectName("AzExperimentalModelThread")
+        self.modeled.setChecked(False)
+        self.modeled.setEnabled(initial != "None")
+        layout.addWidget(self.modeled)
         notice = QtWidgets.QLabel(
-            "Thread standards and sizes are stored natively as cosmetic threads. "
-            "Geometric ModelThread is disabled to avoid kernel crashes."
+            "Normal holes use native cosmetic threads. Experimental helical threads "
+            "may crash ALL of FreeCAD and lose unsaved work. For debugging, open "
+            "a separate FreeCAD instance and use a disposable document. "
+            "A diagnostic log is written before native recomputation."
         )
         notice.setWordWrap(True)
         notice.setStyleSheet("color: #80572b; padding: 6px 0;")
@@ -139,6 +146,9 @@ class HoleTask:
 
     def standard_changed(self, _index):
         standard = self.standard.currentData()
+        self.modeled.setEnabled(standard != "None")
+        if standard == "None":
+            self.modeled.setChecked(False)
         if self.operation and self.operation.started:
             self.operation.valid = False
             self.operation.show_base()
@@ -160,13 +170,15 @@ class HoleTask:
             "color: #ac422e;" if error else "color: #21734a;"
         )
 
-    def settings(self):
+    def settings(self, *, experimental=False):
         return HoleSpec(
             diameter=self.diameter.value(),
             depth=self.depth.value(),
             through_all=self.depth_type.currentIndex() == 1,
             thread_type=self.standard.currentData(),
             thread_size=self.size.currentData() or "",
+            model_thread=self.modeled.isChecked(),
+            experimental=experimental,
         )
 
     def ensure_operation(self):
@@ -184,7 +196,24 @@ class HoleTask:
         if self.closed:
             return False
         try:
-            spec = self.settings().validate()
+            if self.modeled.isChecked():
+                choice = QtWidgets.QMessageBox.warning(
+                    self.form,
+                    "Experimental modeled threads — FreeCAD may crash",
+                    "This enables FreeCAD's real OCCT helical thread generator. "
+                    "It has previously crashed FreeCAD on this workstation.\\n\\n"
+                    "SAVE your other documents first. Prefer a second FreeCAD "
+                    "instance and a disposable part. The crash may terminate "
+                    "the entire process without an undo or normal traceback.\\n\\n"
+                    "A diagnostic log will be flushed before the native operation. "
+                    "Run this experiment now?",
+                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                    QtWidgets.QMessageBox.No,
+                )
+                if choice != QtWidgets.QMessageBox.Yes:
+                    self.message("Modeled thread test cancelled; no geometry changed.")
+                    return False
+            spec = self.settings(experimental=self.modeled.isChecked()).validate()
             operation = self.ensure_operation()
             if spec.thread_type != "None" and not spec.thread_size:
                 # Options depend on the native Hole standard and FreeCAD version.
@@ -199,7 +228,10 @@ class HoleTask:
                 self.message("Choose the actual thread size, then Show result.", True)
                 return False
             volume = operation.preview(spec)
-            self.message("Valid Hole · result volume {:.3f} mm³".format(volume))
+            status = "Valid Hole · result volume {:.3f} mm³".format(volume)
+            if spec.model_thread:
+                status += " · diagnostic: " + str(operation.last_diagnostic)
+            self.message(status)
             return True
         except Exception as exc:
             if self.operation:
@@ -217,8 +249,16 @@ class HoleTask:
         return int(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
 
     def accept(self):
-        if not self.preview():
-            return False
+        # Don't recompute the same successful modeled preview (which could
+        # repeat the kernel crash) when the user clicks OK.
+        expected = self.settings(experimental=self.modeled.isChecked())
+        if (
+            not self.operation
+            or not self.operation.valid
+            or self.operation.last_spec != expected
+        ):
+            if not self.preview():
+                return False
         try:
             hole = self.operation.accept()
         except Exception as exc:
