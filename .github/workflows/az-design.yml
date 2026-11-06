@@ -54,6 +54,7 @@ jobs:
           python addons/AzDesign/tests/test_hole_operation.py
           python addons/AzDesign/tests/test_hole_diagnostics.py
           python addons/AzDesign/tests/test_hole_ui_policy.py
+          python addons/AzDesign/tests/test_hole_panel.py
       - name: Validate Python and XML, then build installer ZIP
         run: python tools/package_azdesign.py
       - uses: actions/upload-artifact@v4
