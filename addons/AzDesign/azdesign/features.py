@@ -29,12 +29,25 @@ def ensure_calculator():
     global _calculator
     if not App.GuiUp:
         return None
-    if _calculator and _calculator.Name in App.listDocuments():
-        return _calculator
+    if _calculator is not None:
+        try:
+            if _calculator.Name in App.listDocuments():
+                return _calculator
+        except RuntimeError:
+            pass  # Close All can dispose of the cached C++ document wrapper.
+        _calculator = None
     if App.getActiveTransaction():
         raise DesignError("Finish the current edit, then reopen the Az Design operation.")
-    _calculator = App.newDocument("AzGeometry", hidden=True, temp=True)
-    _calculator.UndoMode = 0
+    previous_name = getattr(App.activeDocument(), "Name", "")
+    try:
+        _calculator = App.newDocument("AzGeometry", hidden=True, temp=True)
+        _calculator.UndoMode = 0
+    finally:
+        # FreeCAD can leave a hidden/temp document App-active when there was no
+        # previous design. The function reads the native pointer; the Python
+        # ActiveDocument attribute can remain stale after clearing that pointer.
+        if getattr(App.activeDocument(), "Name", "") != previous_name:
+            App.setActiveDocument(previous_name if previous_name in App.listDocuments() else "")
     return _calculator
 
 

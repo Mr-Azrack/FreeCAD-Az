@@ -5,7 +5,7 @@
 **Development branch:** codex/az-design-workbench
 **Implementation baseline reviewed:** dac67fee9cebb9cb7e342a45098fd913510f10f6 (Az Design 0.2)
 **Draft PR:** https://github.com/Mr-Azrack/FreeCAD-Az/pull/1
-**Status:** Az Design 0.2.1 startup hotfix implemented on the feature branch; production Windows validation and comprehensive workflow parity remain outstanding.
+**Status:** Az Design 0.2.2 first-document fix implemented on the feature branch; production Windows validation and comprehensive workflow parity remain outstanding.
 
 ## Objective
 
@@ -13,7 +13,7 @@ Build an independently maintainable FreeCAD-based CAD workflow approaching Fusio
 
 ## Observed code in Az Design 0.2
 
-- Installable add-on in addons/AzDesign with packaged addons/releases/AzDesign-0.2.1.zip and local installer with backup.
+- Installable add-on in addons/AzDesign with packaged addons/releases/AzDesign-0.2.2.zip and local installer with backup.
 - Solid/Sketch/Utilities ribbon, native Browser/Tasks arrangement, shortcuts, search, camera/navigation handling and bottom feature history.
 - Sketches with separately selectable exact planar regions (including nested/overlapping/divided profiles), live extrude/cut/intersect/join/new body previews, distance handles, signed distances, symmetric/two-sided extents, taper, offsets, Through all and To face.
 - Press/Pull for supported extrusion end caps, some prismatic faces, source sketch circles, and supported native cylinder/hole dimensions. Unsupported ambiguous geometry reports an error instead of silently changing the wrong feature.
@@ -84,3 +84,24 @@ installer/package jobs. The ZIP is `addons/releases/AzDesign-0.2.1.zip`, SHA256
 PR #1 remains draft and main is unchanged. The inherited Dependency Review setting
 issue persists. The remaining immediate action is the owner's Windows/1.1 reinstall
 and startup/modeling retest; Linux startup validation does not close that gate.
+
+## First-document hotfix — 0.2.2
+
+The owner reported Create Sketch failing at `Gui.activeDocument().activeView()`
+with no visible document; choosing New stopped it. Reproduced the traceback: the
+hidden temporary AzGeometry calculator could be App-active while Gui had no
+active design. Modeling now resolves the visible Gui document, creates a normal
+Design when needed, and synchronizes the App context. Body/face selection ignores
+other documents. Calculator creation restores its native active-document pointer
+without closing the persistent document or committing an edit transaction. The
+Python App.ActiveDocument attribute may remain stale after clearing that pointer;
+it is not a reliable test for a visible modeling context.
+
+Fresh verification: 13 context, 5 startup, 4 installer and 26 native modeling tests
+passed. An installed FreeCAD 1.0/Linux restart followed by Create Sketch, XY plane,
+mouse-drawn rectangle and Extrude produced a valid solid without choosing New.
+All 27 native GUI workflow checks passed again, including undo/redo, parameters,
+rollback, cancellation, native Fillet propagation and save/reopen. Final calculator
+code was installed and reloaded before the last GUI suite. Evidence:
+`addons/AzDesign/tests/validation-document-context-0.2.2.json`. CI publication is
+pending at this source checkpoint. Windows/1.1 acceptance remains pending.

@@ -5,7 +5,7 @@ with selectable sketch regions, live Join/Cut/Intersect previews, viewport drag
 handles, Press/Pull, user parameters and Body history rollback. It installs in standard FreeCAD without compiling this fork.
 
 [Az Design installation and guide](addons/AzDesign/README.md) ·
-[Download AzDesign-0.2.1.zip](addons/releases/AzDesign-0.2.1.zip)
+[Download AzDesign-0.2.2.zip](addons/releases/AzDesign-0.2.2.zip)
 
 <a href="https://freecad.org"><img src="/src/Gui/Icons/freecad.svg" height="100px" width="100px"></a>
 

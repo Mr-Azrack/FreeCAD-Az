@@ -45,8 +45,9 @@ def invoke(command):
 def home():
     if Gui.activeDocument():
         view = Gui.activeDocument().activeView()
-        view.viewAxonometric()
-        view.fitAll()
+        if view:
+            view.viewAxonometric()
+            view.fitAll()
 
 
 def native():

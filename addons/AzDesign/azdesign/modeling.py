@@ -11,8 +11,19 @@ class ModelingError(ValueError):
     """An actionable modeling precondition was not met."""
 
 
+def current_document():
+    """Return the user's visible document, not an App-only calculation document."""
+    gui_doc = Gui.activeDocument()
+    return gui_doc.Document if gui_doc and gui_doc.activeView() else None
+
+
 def document():
-    return App.ActiveDocument or App.newDocument("Design")
+    doc = current_document()
+    if doc is None:
+        doc = App.newDocument("Design", hidden=False, temp=False)
+    if App.ActiveDocument != doc:
+        App.setActiveDocument(doc.Name)
+    return doc
 
 
 def in_sketch():
@@ -27,22 +38,28 @@ def body_of(obj):
 
 
 def active_body():
-    if not App.ActiveDocument:
+    gui_doc = Gui.activeDocument()
+    if not gui_doc:
         return None
+    view = gui_doc.activeView()
+    if not view:
+        return None
+    doc = gui_doc.Document
     for obj in Gui.Selection.getSelection():
+        if obj.Document != doc:
+            continue
         if obj.isDerivedFrom("PartDesign::Body"):
             return obj
         body = body_of(obj)
         if body:
             return body
-    view = Gui.activeDocument().activeView()
-    return view.getActiveObject("pdbody") if view else None
+    return view.getActiveObject("pdbody") if hasattr(view, "getActiveObject") else None
 
 
 def new_body():
-    doc = document()
     if Gui.Control.activeDialog():
         raise ModelingError("Finish or cancel the current operation before creating a body.")
+    doc = document()
     doc.openTransaction("Az: New body")
     try:
         body = doc.addObject("PartDesign::Body", "Body")
@@ -58,9 +75,9 @@ def new_body():
 
 
 def create_sketch():
-    doc = document()
     if Gui.Control.activeDialog():
         raise ModelingError("Finish or cancel the current operation first.")
+    doc = document()
     body = active_body()
     if not body:
         bodies = [obj for obj in doc.Objects if obj.isDerivedFrom("PartDesign::Body")]
@@ -69,6 +86,8 @@ def create_sketch():
         body = bodies[0] if bodies else None
     support = None
     for selection in Gui.Selection.getSelectionEx():
+        if selection.Object.Document != doc:
+            continue
         for name, shape in zip(selection.SubElementNames, selection.SubObjects):
             if name.startswith("Face"):
                 import Part

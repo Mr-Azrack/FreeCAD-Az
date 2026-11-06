@@ -136,12 +136,13 @@ def show():
     import FreeCADGui as Gui
     from .qt import QtCore, QtWidgets
     from .tasks import track, forget
+    from . import modeling
 
-    if not App.ActiveDocument:
+    if not modeling.current_document():
         raise DesignError("Create or open a design first.")
     if Gui.Control.activeDialog():
         raise DesignError("Finish or cancel the current operation first.")
-    doc = App.ActiveDocument
+    doc = modeling.document()
 
     class Task:
         def __init__(self):

@@ -42,6 +42,8 @@ jobs:
         run: python addons/AzDesign/tests/test_install.py
       - name: Test FreeCAD startup without __file__
         run: python addons/AzDesign/tests/test_startup.py
+      - name: Test first command and hidden-document lifecycle
+        run: python addons/AzDesign/tests/test_document_context.py
       - name: Validate Python and XML, then build installer ZIP
         run: python tools/package_azdesign.py
       - uses: actions/upload-artifact@v4

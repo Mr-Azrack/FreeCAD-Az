@@ -50,3 +50,14 @@ scripts without guaranteeing `__file__` or a stable shared namespace. Define the
 workbench and locate its resources in the normally imported package module.
 Do not fix this by hard-coding a user directory or assuming one FreeCAD version's
 Mod path. CI now tests the actual missing-file/separate-namespace startup contract.
+
+## Visible modeling context — 0.2.2, 2026-11-05
+
+Treat the active Gui document with a view as the modeling context. App-only
+calculation documents must never receive user sketches/bodies/parameters.
+Create Sketch and New Body create a normal visible Design if needed. Reuse an
+existing visible design and synchronize App activation. This fixes the first-use
+failure without requiring the owner to manually create a document or closing the
+persistent calculation document, which would break transaction cancellation.
+Use App.activeDocument() to preserve the native pointer; its Python module
+attribute can remain stale after setActiveDocument(""). Tests model that split.

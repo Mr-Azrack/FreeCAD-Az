@@ -93,3 +93,29 @@ installer/package jobs. The ZIP is `addons/releases/AzDesign-0.2.1.zip`, SHA256
 PR #1 remains draft and main is unchanged. The inherited Dependency Review setting
 issue persists. The remaining immediate action is the owner's Windows/1.1 reinstall
 and startup/modeling retest; Linux startup validation does not close that gate.
+
+## First-document failure follow-up — 0.2.2, 2026-11-05
+
+Inspected parent: `788e74da80a86f30a0b48747f9d2bbe52da06bd7`, branch
+`codex/az-design-workbench`. The owner reported the Create Sketch None.activeView
+traceback and confirmed New was a workaround. The hidden AzGeometry calculator
+was incorrectly accepted as a modeling document. Updated modeling.py, features.py,
+commands.py, tasks.py and parameters.py to use visible design context and preserve
+the calculator lifecycle. Added test_document_context.py to package CI; bumped
+package and guide/download links to 0.2.2. Init entry scripts retain the 0.2.1 fix.
+
+Personally executed: initial 10 regressions against old code reproduced 6 failures,
+3 errors and 1 pass; current 13 context tests, 5 startup, 4 installer, 26 modeling
+tests and 27 installed-module desktop workflow checks pass. Cold installed startup
+and manual Create Sketch through Extrude succeeded without New. Calculator uses
+the native activeDocument() getter because clearing it can leave the Python
+ActiveDocument attribute stale. Final code was installed/reloaded for the last
+GUI suite. Platform: Linux FreeCAD 1.0/Qt5; owner Windows/1.1 retest still pending.
+See validation-document-context-0.2.2.json. The 30 older v0.1 GUI checks were not
+rerun for this hotfix; do not count them as fresh evidence.
+
+At this source checkpoint, build/package integrity and publishing are next. Publish
+the corrected ZIP and source on the existing feature branch with a head lease;
+update PR #1 and inspect add-on CI. Do not merge main or claim repository-wide
+CI success. Preserve any concurrent changes if the branch advances. Local desktop
+helpers and FCStd models outside the checkout are transient test artifacts.

@@ -1,4 +1,4 @@
-# Az Design 0.2.1
+# Az Design 0.2.2
 
 A Fusion-inspired modeling workspace for **FreeCAD-Az**. Install it in standard
 **FreeCAD 1.0 or newer** without compiling the fork. All code is in this repository
@@ -7,7 +7,7 @@ Autodesk code and artwork are not included.
 
 ## Install or update
 
-1. Download **[AzDesign-0.2.1.zip](../releases/AzDesign-0.2.1.zip)** and extract it.
+1. Download **[AzDesign-0.2.2.zip](../releases/AzDesign-0.2.2.zip)** and extract it.
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
 3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
@@ -18,9 +18,22 @@ up in `AzDesign-backups` beside FreeCAD's `Mod` directory before replacement.
 For manual installation, copy the **AzDesign** folder into the `Mod` folder under
 `App.getUserAppDataDir()` and restart FreeCAD.
 
-## Startup fix in 0.2.1
+## First sketch fix in 0.2.2
 
-If 0.2.0 reports `name '__file__' is not defined` in `InitGui.py`, install 0.2.1
+Create Sketch now opens a visible design automatically when none is open. You do
+not need to choose New first. Az's hidden geometry calculator is never used as
+the modeling document. New Body, Extrude and Parameters also check the visible
+document context. Existing designs are reused, and selections in other documents
+are ignored when creating a sketch or choosing its body.
+
+The reported failure was `NoneType` having no `activeView` after starting without
+a document. The fix has 13 document-context regressions, a fresh installed Linux
+startup/sketch/extrusion check, and 27 passing GUI workflow checks. The owner's
+Windows/FreeCAD 1.1 update and full workflow retest remain pending.
+
+## Startup fix included from 0.2.1
+
+If 0.2.0 reports `name '__file__' is not defined` in `InitGui.py`, install 0.2.2
 with the same macro and restart FreeCAD. The update keeps a backup of the old
 installation. Both startup entry scripts now import a normal package module;
 they no longer assume FreeCAD defines `__file__` for its executed init scripts.

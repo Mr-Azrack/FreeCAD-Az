@@ -45,8 +45,10 @@ def default_target(source, doc):
         owner = features.owner_body(source[0])
         if owner:
             return owner
-    if Gui.activeDocument():
-        body = Gui.activeDocument().activeView().getActiveObject("pdbody")
+    gui_doc = Gui.activeDocument()
+    view = gui_doc.activeView() if gui_doc else None
+    if view and hasattr(view, "getActiveObject"):
+        body = view.getActiveObject("pdbody")
         if body:
             return body
     candidates = [o for o in doc.Objects if o.isDerivedFrom("PartDesign::Body")]
@@ -554,9 +556,9 @@ def show_extrude(source=None, cut=False, editing=None):
         source = (modeling.finish_sketch(), [])
     if Gui.Control.activeDialog():
         raise DesignError("Finish or cancel the current operation first.")
-    doc = App.ActiveDocument
-    if not doc:
+    if not modeling.current_document():
         raise DesignError("Create a sketch to start a design.")
+    doc = modeling.document()
     task = ExtrudeTask.__new__(ExtrudeTask)
     try:
         task.__init__(doc, source or selected_source(), cut, editing)
