@@ -6,6 +6,10 @@ The native Hole task now uses compact **Placement**, **Geometry** and **Thread**
 groups instead of a long uninterrupted stack of labels. Select a hole-center
 sketch, set the diameter/depth, and choose a thread standard. Native available
 thread sizes appear immediately, without a first dummy **Show result** click.
+Thread standards have readable names while retaining FreeCAD's exact native
+enum IDs. Diameter is disabled for threaded holes because the selected native
+thread size determines the nominal diameter; choose **None (plain hole)** to
+enter a free diameter.
 
 Plain and cosmetic holes have a 350 ms debounced **automatic preview** by
 default, reducing extra button clicks while typing. Auto-preview is optional.
