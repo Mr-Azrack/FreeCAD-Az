@@ -364,6 +364,10 @@ class FeatureButton(QtWidgets.QToolButton):
                 from .tasks import edit_feature
 
                 edit_feature(obj)
+            elif obj.isDerivedFrom("PartDesign::Hole"):
+                from .hole import edit_feature
+
+                edit_feature(obj)
             else:
                 Gui.activeDocument().setEdit(obj.Name)
         except RuntimeError:
