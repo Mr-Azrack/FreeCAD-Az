@@ -98,7 +98,9 @@ def help_dialog():
     Through All or To Face when needed. Negative distances reverse direction.</p>
     <p><b>Parameters:</b> Utilities → Parameters edits native feature dimensions
     and user parameters. Use expressions such as Parameters.Width / 2.</p>
-    <p><b>Hole:</b> The Az task makes native, editable holes. Threads use cosmetic\n    specifications; modeled helical threads are temporarily disabled for stability.</p>\n    <p><b>Native tools:</b> Fillet, Shell, Revolve and other advanced tools use
+    <p><b>Hole:</b> The Az task makes native, editable holes. Threads use cosmetic
+    specifications; modeled helical threads are temporarily disabled for stability.</p>
+    <p><b>Native tools:</b> Fillet, Shell, Revolve and other advanced tools use
     FreeCAD's task dialogs. The Tasks panel is on the right.</p>
     <p><b>Return:</b> Utilities → Native CAD restores your previous layout.
     This is an independent interface, not an Autodesk product.</p>"""
