@@ -62,3 +62,23 @@ transient diagnostics outside the checkout and are not needed for recovery. Next
 perform the Windows shop-part acceptance workflow listed above, record actual
 versions/results, then choose the next measured usability gap. Do not duplicate the
 already implemented profile selection, parameters, Q or rollback from stale notes.
+
+## Startup failure follow-up — 0.2.1
+
+Parent inspected before this fix: `8b27bb09993a40d4c52b64f210951cb17aee5c40`.
+Owner's Windows FreeCAD v1-1 installation failed while executing InitGui.py because
+`__file__` was absent. Init.py had the same bug. It was hidden by earlier manual
+GUI launchers that injected a file value. Startup workbench code moved into
+`azdesign/workbench.py`; both entry scripts now import normally. Added five loader
+regressions to package CI. All five fail against 0.2.0 and pass against 0.2.1; the
+four installer tests also pass. A full installed FreeCAD 1.0/Linux restart
+automatically registered the workbench and activated its ribbon. Evidence and
+platform limits are recorded in
+`addons/AzDesign/tests/validation-startup-0.2.1.json`.
+
+New installer: `addons/releases/AzDesign-0.2.1.zip`. The owner should extract it,
+rerun Install_AzDesign.FCMacro and restart FreeCAD, then confirm startup and run the
+Windows shop-part workflow. Do not reuse the known-broken 0.2.0 startup entry files.
+The modeling engine is unchanged by this hotfix. Full Windows/1.1 modeling support
+must not be inferred from the startup fix or earlier Linux results. Read current
+branch HEAD and PR #1 before resuming; keep the branch under review.

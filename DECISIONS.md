@@ -42,3 +42,11 @@ For each new accepted decision record date, rationale, alternatives and compatib
 - Supported Q edits preserve recognized driving dimensions and refuse unsafe
   arbitrary surface offsets. History insertion preserves explicit source references
   and rejects branching rather than silently changing downstream design intent.
+
+## Startup module boundary — 0.2.1
+
+Keep Init.py and InitGui.py as import-only entry glue. FreeCAD executes these
+scripts without guaranteeing `__file__` or a stable shared namespace. Define the
+workbench and locate its resources in the normally imported package module.
+Do not fix this by hard-coding a user directory or assuming one FreeCAD version's
+Mod path. CI now tests the actual missing-file/separate-namespace startup contract.

@@ -5,7 +5,7 @@
 **Development branch:** codex/az-design-workbench
 **Implementation baseline reviewed:** dac67fee9cebb9cb7e342a45098fd913510f10f6 (Az Design 0.2)
 **Draft PR:** https://github.com/Mr-Azrack/FreeCAD-Az/pull/1
-**Status:** Az Design 0.2 implemented on the feature branch; production Windows validation and comprehensive workflow parity remain outstanding.
+**Status:** Az Design 0.2.1 startup hotfix implemented on the feature branch; production Windows validation and comprehensive workflow parity remain outstanding.
 
 ## Objective
 
@@ -13,7 +13,7 @@ Build an independently maintainable FreeCAD-based CAD workflow approaching Fusio
 
 ## Observed code in Az Design 0.2
 
-- Installable add-on in addons/AzDesign with packaged addons/releases/AzDesign-0.2.0.zip and local installer with backup.
+- Installable add-on in addons/AzDesign with packaged addons/releases/AzDesign-0.2.1.zip and local installer with backup.
 - Solid/Sketch/Utilities ribbon, native Browser/Tasks arrangement, shortcuts, search, camera/navigation handling and bottom feature history.
 - Sketches with separately selectable exact planar regions (including nested/overlapping/divided profiles), live extrude/cut/intersect/join/new body previews, distance handles, signed distances, symmetric/two-sided extents, taper, offsets, Through all and To face.
 - Press/Pull for supported extrusion end caps, some prismatic faces, source sketch circles, and supported native cylinder/hole dimensions. Unsupported ambiguous geometry reports an error instead of silently changing the wrong feature.
@@ -59,3 +59,17 @@ workflow failed because this fork's Dependency graph is disabled/unsupported;
 no repository settings were changed. Do not call repository-wide upstream CI all
 green. Formatting, source/XML and ZIP integrity checks passed. Installer SHA256:
 `b7cc3ac7c97cfe8a26b29085e7efd230c0cf92fbf507e9e7f75ce5cca765579e`.
+
+## Startup hotfix — 0.2.1
+
+The owner reported `name '__file__' is not defined` from InitGui.py in a Windows
+FreeCAD v1-1 installation. Both entry scripts had that assumption. Previous GUI
+launchers explicitly injected `__file__` and did not validate the real startup
+contract. Reproduced before fixing: four startup-test errors and one resource-path
+failure. The workbench now lives in imported `azdesign.workbench`; Init.py and
+InitGui.py rely on FreeCAD's prepared module path. The five startup regressions
+and four installer tests pass. A full installed FreeCAD 1.0/Linux restart also
+automatically registered Az Design and activated its ribbon, without injecting
+loader variables. See `validation-startup-0.2.1.json` for fresh startup
+evidence; previous geometry checks remain evidence for the unchanged 0.2 engine.
+Full Windows/1.1 acceptance remains pending the owner's reinstall and retest.

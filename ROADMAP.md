@@ -10,7 +10,8 @@
 - [x] v0.2 supported Press/Pull, parameters via native spreadsheet, Body Tip rollback and suppression, saved parametric Az features.
 - [x] Recorded Linux FreeCAD 1.0.0 geometry and GUI validation for v0.2.
 - [x] Confirm add-on native modeling and package CI for v0.2 (run 42100114683).
-- [ ] Owner acceptance and full Windows on-machine integration and document round-trip.
+- [x] Reproduce and fix the Windows-reported missing `__file__` startup error in 0.2.1; add startup regression CI.
+- [ ] Owner acceptance and full Windows/FreeCAD 1.1 integration and document round-trip using 0.2.1.
 
 **Gate:** reproduce a representative shop part on the intended Windows machine and confirm save/reopen, Undo/Redo, export, Az/native feature interoperability, cancellation and install/upgrade/rollback.
 

@@ -40,6 +40,8 @@ jobs:
           python-version: '3.11'
       - name: Test installer backup and recovery
         run: python addons/AzDesign/tests/test_install.py
+      - name: Test FreeCAD startup without __file__
+        run: python addons/AzDesign/tests/test_startup.py
       - name: Validate Python and XML, then build installer ZIP
         run: python tools/package_azdesign.py
       - uses: actions/upload-artifact@v4

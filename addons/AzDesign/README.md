@@ -1,4 +1,4 @@
-# Az Design 0.2
+# Az Design 0.2.1
 
 A Fusion-inspired modeling workspace for **FreeCAD-Az**. Install it in standard
 **FreeCAD 1.0 or newer** without compiling the fork. All code is in this repository
@@ -7,7 +7,7 @@ Autodesk code and artwork are not included.
 
 ## Install or update
 
-1. Download **[AzDesign-0.2.0.zip](../releases/AzDesign-0.2.0.zip)** and extract it.
+1. Download **[AzDesign-0.2.1.zip](../releases/AzDesign-0.2.1.zip)** and extract it.
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
 3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
@@ -17,6 +17,16 @@ The installer needs no administrator rights. An existing installation is backed
 up in `AzDesign-backups` beside FreeCAD's `Mod` directory before replacement.
 For manual installation, copy the **AzDesign** folder into the `Mod` folder under
 `App.getUserAppDataDir()` and restart FreeCAD.
+
+## Startup fix in 0.2.1
+
+If 0.2.0 reports `name '__file__' is not defined` in `InitGui.py`, install 0.2.1
+with the same macro and restart FreeCAD. The update keeps a backup of the old
+installation. Both startup entry scripts now import a normal package module;
+they no longer assume FreeCAD defines `__file__` for its executed init scripts.
+Startup regression tests cover an absent or unrelated loader `__file__`, separate
+loader namespaces and installation paths with spaces/non-ASCII characters.
+Full Windows/FreeCAD 1.1 modeling validation is still pending.
 
 ## Build a part
 
@@ -138,6 +148,7 @@ Fusion-style CAM setup and arbitrary direct surface modeling are not redesigned.
 Run from the repository root:
 
 ```sh
+python3 addons/AzDesign/tests/test_startup.py
 python3 addons/AzDesign/tests/test_install.py
 /usr/bin/python3 addons/AzDesign/tests/run_workflow.py
 python3 tools/package_azdesign.py

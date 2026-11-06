@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Build the standalone installer ZIP without building the FreeCAD fork."""
+
 import argparse
 import ast
 import xml.etree.ElementTree as ET
@@ -14,7 +15,13 @@ def package(output=None):
     version = ET.parse(addon / "package.xml").getroot().findtext("version")
     output = Path(output) if output else repo / "dist" / ("AzDesign-" + version + ".zip")
     output.parent.mkdir(parents=True, exist_ok=True)
-    required = [addon / "InitGui.py", addon / "azdesign" / "session.py", addon / "LICENSE"]
+    required = [
+        addon / "Init.py",
+        addon / "InitGui.py",
+        addon / "azdesign" / "workbench.py",
+        addon / "azdesign" / "session.py",
+        addon / "LICENSE",
+    ]
     for path in required:
         if not path.is_file():
             raise FileNotFoundError(path)

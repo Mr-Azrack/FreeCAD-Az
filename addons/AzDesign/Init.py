@@ -1,9 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
-"""Make saved feature proxies importable before a document is restored."""
+"""Load the package after FreeCAD has added the workbench root to sys.path."""
 
-import os
-import sys
-
-_az_root = os.path.dirname(__file__)
-if _az_root not in sys.path:
-    sys.path.insert(0, _az_root)
+# FreeCAD executes this entry script without defining __file__. A normal package
+# import has its own module namespace and supports restoring saved Az proxies.
+import azdesign
