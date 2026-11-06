@@ -1,4 +1,27 @@
-# Az Design 0.3.4
+# Az Design 0.3.5
+
+## Hole workflow polish — 0.3.5
+
+The native Hole task now uses compact **Placement**, **Geometry** and **Thread**
+groups instead of a long uninterrupted stack of labels. Select a hole-center
+sketch, set the diameter/depth, and choose a thread standard. Native available
+thread sizes appear immediately, without a first dummy **Show result** click.
+
+Plain and cosmetic holes have a 350 ms debounced **automatic preview** by
+default, reducing extra button clicks while typing. Auto-preview is optional.
+It is **never triggered** for currently modeled threads, Holes that originally
+had modeled geometry, or a session that just previewed a modeled thread.
+Those still require **Update preview** and the existing explicit crash warning,
+diagnostic stages, and transactional Cancel. The prominent danger note appears
+only when the experimental modeled-thread option is checked. **Show original**
+stops pending preview timers to keep the unmodified base visible.
+
+If no sketch is selected, Az requires an explicit choice rather than guessing
+that the only sketch drives hole centers; it may instead be the existing Pad's
+profile. The editor continues to preserve existing modeled-thread settings and
+does not recompute unchanged features. No underlying geometry kernel was
+replaced, and FreeCAD 1.1 Windows GUI acceptance is still required for this
+polish build.
 
 ## Editing an existing modeled Hole — 0.3.4
 
@@ -24,7 +47,7 @@ Autodesk code and artwork are not included.
 
 ## Install or update
 
-1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.3.4.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
+1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.3.5.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
 3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
