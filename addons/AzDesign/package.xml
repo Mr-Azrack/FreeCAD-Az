@@ -2,7 +2,7 @@
 <package format="1">
   <name>AzDesign</name>
   <description>A familiar sketch-to-solid modeling workspace for FreeCAD.</description>
-  <version>0.3.3</version>
+  <version>0.3.4</version>
   <date>2026-11-06</date>
   <maintainer>FreeCAD-Az</maintainer>
   <license file="LICENSE">LGPL-2.1-or-later</license>
