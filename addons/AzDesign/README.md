@@ -1,4 +1,4 @@
-# Az Design 0.3.2
+# Az Design 0.3.3
 
 A Fusion-inspired modeling workspace for **FreeCAD-Az**. Install it in standard
 **FreeCAD 1.0 or newer** without compiling the fork. All code is in this repository
@@ -7,7 +7,7 @@ Autodesk code and artwork are not included.
 
 ## Install or update
 
-1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.3.2.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
+1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.3.3.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
 3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
@@ -17,6 +17,26 @@ The installer needs no administrator rights. An existing installation is backed
 up in `AzDesign-backups` beside FreeCAD's `Mod` directory before replacement.
 For manual installation, copy the **AzDesign** folder into the `Mod` folder under
 `App.getUserAppDataDir()` and restart FreeCAD.
+
+## Experimental modeled-thread crash lab — 0.3.3
+
+The Hole panel now has an **Actually model helical threads — EXPERIMENTAL**
+checkbox (off by default). The user must pick an actual thread standard and
+size, then explicitly approve a strong crash warning. Only then does Az enable
+the native `ModelThread` property. The operation writes fsynced checkpoints
+just before the native geometry switch and recomputation, plus Python fault
+traces when supported. Clicking OK after a valid unchanged preview does not
+repeat the expensive risky recompute.
+
+**Reproduce in a second FreeCAD process with disposable work.** The installer
+includes `Probe_Modeled_Thread.FCMacro`, which creates and saves a test block
+and attempts a modeled M4 thread while recording its settings. Full
+instructions, log locations and optional Windows ProcDump steps are in
+[THREAD_CRASH_LAB.md](THREAD_CRASH_LAB.md).
+
+Modeled threads can still terminate FreeCAD, and no C++ root cause has yet
+been established. Default cosmetic threading stays unchanged. Modeled-thread
+execution is intentionally excluded from automated CI.
 
 ## Native Hole stability improvements in 0.3.2\n\nThe Hole ribbon tool and H shortcut now open an Az task panel instead of the native\nPart Design Hole task. Select a sketch containing circles or arcs used as hole\ncenters, choose diameter and depth (or Through all), and click **Show result**.\nInvalid previews reveal the original solid instead of leaving an empty viewport;\nCancel restores the original Body Tip and visibility. Native Hole objects remain\neditable FreeCAD features, including in exported FCStd files. The Az Browser and\ntimeline route Hole editing to the same task panel.\n\nThe Hole task supports native cosmetic thread definitions (choose an explicit\nstandard and thread size). The OCCT helical **ModelThread** option is intentionally\nnot enabled; it crashed the owner's FreeCAD session and Python cannot catch an\nin-process geometry-kernel crash. This is a safety workaround, **not** a fix for\nactual geometric threads. Existing geometric-thread Hole features and non-tip\nHole edits require switching to Native CAD. Advanced native Hole settings are not\nyet in the Az task.\n\nAutomated checks cover native FreeCAD 1.0 geometry, preview rollback, and offline\nthread parameter contracts. **Windows/FreeCAD 1.1 and the visual task layout still\nrequire owner testing.** See PROJECT_STATE.md / SESSION_HANDOFF.md for details.\n\n## Compatibility fixes and grid defaults in 0.3.1
 
