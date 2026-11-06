@@ -1,0 +1,114 @@
+# -*- coding: utf-8 -*-
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Disposable, opt-in modeled-thread crash reproduction for FreeCAD.
+
+Run from a SECOND FreeCAD process with no unsaved work in that process.
+Creates its own small block and center sketch; never edits an existing model.
+The last diagnostic stage survives an abrupt native kernel crash.
+"""
+
+import traceback
+from datetime import datetime, timezone
+from pathlib import Path
+
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+from azdesign.qt import QtWidgets
+from azdesign.hole_operation import HoleOperation
+from azdesign.hole_spec import HoleSpec, thread_sizes
+
+
+message = (
+    "This probe creates a disposable 20 x 20 x 10 mm block and asks FreeCAD "
+    "to build a real M4 helical thread. It may terminate FreeCAD instantly.\n\n"
+    "Use a SEPARATE FreeCAD instance. Save any other work first. The input "
+    "FCStd model and fsynced crash trace will be stored in your FreeCAD "
+    "AzDesign-Diagnostics directory.\n\n"
+    "Run the modeled-thread probe?"
+)
+answer = QtWidgets.QMessageBox.warning(
+    Gui.getMainWindow(),
+    "Az Design — modeled thread crash probe",
+    message,
+    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+    QtWidgets.QMessageBox.No,
+)
+
+if answer == QtWidgets.QMessageBox.Yes:
+    folder = Path(App.getUserAppDataDir()) / "AzDesign-Diagnostics"
+    folder.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    base_path = folder / ("thread-probe-input-" + stamp + ".FCStd")
+    App.Console.PrintWarning("Az modeled-thread probe input: " + str(base_path) + "\n")
+    operation = None
+    try:
+        doc = App.newDocument("AzThreadCrashProbe")
+        body = doc.addObject("PartDesign::Body", "Body")
+        sketch = body.newObject("Sketcher::SketchObject", "BlockProfile")
+        edges = [(0, 0, 20, 0), (20, 0, 20, 20),
+                 (20, 20, 0, 20), (0, 20, 0, 0)]
+        for x, y, u, v in edges:
+            sketch.addGeometry(
+                Part.LineSegment(App.Vector(x, y, 0), App.Vector(u, v, 0)), False
+            )
+        pad = body.newObject("PartDesign::Pad", "Pad")
+        pad.Profile = sketch
+        pad.Length = 10
+        doc.recompute()
+        if pad.Shape.isNull() or not pad.Shape.isValid():
+            raise RuntimeError("Probe setup produced an invalid Pad; aborting.")
+        centers = body.newObject("Sketcher::SketchObject", "ThreadCenters")
+        centers.Placement.Base.z = 10
+        centers.addGeometry(
+            Part.Circle(App.Vector(10, 10, 0), App.Vector(0, 0, 1), 2), False
+        )
+        doc.recompute()
+        sketch.Visibility = pad.Visibility = False
+        body.Visibility = True
+        doc.saveAs(str(base_path))  # Durable input even if OCCT terminates FreeCAD.
+        operation = HoleOperation(doc, centers)
+        operation._start()
+        choices = thread_sizes(operation.hole, "ISOMetricProfile")
+        if "M4" not in choices:
+            raise RuntimeError(
+                "FreeCAD did not offer M4 for ISO metric threads; available: "
+                + ", ".join(choices)
+            )
+        spec = HoleSpec(
+            diameter=4.0,
+            depth=8.0,
+            through_all=False,
+            thread_type="ISOMetricProfile",
+            thread_size="M4",
+            model_thread=True,
+            experimental=True,
+        )
+        App.Console.PrintWarning(
+            "Az probe: beginning modeled M4; diagnostic logs in " + str(folder) + "\n"
+        )
+        volume = operation.preview(spec)  # Intentionally enters FreeCAD::Hole::makeThread.
+        hole = operation.accept()
+        Gui.activeDocument().activeView().viewAxonometric()
+        Gui.activeDocument().activeView().fitAll()
+        report = (
+            "Native modeled M4 completed!\n"
+            "Hole: " + str(hole.Name) +
+            "\nResult volume: " + str(volume) + " mm^3\n"
+            "Diagnostic: " + str(operation.last_diagnostic)
+        )
+        App.Console.PrintMessage(report + "\n")
+        QtWidgets.QMessageBox.information(Gui.getMainWindow(), "Az crash probe completed", report)
+    except Exception:
+        if operation is not None and not operation.closed:
+            try:
+                operation.cancel()
+            except Exception:
+                pass
+        details = traceback.format_exc()
+        App.Console.PrintError("Az modeled-thread probe error:\n" + details + "\n")
+        QtWidgets.QMessageBox.warning(
+            Gui.getMainWindow(),
+            "Az crash probe failed without a native crash",
+            details + "\nDiagnostics folder: " + str(folder),
+        )
