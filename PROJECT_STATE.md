@@ -5,7 +5,7 @@
 **Development branch:** codex/az-design-workbench
 **Implementation baseline reviewed:** dac67fee9cebb9cb7e342a45098fd913510f10f6 (Az Design 0.2)
 **Draft PR:** https://github.com/Mr-Azrack/FreeCAD-Az/pull/1
-**Status:** Az Design 0.3.0 workspace redesign implemented and locally verified; Windows/1.1 acceptance and comprehensive workflow parity remain outstanding.
+**Status:** Az Design 0.3.1 extrusion/preference compatibility fixes and default-visible grids implemented; Windows/1.1 acceptance remains outstanding.
 
 ## Objective
 
@@ -13,7 +13,7 @@ Build an independently maintainable FreeCAD-based CAD workflow approaching Fusio
 
 ## Observed code in Az Design 0.2
 
-- Installable add-on in addons/AzDesign with packaged addons/releases/AzDesign-0.3.0.zip and local installer with backup.
+- Installable add-on in addons/AzDesign with packaged addons/releases/AzDesign-0.3.1.zip and local installer with backup.
 - Solid/Sketch/Utilities ribbon, native Browser/Tasks arrangement, shortcuts, search, camera/navigation handling and bottom feature history.
 - Sketches with separately selectable exact planar regions (including nested/overlapping/divided profiles), live extrude/cut/intersect/join/new body previews, distance handles, signed distances, symmetric/two-sided extents, taper, offsets, Through all and To face.
 - Press/Pull for supported extrusion end caps, some prismatic faces, source sketch circles, and supported native cylinder/hole dimensions. Unsupported ambiguous geometry reports an error instead of silently changing the wrong feature.
@@ -183,3 +183,39 @@ Verify sketch readability, Browser/selection, document tabs, native task behavio
 undo/save/reopen and Native CAD restoration on a representative shop part. Use
 that feedback to choose the next visual/ergonomic gap; do not mark complete Fusion
 parity or Windows/Qt6 acceptance from this Linux checkpoint.
+
+## Compatibility and grid follow-up — 0.3.1, 2026-11-06
+
+Parent inspected: `d6d9611917a9e47745659c87fedda456cab4c5dc` on
+`codex/az-design-workbench`. Owner likes the new layout, then reported Midplane
+deprecation messages and `('Boolean',)`, and requested a visible Fusion-like grid.
+The visual feedback is positive, not full Windows platform acceptance.
+
+Added compat.py to use native SideType/Type2 on modern Pad/Pocket and reserve
+Midplane/TwoLengths for older features. Updated both extrusion paths and native
+Press/Pull classification. Reproduced the Boolean failure as KeyError in preference
+restoration; native GetContents returns Boolean/Integer, not only the aliases
+assumed by our stub. Also reproduced empty-group GetContents returning None.
+Both are fixed, and CI covers preference and modern/legacy API contracts.
+
+Grid now defaults on and remembers the Az setting; modeling draws 10 mm major /
+2 mm minor lines, while native sketch grid follows its editing plane. Native
+sketch ShowGrid is restored after edit/exit. A Coin bounds reset excludes floor
+decoration from native scene bounds, including animated fitting; it creates no
+saved model object. Updated sketch entry/Finish Sketch fitting accordingly.
+
+Fresh passing checks: 3 modern/legacy property contracts, 4 appearance lifecycles,
+13 document-context, 5 startup, 4 installer, 26 native modeling tests; final installed
+fresh-app grid suite passed 16 checks and a 20×20×6 solid smoke check (2400 mm³).
+The real native saved preference kind was Boolean and its restoration passed.
+Manual inspection confirmed readable aligned sketch grid and properly framed
+modeling floor. Earlier candidate passed 27+30 GUI checks, but a workspace run
+stopped after 21 and the long-lived test desktop later required recovery. Do not
+count it as a passing 28-check run. Final bounds correction was verified in a fresh
+app using the focused native grid suite and manual checks. See
+`tests/validation-compat-grid-0.3.1.json` for exact provenance.
+
+Native evidence: Linux FreeCAD 1.0/Qt5/PySide2. FreeCAD 1.1 API checked from source
+and sentinel contracts only; Windows/1.1 runtime retest remains pending. At this
+checkpoint, package integrity/publication/CI are next. Keep PR #1 draft, lease the
+branch head and preserve concurrent work. No merge to main is authorized here.

@@ -22,6 +22,7 @@ def run(report_path):
         report["checks"].append(label)
         Path(report_path).write_text(json.dumps(report, indent=2))
 
+    original_grid = current().appearance.grid_visible if current() else True
     try:
         Gui.activateWorkbench("AzDesignWorkbench")
         doc = App.newDocument("AzWorkspaceChecks")
@@ -248,9 +249,11 @@ def run(report_path):
         )
         view.setAnimationEnabled(True)
         report["passed"] = True
-    except Exception:
+    except BaseException:
         report["error"] = traceback.format_exc()
         App.Console.PrintError(report["error"])
     finally:
+        if current():
+            current().navigation.grid_action.setChecked(original_grid)
         Path(report_path).write_text(json.dumps(report, indent=2))
     return report

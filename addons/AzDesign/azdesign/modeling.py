@@ -5,6 +5,7 @@ import math
 import FreeCAD as App
 import FreeCADGui as Gui
 from .qt import QtCore, QtWidgets
+from .compat import set_extrusion_sides
 
 
 class ModelingError(ValueError):
@@ -140,7 +141,14 @@ def edit_sketch(sketch):
     previous = view_object.EditingWorkbench
     try:
         view_object.EditingWorkbench = ""
-        Gui.activeDocument().setEdit(sketch.Name)
+        from .session import current
+
+        session = current()
+        if session:
+            session.appearance.fit(lambda: Gui.activeDocument().setEdit(sketch.Name))
+            session.appearance.update()
+        else:
+            Gui.activeDocument().setEdit(sketch.Name)
     finally:
         view_object.EditingWorkbench = previous
 
@@ -154,7 +162,9 @@ def finish_sketch():
     Gui.Selection.clearSelection()
     Gui.Selection.addSelection(sketch)
     Gui.activeDocument().activeView().viewAxonometric()
-    Gui.activeDocument().activeView().fitAll()
+    from . import commands
+
+    commands.invoke("Std_ViewFitAll")
     return sketch
 
 
@@ -265,7 +275,7 @@ class Extrusion:
             raise ModelingError("This operation is already closed.")
         value = length_mm(distance)
         self.feature.Length = value
-        self.feature.Midplane = direction == "Symmetric"
+        set_extrusion_sides(self.feature, "Symmetric" if direction == "Symmetric" else "One side")
         self.feature.Reversed = direction == "Reversed"
         self.doc.recompute()
         shape = self.feature.Shape

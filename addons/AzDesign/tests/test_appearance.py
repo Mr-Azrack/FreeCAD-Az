@@ -8,6 +8,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+APPEARANCE_SOURCE = Path(__file__).resolve().parents[1] / "azdesign" / "appearance.py"
+
 
 class ParameterGroup:
     def __init__(self, original):
@@ -15,10 +17,14 @@ class ParameterGroup:
         self.native_edge_color = self.values.get("EditedEdgeColor", (None, 0xFFFFFFFF))[1]
 
     def GetContents(self):
-        return [(kind, name, value) for name, (kind, value) in self.values.items()]
+        return [(kind, name, value) for name, (kind, value) in self.values.items()] or None
+
+    def GetBool(self, name, default=False):
+        return self.values.get(name, (None, default))[1]
 
     def SetBool(self, name, value):
-        self.values[name] = ("Bool", value)
+        kind = self.values.get(name, ("Boolean", None))[0]
+        self.values[name] = (kind, value)
 
     def RemBool(self, name):
         self.values.pop(name, None)
@@ -41,13 +47,14 @@ class ParameterGroup:
 class AppearanceTest(unittest.TestCase):
     def run_lifecycle(self, original):
         group = ParameterGroup(original)
+        grid = ParameterGroup({})
         app = types.ModuleType("FreeCAD")
-        app.ParamGet = lambda _path: group
+        app.ParamGet = lambda path: grid if path.endswith("/AzDesign") else group
         package = types.ModuleType("azdesign")
         package.__path__ = []
         modeling = types.ModuleType("azdesign.modeling")
-        path = Path(__file__).resolve().parents[1] / "azdesign" / "appearance.py"
-        spec = importlib.util.spec_from_file_location("azdesign.appearance", path)
+        modeling.current_document = lambda: None
+        spec = importlib.util.spec_from_file_location("azdesign.appearance", APPEARANCE_SOURCE)
         module = importlib.util.module_from_spec(spec)
         with patch.dict(
             sys.modules, {"FreeCAD": app, "azdesign": package, "azdesign.modeling": modeling}
@@ -57,6 +64,9 @@ class AppearanceTest(unittest.TestCase):
             appearance.activate()
             self.assertNotEqual(group.native_edge_color, 0xFFFFFFFF)
             appearance.deactivate()
+            self.assertTrue(appearance.grid_visible)
+            appearance.toggle_grid(False)
+            self.assertFalse(module.Appearance().grid_visible)
         self.assertEqual(group.values, original)
         return group
 
@@ -73,6 +83,12 @@ class AppearanceTest(unittest.TestCase):
             }
         )
         self.assertEqual(group.native_edge_color, 0x123456FF)
+
+    def test_native_boolean_type_name_is_restored(self):
+        self.run_lifecycle({"Simple": ("Boolean", False), "Gradient": ("Boolean", True)})
+
+    def test_empty_native_parameter_group_is_supported(self):
+        self.run_lifecycle({})
 
 
 if __name__ == "__main__":

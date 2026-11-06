@@ -8,7 +8,10 @@ from . import modeling
 class Appearance:
     def __init__(self):
         self.params = App.ParamGet("User parameter:BaseApp/Preferences/View")
-        self.saved = {name: (kind, value) for kind, name, value in self.params.GetContents()}
+        self.saved = {
+            name: (kind, value) for kind, name, value in (self.params.GetContents() or ())
+        }
+        self.grid_preferences = App.ParamGet("User parameter:BaseApp/Preferences/Mod/AzDesign")
         self.values = {
             "Simple": ("Bool", True),
             "Gradient": ("Bool", False),
@@ -32,7 +35,8 @@ class Appearance:
             "FullyConstraintConstructionElementColor": 0x8FA8FCFF,
         }
         self.grids = []
-        self.grid_visible = False
+        self.grid_visible = self.grid_preferences.GetBool("ShowGrid", True)
+        self.sketch_grids = []
         self.last_view = None
 
     def activate(self):
@@ -42,8 +46,10 @@ class Appearance:
     def write(self, kind, name, value):
         methods = {
             "Bool": "Bool",
+            "Boolean": "Bool",
             "Unsigned Long": "Unsigned",
             "Int": "Int",
+            "Integer": "Int",
             "String": "String",
             "Float": "Float",
         }
@@ -62,22 +68,33 @@ class Appearance:
         picking = coin.SoPickStyle()
         picking.style = coin.SoPickStyle.UNPICKABLE
         group.addChild(picking)
-        color = coin.SoBaseColor()
-        color.rgb = (0.77, 0.80, 0.83)
-        style = coin.SoDrawStyle()
-        style.lineWidth = 1
-        coords = coin.SoCoordinate3()
-        # A fixed world plane keeps the grid's millimetre spacing meaningful.
-        # It is a scene decoration, never a document object or exportable shape.
-        points = []
-        for i in range(-20, 21):
-            p = i * 10.0
-            points.extend([(-200, p, 0), (200, p, 0), (p, -200, 0), (p, 200, 0)])
-        coords.point.setValues(0, len(points), points)
-        lines = coin.SoLineSet()
-        lines.numVertices.setValues(0, 82, [2] * 82)
-        for child in (color, style, coords, lines):
-            group.addChild(child)
+        # World-space 10 mm major / 2 mm minor lines remain separate from
+        # document geometry, picking and exports.
+        for major, rgb in ((False, (0.83, 0.85, 0.87)), (True, (0.72, 0.76, 0.80))):
+            level = coin.SoSeparator()
+            color = coin.SoBaseColor()
+            color.rgb = rgb
+            style = coin.SoDrawStyle()
+            style.lineWidth = 1
+            coords = coin.SoCoordinate3()
+            points = []
+            for i in range(-100, 101):
+                if (i % 5 == 0) != major:
+                    continue
+                p = i * 2.0
+                points.extend([(-200, p, 0), (200, p, 0), (p, -200, 0), (p, 200, 0)])
+            coords.point.setValues(0, len(points), points)
+            lines = coin.SoLineSet()
+            lines.numVertices.setValues(0, len(points) // 2, [2] * (len(points) // 2))
+            for child in (color, style, coords, lines):
+                level.addChild(child)
+            group.addChild(level)
+        # This decoration is inserted before all model geometry. Clear its
+        # bounds before traversal reaches the model so native animated Fit and
+        # sketch entry ignore the floor, not only Az's explicit Fit command.
+        reset = coin.SoResetTransform()
+        reset.whatToReset = coin.SoResetTransform.BBOX
+        group.addChild(reset)
         node.addChild(group)
         root.insertChild(node, 0)
         self.grids.append((view, root, node))
@@ -92,14 +109,32 @@ class Appearance:
         view = Gui.activeDocument().activeView()
         if not hasattr(view, "getSceneGraph"):
             return
+        sketch = modeling.in_sketch()
+        if sketch and hasattr(sketch.ViewObject, "ShowGrid"):
+            provider = sketch.ViewObject
+            if not any(saved == provider for saved, _value in self.sketch_grids):
+                self.sketch_grids.append((provider, provider.ShowGrid))
+            if provider.ShowGrid != self.grid_visible:
+                provider.ShowGrid = self.grid_visible
+        elif not sketch:
+            self.restore_sketch_grids()
         if self.grid_visible or any(v == view for v, _root, _node in self.grids):
             node = self.grid(view)
-            node.whichChild = -3 if self.grid_visible and not modeling.in_sketch() else -1
+            node.whichChild = -3 if self.grid_visible and not sketch else -1
         self.last_view = view
 
     def toggle_grid(self, checked):
         self.grid_visible = checked
+        self.grid_preferences.SetBool("ShowGrid", checked)
         self.update()
+
+    def restore_sketch_grids(self):
+        for provider, visible in self.sketch_grids:
+            try:
+                provider.ShowGrid = visible
+            except (RuntimeError, ReferenceError):
+                pass
+        self.sketch_grids = []
 
     def fit(self, callback):
         visible = []
@@ -119,6 +154,7 @@ class Appearance:
                     pass
 
     def deactivate(self):
+        self.restore_sketch_grids()
         for _view, root, node in self.grids:
             try:
                 if root.findChild(node) >= 0:

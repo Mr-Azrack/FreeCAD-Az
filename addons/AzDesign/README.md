@@ -1,4 +1,4 @@
-# Az Design 0.3.0
+# Az Design 0.3.1
 
 A Fusion-inspired modeling workspace for **FreeCAD-Az**. Install it in standard
 **FreeCAD 1.0 or newer** without compiling the fork. All code is in this repository
@@ -7,7 +7,7 @@ Autodesk code and artwork are not included.
 
 ## Install or update
 
-1. Download **[AzDesign-0.3.0.zip](../releases/AzDesign-0.3.0.zip)** and extract it.
+1. Download **[AzDesign-0.3.1.zip](../releases/AzDesign-0.3.1.zip)** and extract it.
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
 3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
@@ -18,7 +18,25 @@ up in `AzDesign-backups` beside FreeCAD's `Mod` directory before replacement.
 For manual installation, copy the **AzDesign** folder into the `Mod` folder under
 `App.getUserAppDataDir()` and restart FreeCAD.
 
-## Workspace in 0.3.0
+## Compatibility fixes and grid defaults in 0.3.1
+
+The work area now opens with the grid visible. Modeling uses 10 mm major lines
+and 2 mm minor lines; sketch editing uses FreeCAD's aligned sketch grid. Toggle
+**Display settings → Grid** in the bottom navigation bar. Your Az grid choice is
+remembered. Floor decoration is unpickable, excluded from saved/exported geometry,
+and excluded from native model bounds so it does not enlarge Home/Fit.
+
+Native extrusion uses **SideType** on FreeCAD versions that provide it, including
+modern symmetric/two-side settings, while retaining older-version support. This
+removes Az's direct writes to deprecated Midplane on those versions. Preference
+restoration recognizes native Boolean/Integer type names and empty groups, fixing
+the reproduced `('Boolean',)` / KeyError when leaving the workspace.
+
+Linux FreeCAD 1.0 native grid/model checks and modern API contract regressions
+pass. Windows/FreeCAD 1.1 still needs the owner's retest. Previously saved native
+files may emit FreeCAD's own migration notices independently of Az's scripts.
+
+## Workspace introduced in 0.3.0
 
 The work area now has a light canvas, original SVG tool icons, document tabs above
 the tools, a Design selector on the left, a grouped Browser, compact timeline and
@@ -40,8 +58,8 @@ restores the previous layout, menus, canvas colors and navigation.
 - **Navigation:** Home, Orbit, Pan, Fit and Zoom use the native camera. Orbit/Pan
   buttons enable left-button dragging; Esc returns to selection. Middle button
   pans and Shift + middle button orbits as before. Display settings include native
-  shaded/edge/wireframe styles, orthographic/perspective cameras and an optional
-  10 mm construction grid. Grid geometry is transient and excluded from Home/Fit.
+  shaded/edge/wireframe styles, orthographic/perspective cameras and the default
+  modeling/sketch grid. Grid geometry is transient and excluded from Home/Fit.
 - **Canvas right-click:** While idle in Solid, eight radial tools offer Sketch,
   Extrude, Press/Pull, Fillet, Hole, Move, Undo and Redo. Click a tool or press Esc.
   Active tasks and sketch drawing retain native right-click/cancel behavior.

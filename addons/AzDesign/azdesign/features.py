@@ -11,6 +11,7 @@ import math
 import FreeCAD as App
 import Part
 from . import profiles, references
+from .compat import set_extrusion_sides
 
 _calculator = None
 
@@ -232,13 +233,11 @@ def native_extrusion(
         native.Length = distance
         native.Length2 = distance2
         native.Reversed = reversed
-        native.Midplane = direction == "Symmetric"
+        set_extrusion_sides(native, direction)
         native.TaperAngle = taper
         native.TaperAngle2 = taper2
         native.Refine = True
-        if direction == "Two sides":
-            native.Type = "TwoLengths"
-        elif extent == "Through all":
+        if extent == "Through all":
             native.Type = "ThroughAll"
         elif extent == "To face":
             if to_face is None:

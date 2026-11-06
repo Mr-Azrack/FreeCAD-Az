@@ -399,8 +399,9 @@ class Navigation(QtWidgets.QFrame):
         ):
             menu.addAction(title, lambda camera=camera: self.camera(camera))
         menu.addSeparator()
-        grid = menu.addAction("Construction grid · 10 mm")
+        grid = menu.addAction("Grid · 10 mm major / 2 mm minor")
         grid.setCheckable(True)
+        grid.setChecked(session.appearance.grid_visible)
         grid.toggled.connect(session.appearance.toggle_grid)
         self.grid_action = grid
         display.setMenu(menu)

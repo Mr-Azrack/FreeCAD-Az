@@ -7,6 +7,7 @@ import Part
 import Sketcher
 from . import features, operations
 from .features import DesignError
+from .compat import extrusion_side_type
 
 
 @dataclass
@@ -51,7 +52,11 @@ def cap_binding(obj, face):
             obj.Source, body, obj.Regions, obj.WholeSketch, obj.SourceFaceSignature
         )
         offset = obj.StartOffset.Value
-    elif obj.isDerivedFrom("PartDesign::Pad") and obj.Type == "Length" and not obj.Midplane:
+    elif (
+        obj.isDerivedFrom("PartDesign::Pad")
+        and obj.Type == "Length"
+        and extrusion_side_type(obj) == "One side"
+    ):
         profile = features.source_shape(obj.Profile, body, whole=True)
         offset = 0
     else:

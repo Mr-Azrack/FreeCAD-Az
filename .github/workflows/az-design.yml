@@ -46,6 +46,8 @@ jobs:
         run: python addons/AzDesign/tests/test_document_context.py
       - name: Test workspace preference and native sketch-color restoration
         run: python addons/AzDesign/tests/test_appearance.py
+      - name: Test modern and legacy extrusion property contracts
+        run: python addons/AzDesign/tests/test_compat.py
       - name: Validate Python and XML, then build installer ZIP
         run: python tools/package_azdesign.py
       - uses: actions/upload-artifact@v4

@@ -12,14 +12,16 @@
 - [x] Confirm add-on native modeling and package CI for v0.2 (run 42100114683).
 - [x] Reproduce and fix the Windows-reported missing `__file__` startup error in 0.2.1; add startup regression CI.
 - [x] Reproduce and fix Create Sketch with no visible document in 0.2.2; validate automatic document creation, hidden calculator separation, and existing GUI workflows. Add-on CI run 42165160134 passed.
-- [ ] Owner acceptance and full Windows/FreeCAD 1.1 integration and document round-trip using 0.2.2.
+- [ ] Owner acceptance and full Windows/FreeCAD 1.1 integration and document round-trip using 0.3.1.
 
 **Gate:** reproduce a representative shop part on the intended Windows machine and confirm save/reopen, Undo/Redo, export, Az/native feature interoperability, cancellation and install/upgrade/rollback.
 
 ## Stage 1 — Reliable everyday CAD speed (active)
 
 - [x] 0.3.0 workspace layout and visuals: top design tabs, grouped Browser, light canvas/readable sketches, compact timeline, navigation/display controls and idle Solid radial tools; 85 desktop checks passed on Linux; add-on CI 42231553398 passed native modeling/package checks.
-- [ ] Owner review of the 0.3.0 layout and behavior on Windows/1.1, including DPI and Qt version.
+- [x] Owner gave positive 0.3.0 visual feedback; requested default-visible grids.
+- [x] 0.3.1 uses modern extrusion sides where available, restores native Boolean preferences, and shows persistent modeling/sketch grids by default.
+- [ ] Full owner workflow acceptance on Windows/1.1, including DPI and Qt version.
 - [ ] Expand sketch constraints/dimensions and context-aware profile selection; measure time and clicks versus familiar Fusion workflows.
 - [ ] Consistent Az task UI for key tools currently delegated to native dialogs: Revolve, Hole, Fillet/Chamfer, Shell, Loft, Sweep, patterns and mirror.
 - [ ] Improve selection feedback, failures, reference recovery, multi-body operations and ergonomics for real parts.
