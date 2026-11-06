@@ -6,6 +6,24 @@ from . import features
 from .hole_spec import HoleSpec
 
 
+def hole_profile_sketch(hole):
+    """Resolve FreeCAD's Profile link or LinkSub to the sketch object.
+
+    Native PartDesign features may expose Profile directly or as a tuple
+    (sketch, subelement names). Test the sketch itself, never the raw tuple.
+    """
+    profile = getattr(hole, "Profile", None)
+    if isinstance(profile, (tuple, list)):
+        if not profile:
+            return None
+        profile = profile[0]
+    if profile and hasattr(profile, "isDerivedFrom") and profile.isDerivedFrom(
+        "Sketcher::SketchObject"
+    ):
+        return profile
+    return None
+
+
 class HoleOperation:
     def __init__(self, doc, sketch, editing=None):
         if not sketch or not sketch.isDerivedFrom("Sketcher::SketchObject"):
@@ -19,7 +37,7 @@ class HoleOperation:
             raise features.DesignError("The hole sketch must belong to a Part Design Body.")
         self.editing = editing
         if editing:
-            if not editing.isDerivedFrom("PartDesign::Hole") or editing.Profile != sketch:
+            if not editing.isDerivedFrom("PartDesign::Hole") or hole_profile_sketch(editing) != sketch:
                 raise features.DesignError("Choose a native Hole associated with this sketch.")
             if self.body.Tip != editing:
                 raise features.DesignError(
