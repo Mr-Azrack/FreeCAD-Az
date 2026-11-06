@@ -50,6 +50,11 @@ class NativeHole:
 
 
 class HoleSpecTest(unittest.TestCase):
+    def test_human_thread_labels_keep_native_enum_values(self):
+        self.assertEqual(set(module.THREAD_LABELS), set(module.THREAD_TYPES))
+        self.assertEqual(module.THREAD_LABELS["ISOMetricProfile"], "ISO metric · coarse")
+        self.assertEqual(len(set(module.THREAD_LABELS.values())), len(module.THREAD_TYPES))
+
     def test_plain_through_hole(self):
         hole = NativeHole()
         HoleSpec(diameter=4.5, depth=15, through_all=True).apply(hole)
