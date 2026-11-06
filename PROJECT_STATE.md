@@ -5,7 +5,7 @@
 **Development branch:** codex/az-design-workbench
 **Implementation baseline reviewed:** dac67fee9cebb9cb7e342a45098fd913510f10f6 (Az Design 0.2)
 **Draft PR:** https://github.com/Mr-Azrack/FreeCAD-Az/pull/1
-**Status:** Az Design 0.3.2 Hole stabilization review build in development; native FreeCAD 1.0 and offline Hole tests passed, Windows/1.1 GUI acceptance outstanding. The checked-in installer ZIP remains 0.3.1.
+**Status:** Az Design 0.3.3 modeled-thread crash-lab review build in development; opt-in helical threads and diagnostic probes implemented. Prior 0.3.2 Linux tests passed; Windows/1.1 modeled-thread crash not reproduced or fixed. The checked-in release ZIP remains 0.3.1.
 
 ## Objective
 
@@ -293,3 +293,38 @@ SHA256 `23a308cbf2dc0d50396b95156851fbde115d7e15b3c25a9b792b337208130e11`.
 The downloaded ZIP's CRC check passed and its packaged offline HoleSpec
 (4) and HoleOperation (3) tests all passed separately on Python 3.13.
 These package checks do not substitute for a Windows/FreeCAD 1.1 GUI retest.
+
+## Opt-in native modeled threads and crash capture — 0.3.3, 2026-11-06
+
+After testing 0.3.2, the owner confirmed that the normal Hole task works, albeit
+less polished than Fusion, and specifically requested enabling real modeled
+threads again to reproduce and investigate FreeCAD's crash.
+
+Implemented on `codex/az-design-workbench`:
+- `hole_spec.py` permits `ModelThread=True` ONLY with explicit experimental
+  authorization, a recognized standard, a chosen size and a durable pre-switch
+  callback. Regular holes remain cosmetic. The native ModelThread flag is set
+  last, after other settings. FreeCAD 1.0/1.1 optional CosmeticThread is
+  capability-checked and its read-only lifecycle respected.
+- `hole.py` adds an unchecked-by-default "Actually model helical threads —
+  EXPERIMENTAL" checkbox. Show result requires a specific crash-risk confirmation
+  before creating geometry. The first thread-size discovery is non-geometric.
+  Clicking OK on an unchanged successful preview does not recompute twice.
+- `hole_operation.py` records pre-transaction, pre-property, pre-ModelThread,
+  pre-recompute, post-recompute and error/valid-result checkpoints for opted-in
+  modeled threads. `hole_diagnostics.py` uses fsynced JSONL logs in
+  `App.getUserAppDataDir()/AzDesign-Diagnostics`, and enables Python fault
+  traces where possible. These logs do not provide native C++ frames.
+- `Tools/Probe_Modeled_Thread.FCMacro` builds a disposable native block,
+  saves its input FCStd, then requests a genuine modeled M4 thread. The macro
+  is included at the root of the installer ZIP. Run it in a SECOND FreeCAD
+  process with no unsaved work. `THREAD_CRASH_LAB.md` explains reproduction,
+  Windows Event Viewer, and optional ProcDump collection for a native stack.
+- Offline tests check explicit opt-in, no uninstrumented model switch and
+  checkpoint ordering. Live modeled helical OCCT calls are intentionally NOT
+  executed by GitHub CI because the native crash may kill the worker.
+
+**No root-cause fix is claimed.** The user must perform the first isolated
+Windows/FreeCAD 1.1 reproduction and provide checkpoint/fault details. The
+ordinary 0.3.2 modeled-thread safety restriction is superseded by this
+experimental mode only, not removed from normal use. PR #1 remains draft.
