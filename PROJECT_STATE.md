@@ -351,3 +351,31 @@ Its SHA256 is
 Important: Windows FreeCAD 1.1 GUI acceptance and modeled-thread crash
 reproduction remain outstanding. The first real crash should be reproduced
 in a separate disposable FreeCAD process, followed by log analysis.
+
+## 0.3.4 — Modeled Hole editing correction (2026-11-06)
+
+**Owner Windows feedback:** Az 0.3.3 modeled-thread creation in the interactive
+Hole panel completed without crashing and visibly generated physical spiral
+threads. The disposable probe macro was *not* used. Owner then tried editing
+the modeled-thread Hole and encountered many error messages; verbatim error
+output has not yet been captured. No Windows save/reopen test claimed.
+
+**Confirmed code defect:** Both `HoleTask.__init__` and `HoleOperation.__init__`
+still had explicit rejections of `editing.ModelThread`, inherited from 0.3.2.
+0.3.3 also initialized the experimental checkbox to False even when editing a
+feature where native `ModelThread=True`, risking accidental cosmetic conversion.
+
+**0.3.4 change:** Remove those old edit-only refusal paths while retaining the
+existing Body Tip and source sketch checks. Populate the edit checkbox using
+native `ModelThread` and preserve original standard/size; store initial controls.
+Show result/OK on an unchanged existing Hole does not touch the document or
+regenerate helices. Changed modeled-thread settings still require explicit
+per-preview warning and fsynced diagnostics. Transactional Cancel restores the
+original. Added stubbed regression tests for existing modeled-feature edit and
+native FreeCAD 1.0 cosmetic threaded-edit/cancel geometry rollback. The real
+modeled-thread recompute is **not executed in CI**.
+
+**Outstanding:** owner Windows/FreeCAD 1.1 0.3.4 trial, precise error text if
+errors persist, actual modeled-thread edit/change followed by save/reopen, and
+full native crash root-cause analysis if triggered. Do not label this a fully
+validated modeled-thread edit implementation before those tests.
