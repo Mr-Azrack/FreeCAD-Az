@@ -24,11 +24,8 @@ class HoleTask:
         self.doc, self.editing = doc, editing
         self.operation = None
         self.closed = False
-        if editing and editing.ModelThread:
-            raise features.DesignError(
-                "This Hole contains geometric threads. Use Native CAD to edit it; "
-                "Az will not trigger crash-prone helical recomputation."
-            )
+        # Opening an existing modeled Hole is read-only until the user
+        # explicitly changes settings and approves a risky new recompute.
         self.sketches = [
             obj for obj in doc.Objects
             if obj.isDerivedFrom("Sketcher::SketchObject") and features.owner_body(obj)
@@ -99,7 +96,7 @@ class HoleTask:
         layout.addWidget(self.size)
         self.modeled = QtWidgets.QCheckBox("Actually model helical threads — EXPERIMENTAL")
         self.modeled.setObjectName("AzExperimentalModelThread")
-        self.modeled.setChecked(False)
+        self.modeled.setChecked(bool(editing.ModelThread) if editing else False)
         self.modeled.setEnabled(initial != "None")
         layout.addWidget(self.modeled)
         notice = QtWidgets.QLabel(
@@ -129,6 +126,12 @@ class HoleTask:
             index = self.size.findData(str(editing.ThreadSize))
             if index >= 0:
                 self.size.setCurrentIndex(index)
+        # Take a normalized snapshot of the original task inputs. Closing
+        # an unmodified edit should not touch a native helical feature.
+        self.original_spec = (
+            self.settings(experimental=bool(editing.ModelThread)) if editing
+            else None
+        )
 
     def populate_sizes(self, standard, feature=None):
         self.size.blockSignals(True)
@@ -196,6 +199,19 @@ class HoleTask:
         if self.closed:
             return False
         try:
+            # An existing native Hole already has valid geometry. Do not
+            # regenerate its helix just because Show result was clicked.
+            current = self.settings(experimental=self.modeled.isChecked())
+            if self.editing and current == self.original_spec and not self.operation:
+                self.message("Existing Hole unchanged; no recompute necessary.")
+                return True
+            if (
+                self.operation and self.operation.valid
+                and self.operation.last_spec == current
+            ):
+                self.operation.show_result()
+                self.message("Existing valid preview displayed; no recompute.")
+                return True
             # Populate native thread-size choices without turning on modeled
             # geometry or asking for crash consent prematurely.
             preliminary = self.settings()
@@ -251,6 +267,20 @@ class HoleTask:
         return int(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
 
     def accept(self):
+        # A simple open/close (or returning settings to their starting
+        # values) must not regenerate an existing helical Hole. Discard
+        # any intermediate in-transaction modifications before closing.
+        expected = self.settings(experimental=self.modeled.isChecked())
+        if self.editing and expected == self.original_spec:
+            if self.operation and self.operation.started:
+                self.operation.cancel()
+            self.cleanup()
+            Gui.Control.closeDialog()
+            restored = self.doc.getObject(self.editing.Name)
+            if restored:
+                Gui.Selection.clearSelection()
+                Gui.Selection.addSelection(restored)
+            return True
         # Don't recompute the same successful modeled preview (which could
         # repeat the kernel crash) when the user clicks OK.
         expected = self.settings(experimental=self.modeled.isChecked())
