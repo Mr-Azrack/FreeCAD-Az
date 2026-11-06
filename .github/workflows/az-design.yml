@@ -48,6 +48,10 @@ jobs:
         run: python addons/AzDesign/tests/test_appearance.py
       - name: Test modern and legacy extrusion property contracts
         run: python addons/AzDesign/tests/test_compat.py
+      - name: Test Hole safety contracts and reversible preview
+        run: |
+          python addons/AzDesign/tests/test_hole_spec.py
+          python addons/AzDesign/tests/test_hole_operation.py
       - name: Validate Python and XML, then build installer ZIP
         run: python tools/package_azdesign.py
       - uses: actions/upload-artifact@v4
