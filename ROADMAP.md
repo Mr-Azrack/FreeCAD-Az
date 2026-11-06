@@ -71,3 +71,12 @@
 - [ ] Owner Windows/FreeCAD 1.1 acceptance for **edit existing modeled Hole**:
       change thread size and depth, preview, cancel/accept, save/reopen; capture
       actual error traces if another failure occurs.
+
+- [x] 0.3.5 compact Hole UI (Placement/Geometry/Thread), readable standard
+      labels, native-derived diameter control, immediate thread-size options,
+      reversible source selection before preview, safe 350 ms plain/cosmetic
+      live previews and headless UI/policy regression tests.
+- [ ] Owner Windows/FreeCAD 1.1 acceptance of 0.3.5 task arrangement, live
+      preview, source switching and unchanged modeled threads.
+- [ ] Continue incremental Fusion-like interaction polish on other daily
+      tools, preserving FreeCAD-native geometry, transactions and diagnostics.
