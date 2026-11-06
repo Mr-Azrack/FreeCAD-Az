@@ -1,4 +1,21 @@
-# Az Design 0.3.3
+# Az Design 0.3.4
+
+## Editing an existing modeled Hole — 0.3.4
+
+Az 0.3.3 could create modeled helical threads but left the old explicit
+"existing modeled Hole cannot be edited" blocks in the native edit controller
+and UI. The Hole task now reopens modeled features with the original modeled
+checkbox and thread size preserved. Opening or accepting an unchanged Hole
+**does not recompute** the expensive native helix or change geometry. Changing
+thread size, standard, depth or modeled status uses the same explicitly
+confirmed, logged native preview as creation. Cancel restores the previous
+native Hole via the document transaction. Editing a Hole with later dependent
+features still requires rollback or Native CAD.
+
+**Risk:** A changed modeled-thread preview can still crash Windows/FreeCAD 1.1;
+the owner must save before experimental edits. The old rejection errors were
+reproduced from code inspection; Windows GUI retesting and the exact reported
+error messages remain outstanding. See [THREAD_CRASH_LAB.md](THREAD_CRASH_LAB.md).
 
 A Fusion-inspired modeling workspace for **FreeCAD-Az**. Install it in standard
 **FreeCAD 1.0 or newer** without compiling the fork. All code is in this repository
@@ -7,7 +24,7 @@ Autodesk code and artwork are not included.
 
 ## Install or update
 
-1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.3.3.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
+1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.3.4.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
 3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
