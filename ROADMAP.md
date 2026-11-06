@@ -23,7 +23,10 @@
 - [x] 0.3.1 uses modern extrusion sides where available, restores native Boolean preferences, and shows persistent modeling/sketch grids by default. Add-on CI 42237616994 passed.
 - [ ] Full owner workflow acceptance on Windows/1.1, including DPI and Qt version.
 - [ ] Expand sketch constraints/dimensions and context-aware profile selection; measure time and clicks versus familiar Fusion workflows.
-- [x] 0.3.2 Az-managed native Hole UI for diameter, depth, through-all and cosmetic threads; preview/rollback; Linux FreeCAD 1.0 native and offline checks passed.\n- [ ] Windows/1.1 visual and workflow sign-off for Hole, save/reopen, STEP and compatibility.\n- [ ] Root-cause native modeled/helical thread crash and restore safely validated geometric threads (currently disabled in Az).\n- [ ] Consistent Az task UI for remaining native dialogs: Revolve, Fillet/Chamfer, Shell, Loft, Sweep, patterns and mirror.
+- [x] 0.3.2 Az-managed native Hole UI for diameter, depth, through-all and cosmetic threads; preview/rollback; Linux FreeCAD 1.0 native and offline checks passed.
+- [ ] Windows/1.1 visual and workflow sign-off for Hole, save/reopen, STEP and compatibility.
+- [ ] Root-cause native modeled/helical thread crash and restore safely validated geometric threads (currently disabled in Az).
+- [ ] Consistent Az task UI for remaining native dialogs: Revolve, Fillet/Chamfer, Shell, Loft, Sweep, patterns and mirror.
 - [ ] Improve selection feedback, failures, reference recovery, multi-body operations and ergonomics for real parts.
 - [ ] Extend Press/Pull to more safely identifiable solids and surfaces without silently changing design intent.
 - [ ] Test realistic design scenarios including feature edit propagation, unit conversion, invalid profiles, and repeated undo/redo.
