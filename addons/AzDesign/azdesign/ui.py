@@ -9,34 +9,39 @@ from .catalog import TOOLS, SOLID, SKETCH, UTILITIES
 from . import modeling, commands, history as model_history
 
 STYLE = """
-QWidget#AzRibbon { background: #f8f9fa; color: #263746; }
-QWidget#AzRibbon QLabel { color: #344451; background: transparent; }
-QWidget#AzRibbon QToolButton { border: 1px solid transparent; border-radius: 5px;
-    padding: 4px; color: #263746; background: transparent; }
-QWidget#AzRibbon QToolButton:hover { background: #e6edf3; border-color: #bacbd8; }
-QWidget#AzRibbon QToolButton:pressed { background: #d6e4ef; }
-QWidget#AzRibbon QToolButton:disabled { color: #98a0a7; }
-QWidget#AzRibbon QToolButton#AzFinish { background: #d8ecdf; color: #205a3a; }
-QWidget#AzRibbon QToolButton#AzFinish:hover { background: #c2e4cd; }
-QWidget#AzRibbon QTabBar::tab { background: transparent; border: 0; padding: 7px 19px;
-    color: #62717e; font-size: 11px; font-weight: 600; }
-QWidget#AzRibbon QTabBar::tab:selected { border-bottom: 3px solid #df7844; color: #234b66; }
-QWidget#AzRibbon QComboBox { border: 1px solid #d3dce3; border-radius: 4px;
-    background: white; padding: 5px 8px; color: #234b66; min-width: 116px; }
-QWidget#AzRibbon QFrame#AzSeparator { background: #dbe1e6; max-width: 1px; }
-QWidget#AzRibbon QLabel#AzGroupLabel { color: #72808a; font-size: 9px; letter-spacing: 1px; }
+QWidget#AzRibbon { background: #f7f8f9; color: #354551; }
+QWidget#AzRibbon QLabel { color: #53616c; background: transparent; }
+QWidget#AzRibbon QToolButton { border: 1px solid transparent; border-radius: 3px;
+ padding: 3px; color: #354551; background: transparent; font-size: 11px; }
+QWidget#AzRibbon QToolButton:hover { background: #e3ebf2; border-color: #c4d5e3; }
+QWidget#AzRibbon QToolButton:pressed { background: #d5e6f3; }
+QWidget#AzRibbon QToolButton:disabled { color: #9aa5ad; }
+QWidget#AzRibbon QToolButton#AzFinish { background: #e3efdf; color: #386334; }
+QWidget#AzRibbon QToolButton#AzFinish:hover { background: #cde4c5; }
+QWidget#AzRibbon QTabBar::tab { background: transparent; border: 0; padding: 5px 20px;
+ color: #65717a; font-size: 10px; font-weight: 600; }
+QWidget#AzRibbon QTabBar::tab:selected { border-bottom: 2px solid #d57a3f; color: #354551; }
+QWidget#AzRibbon QTabBar#AzDocumentTabs::tab { padding: 6px 16px; min-width: 100px;
+ background: #e8ecef; border-right: 1px solid #d1d8de; font-size: 11px; font-weight: normal; }
+QWidget#AzRibbon QTabBar#AzDocumentTabs::tab:selected { background: #f7f8f9; border-bottom: 2px solid #4588ba; }
+QWidget#AzRibbon QComboBox { border: 0; border-right: 1px solid #d3dbe1;
+ background: #e9edf0; padding: 10px; color: #374d5c; font-size: 14px; font-weight: 600; }
+QWidget#AzRibbon QFrame#AzSeparator { background: #d8dfe4; border: 0; min-width: 1px; max-width: 1px; }
+QWidget#AzRibbon QLabel#AzGroupLabel { color: #65717b; font-size: 9px; }
 QWidget#AzRibbon QLabel#AzHint { color: #6a7782; padding: 2px 10px; font-size: 10px; }
-QWidget#AzHistory { background: #f6f8fa; color: #334854; }
-QWidget#AzHistory QToolButton { background: white; border: 1px solid #d9e0e6;
-    border-radius: 5px; padding: 4px 8px; color: #334854; }
-QWidget#AzHistory QToolButton:hover { border-color: #7196b1; background: #edf4f9; }
-QWidget#AzHistory QToolButton:checked { border: 2px solid #df7844; background: #fff2e9; }
-QWidget#AzHistory QLabel { color: #637380; background: transparent; }
+QWidget#AzHistory { background: #e8ecef; color: #41515d; }
+QWidget#AzHistory QToolButton { background: transparent; border: 1px solid transparent;
+ border-radius: 2px; padding: 3px; color: #41515d; }
+QWidget#AzHistory QToolButton:hover { border-color: #a2bdcf; background: #dbe6ef; }
+QWidget#AzHistory QToolButton:checked { border: 1px solid #398ddf; background: #cde3f5; }
+QWidget#AzHistory QLabel { color: #70808b; background: transparent; }
 """
 
 
 def command_icon(name):
-    local_icon = os.path.join(os.path.dirname(__file__), "..", "Resources", name + ".svg")
+    local_icon = os.path.join(os.path.dirname(__file__), "..", "Resources", "Icons", name + ".svg")
+    if not os.path.isfile(local_icon):
+        local_icon = os.path.join(os.path.dirname(__file__), "..", "Resources", name + ".svg")
     if os.path.isfile(local_icon):
         return QtGui.QIcon(local_icon)
     try:
@@ -70,11 +75,11 @@ def tool_button(key, small=False):
     button.setText(tool.label)
     button.setToolTip(tool.tip)
     button.setIcon(command_icon(tool.icon or tool.command))
-    button.setIconSize(QtCore.QSize(18 if small else 27, 18 if small else 27))
+    button.setIconSize(QtCore.QSize(18 if small else 29, 18 if small else 29))
     button.setToolButtonStyle(
         QtCore.Qt.ToolButtonIconOnly if small else QtCore.Qt.ToolButtonTextUnderIcon
     )
-    button.setMinimumSize(30 if small else 64, 28 if small else 57)
+    button.setMinimumSize(30 if small else 56, 28 if small else 51)
     button.clicked.connect(lambda _checked=False: commands.invoke(tool.command))
     if key == "finish":
         button.setObjectName("AzFinish")
@@ -84,52 +89,79 @@ def tool_button(key, small=False):
 class Ribbon(QtWidgets.QFrame):
     def __init__(self):
         super().__init__()
+        from .workspace import DocumentTabs
+
         self.setObjectName("AzRibbon")
         self.setStyleSheet(STYLE)
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         layout = QtWidgets.QVBoxLayout(self)
-        layout.setContentsMargins(7, 3, 7, 0)
+        layout.setContentsMargins(5, 0, 5, 0)
         layout.setSpacing(0)
         top = QtWidgets.QHBoxLayout()
+        top.setSpacing(2)
         mark = QtWidgets.QLabel("AZ")
-        mark.setStyleSheet(
-            "background: #234b66; color: white; border-radius: 4px; font-weight: 700; padding: 5px 7px;"
-        )
+        mark.setStyleSheet("color: #3d6886; font-weight: 700; font-size: 15px; padding: 4px 9px;")
         top.addWidget(mark)
-        name = QtWidgets.QLabel("FREECAD AZ")
-        name.setStyleSheet("font-weight: 600; font-size: 11px; padding: 0 9px;")
-        top.addWidget(name)
-        for key in ("new", "open", "save", "undo", "redo"):
+        file_button = QtWidgets.QToolButton()
+        file_button.setObjectName("AzFileMenu")
+        file_button.setText("File")
+        file_button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        self.file_menu = QtWidgets.QMenu(file_button)
+        for key in ("new", "open", "save", "export"):
+            tool = TOOLS[key]
+            self.file_menu.addAction(
+                command_icon(tool.icon or tool.command),
+                tool.label,
+                lambda cmd=tool.command: commands.invoke(cmd),
+            )
+        self.file_menu.addSeparator()
+        self.file_menu.addAction("Native CAD / Properties", lambda: commands.invoke("Az_Native"))
+        self.advanced_menu = self.file_menu.addMenu("Advanced")
+        file_button.setMenu(self.file_menu)
+        top.addWidget(file_button)
+        for key in ("save", "undo", "redo"):
             top.addWidget(tool_button(key, True))
-        self.tabs = QtWidgets.QTabBar()
-        self.tabs.setObjectName("AzWorkspaceTabs")
-        for label in ("SOLID", "SKETCH", "UTILITIES"):
-            self.tabs.addTab(label)
-        top.addSpacing(14)
-        top.addWidget(self.tabs)
-        top.addStretch()
+        top.addSpacing(12)
+        self.documents = DocumentTabs()
+        top.addWidget(self.documents, 1)
+        top.addWidget(tool_button("new", True))
         top.addWidget(tool_button("palette", True))
+        top.addWidget(tool_button("help", True))
+        layout.addLayout(top)
+        tools = QtWidgets.QHBoxLayout()
+        tools.setSpacing(0)
         workspace = QtWidgets.QComboBox()
         workspace.setObjectName("AzWorkspaceSelector")
-        workspace.addItems(["Design", "Manufacture", "Native CAD"])
+        workspace.addItems(["DESIGN", "Manufacture", "Native CAD"])
+        workspace.setFixedWidth(118)
+        workspace.setMinimumHeight(96)
         workspace.activated.connect(
             lambda index: (
                 commands.invoke(TOOLS["cam" if index == 1 else "native"].command) if index else None
             )
         )
-        top.addWidget(workspace)
-        layout.addLayout(top)
+        tools.addWidget(workspace)
+        content = QtWidgets.QVBoxLayout()
+        content.setContentsMargins(8, 0, 0, 0)
+        content.setSpacing(0)
+        self.tabs = QtWidgets.QTabBar()
+        self.tabs.setObjectName("AzWorkspaceTabs")
+        self.tabs.setExpanding(False)
+        for label in ("SOLID", "SKETCH", "UTILITIES"):
+            self.tabs.addTab(label)
+        content.addWidget(self.tabs)
         self.pages = QtWidgets.QStackedWidget()
         self.pages.setObjectName("AzRibbonPages")
-        self.pages.setFixedHeight(83)
+        self.pages.setFixedHeight(74)
         for groups in (SOLID, SKETCH, UTILITIES):
             self.pages.addWidget(self.make_page(groups))
         self.tabs.currentChanged.connect(self.pages.setCurrentIndex)
-        layout.addWidget(self.pages)
-        self.hint = QtWidgets.QLabel(
-            "Create Sketch → draw and dimension → Finish Sketch → Extrude.  S finds any tool."
-        )
+        content.addWidget(self.pages)
+        tools.addLayout(content, 1)
+        layout.addLayout(tools)
+        self.hint = QtWidgets.QLabel()
         self.hint.setObjectName("AzHint")
+        self.hint.hide()
         layout.addWidget(self.hint)
 
     def make_page(self, groups):
@@ -142,14 +174,14 @@ class Ribbon(QtWidgets.QFrame):
         page = QtWidgets.QWidget()
         row = QtWidgets.QHBoxLayout(page)
         row.setContentsMargins(0, 1, 0, 0)
-        row.setSpacing(9)
+        row.setSpacing(5)
         for group_label, keys in groups:
             group = QtWidgets.QWidget()
             column = QtWidgets.QVBoxLayout(group)
             column.setContentsMargins(1, 0, 1, 0)
             column.setSpacing(1)
             buttons = QtWidgets.QHBoxLayout()
-            buttons.setSpacing(1)
+            buttons.setSpacing(0)
             for key in keys:
                 if isinstance(key, tuple):
                     label, entries = key
@@ -279,12 +311,23 @@ class FeatureButton(QtWidgets.QToolButton):
         self.feature_name = obj.Name
         self.history = history
         self.setText(obj.Label)
-        self.setIcon(obj.ViewObject.Icon)
-        self.setIconSize(QtCore.QSize(24, 24))
-        self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        symbol = (
+            "PartDesign_NewSketch"
+            if obj.isDerivedFrom("Sketcher::SketchObject")
+            else "PartDesign_Body"
+        )
+        if getattr(obj, "AzType", "") == "AzExtrude" or obj.TypeId == "PartDesign::Pad":
+            symbol = "extrude"
+        elif obj.TypeId == "PartDesign::Pocket":
+            symbol = "PartDesign_Pocket"
+        elif obj.TypeId == "PartDesign::Fillet":
+            symbol = "PartDesign_Fillet"
+        self.setIcon(command_icon(symbol))
+        self.setIconSize(QtCore.QSize(22, 22))
+        self.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
         self.setCheckable(True)
-        self.setMinimumSize(84, 54)
-        self.setMaximumWidth(150)
+        self.setFixedSize(31, 34)
+        self.setAccessibleName(obj.Label)
         self.setToolTip(obj.Label + "\nClick: select · Double-click: edit · Right-click: more")
         self.clicked.connect(self.select)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -401,42 +444,96 @@ class FeatureButton(QtWidgets.QToolButton):
 class History(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+        from .workspace import action_button
+
         self.setObjectName("AzHistory")
         self.setStyleSheet(STYLE)
         self.signature = None
         self.buttons = []
-        layout = QtWidgets.QVBoxLayout(self)
-        layout.setContentsMargins(10, 2, 10, 4)
-        layout.setSpacing(2)
-        heading = QtWidgets.QHBoxLayout()
-        title = QtWidgets.QLabel(
-            "FEATURE HISTORY  ·  Double-click to edit · Right-click to roll back"
-        )
-        title.setStyleSheet("font-size: 10px;")
-        heading.addWidget(title)
-        heading.addStretch()
-        self.resume = QtWidgets.QPushButton("Resume Latest")
-        self.resume.setObjectName("AzResumeHistory")
-        self.resume.clicked.connect(lambda *_: commands.invoke("Az_ResumeHistory"))
-        heading.addWidget(self.resume)
-        layout.addLayout(heading)
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.setContentsMargins(9, 3, 9, 3)
+        layout.setSpacing(4)
+        for label, symbol, callback in (
+            ("First solid", "history-start", lambda: self.step("first")),
+            ("Previous feature", "history-back", lambda: self.step(-1)),
+            ("Next feature", "history-next", lambda: self.step(1)),
+            ("Latest history", "history-end", lambda: commands.invoke("Az_ResumeHistory")),
+        ):
+            layout.addWidget(action_button(label, symbol, callback))
+        divider = QtWidgets.QFrame()
+        divider.setFrameShape(QtWidgets.QFrame.VLine)
+        divider.setStyleSheet("border: 0; background: #cad3db; min-width: 1px; max-width: 1px;")
+        layout.addWidget(divider)
         self.scroll = QtWidgets.QScrollArea()
         self.scroll.setWidgetResizable(True)
         self.scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.scroll.setMinimumHeight(58)
-        layout.addWidget(self.scroll)
+        self.scroll.setMinimumHeight(37)
+        self.scroll.setStyleSheet(
+            "QScrollArea, QScrollArea > QWidget > QWidget {background: transparent; border: 0;}"
+        )
+        layout.addWidget(self.scroll, 1)
+        self.resume = QtWidgets.QPushButton("Resume Latest")
+        self.resume.setObjectName("AzResumeHistory")
+        self.resume.clicked.connect(lambda *_: commands.invoke("Az_ResumeHistory"))
+        layout.addWidget(self.resume)
+        settings = QtWidgets.QToolButton()
+        settings.setObjectName("AzTimelineSettings")
+        settings.setIcon(command_icon("Std_DlgPreferences"))
+        settings.setToolTip("Timeline settings")
+        settings.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        menu = QtWidgets.QMenu(settings)
+        labels = menu.addAction("Feature labels")
+        labels.setCheckable(True)
+        labels.toggled.connect(self.show_labels)
+        menu.addAction("Resume latest history", lambda: commands.invoke("Az_ResumeHistory"))
+        settings.setMenu(menu)
+        layout.addWidget(settings)
+        self.labels_visible = False
         self.refresh()
 
+    def show_labels(self, enabled):
+        self.labels_visible = enabled
+        self.signature = None
+        self.refresh()
+
+    def step(self, direction):
+        if Gui.Control.activeDialog():
+            commands.notify("Finish or cancel the current operation first.", True)
+            return
+        doc = modeling.current_document()
+        if not doc:
+            return
+        body = modeling.active_body()
+        if body is None:
+            bodies = [o for o in doc.Objects if o.isDerivedFrom("PartDesign::Body")]
+            if len(bodies) != 1:
+                commands.notify("Select a body to step through its history.", True)
+                return
+            body = bodies[0]
+        features = model_history.solids(body)
+        if not features or body.Tip not in features:
+            return
+        index = features.index(body.Tip)
+        target = 0 if direction == "first" else max(0, min(len(features) - 1, index + direction))
+        try:
+            if direction == 1 and target == len(features) - 1:
+                model_history.end(body)
+            elif target != index:
+                model_history.rollback(features[target])
+            self.refresh()
+        except ValueError as exc:
+            commands.notify(str(exc), True)
+
     def features(self):
-        doc = App.ActiveDocument
+        doc = modeling.current_document()
         if not doc:
             return []
         return model_history.ordered(doc)
 
     def refresh(self):
-        doc = App.ActiveDocument
+        doc = modeling.current_document()
         features = self.features()
         rolled = (
             [
@@ -459,9 +556,9 @@ class History(QtWidgets.QWidget):
             page = QtWidgets.QWidget()
             row = QtWidgets.QHBoxLayout(page)
             row.setContentsMargins(0, 0, 0, 0)
-            row.setSpacing(6)
+            row.setSpacing(1)
             if not features:
-                empty = QtWidgets.QLabel("Your sketches and solid features will appear here.")
+                empty = QtWidgets.QLabel("Design history")
                 row.addWidget(empty)
             for obj in features:
                 button = FeatureButton(obj, self)
@@ -474,8 +571,26 @@ class History(QtWidgets.QWidget):
                         and body.Group.index(obj) > body.Group.index(body.Tip)
                     ):
                         button.setStyleSheet("color: #9099a0; background: #e9edf0;")
+                if self.labels_visible:
+                    button.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+                    button.setFixedWidth(
+                        max(90, button.fontMetrics().horizontalAdvance(obj.Label) + 34)
+                    )
                 self.buttons.append(button)
                 row.addWidget(button)
+                if any(obj == body.Tip for body in rolled):
+                    marker = QtWidgets.QFrame()
+                    marker.setObjectName("AzHistoryMarker")
+                    marker.setFixedSize(3, 31)
+                    marker.setStyleSheet("background: #3c596d;")
+                    marker.setToolTip("Current Body Tip · later features are rolled back")
+                    row.addWidget(marker)
+            if features and not rolled:
+                marker = QtWidgets.QFrame()
+                marker.setFixedSize(3, 31)
+                marker.setStyleSheet("background: #3c596d;")
+                marker.setToolTip("Latest history")
+                row.addWidget(marker)
             row.addStretch()
             old = self.scroll.takeWidget()
             if old:

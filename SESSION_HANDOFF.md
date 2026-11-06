@@ -139,3 +139,43 @@ FreeCAD 1.1 workstation, and try Create Sketch from the Start page without New.
 Then complete the representative shop-part acceptance workflow. The New-document
 workaround remains valid for an installation that has not yet been updated.
 Linux evidence does not establish the Windows/1.1 acceptance gate.
+
+## Workspace redesign checkpoint — 0.3.0, 2026-11-06
+
+Inspected source parent: `5d9cc1056615878e320fcee107d8008ff0d1e698` on
+`codex/az-design-workbench`. The owner says the existing installation works and
+wants the workspace's layout/visual behavior comparable to Fusion; they expressly
+permit full-fork/core work. No installed version was stated in that confirmation.
+
+Changed ui.py/session.py for application tabs/ribbon, grouped Browser dock, compact
+timeline and reversible layout. Added workspace.py (Browser, native document tabs,
+canvas navigation and idle Solid radial menu), appearance.py (scoped preferences
+and scene-only grid), original SVG icon sources/generator, and
+tests/integration_workspace.py. commands.py routes Az Home/Fit around the grid.
+Package version and download guides now target 0.3.0. No C++ core patch is needed
+for this increment; the frontend remains entirely in our repo.
+
+Personally executed and passing: 28 new workspace GUI checks, 27 existing v0.2 GUI
+checks, 30 original GUI/navigation checks, 26 native modeling tests, 13 document
+context tests, 5 startup tests and 4 installer tests. Installed in the native test
+profile, fully quit/relaunched, observed automatic registration and a visible empty
+Design. Visual QA then caught white sketch edges on the light canvas; final
+edit-mode colors and light task headers were installed/reloaded and all 85 desktop
+checks passed again. Manual Browser sketch edit and Finish Sketch returned to the
+Solid layout correctly. Evidence: tests/validation-workspace-0.3.0.json.
+
+Environment: Linux FreeCAD 1.0/Qt5/PySide2. Do not infer Windows/1.1/Qt6 sign-off.
+Native advanced dialogs, click-to-activate idle Solid radial tools and Body-Tip
+stepping are the supported behavior; full history reordering and complete Fusion
+parity remain future scope. At this checkpoint, package integrity/publication/CI
+are next. Keep PR #1 draft; do not merge main. Publish with a head lease and
+preserve concurrent edits. Native test helpers/FCStd files outside the repo are
+transient diagnostics. Next owner task after publication: install 0.3.0, review
+the work area at their Windows display scale, and run a representative shop part.
+
+Final restoration hardening: Sketcher can use its current cached edit color as
+the default after a preference is removed. The cleanup now primes native sketch
+color defaults before removing keys that were originally absent. Two focused
+Python lifecycle regressions pass for absent/default and existing custom colors;
+package CI includes them. The 85 GUI suites above preceded this deactivation-only
+hardening; do not relabel it as a separate native GUI rerun.

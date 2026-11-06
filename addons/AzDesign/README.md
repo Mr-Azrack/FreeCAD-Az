@@ -1,4 +1,4 @@
-# Az Design 0.2.2
+# Az Design 0.3.0
 
 A Fusion-inspired modeling workspace for **FreeCAD-Az**. Install it in standard
 **FreeCAD 1.0 or newer** without compiling the fork. All code is in this repository
@@ -7,7 +7,7 @@ Autodesk code and artwork are not included.
 
 ## Install or update
 
-1. Download **[AzDesign-0.2.2.zip](../releases/AzDesign-0.2.2.zip)** and extract it.
+1. Download **[AzDesign-0.3.0.zip](../releases/AzDesign-0.3.0.zip)** and extract it.
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
 3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
@@ -18,7 +18,47 @@ up in `AzDesign-backups` beside FreeCAD's `Mod` directory before replacement.
 For manual installation, copy the **AzDesign** folder into the `Mod` folder under
 `App.getUserAppDataDir()` and restart FreeCAD.
 
-## First sketch fix in 0.2.2
+## Workspace in 0.3.0
+
+The work area now has a light canvas, original SVG tool icons, document tabs above
+the tools, a Design selector on the left, a grouped Browser, compact timeline and
+bottom-center navigation controls. Activating Az with no visible design opens a
+normal empty Design. The native menu and auxiliary panels are available from
+**File → Advanced**. **File → Native CAD / Properties** returns to Part Design and
+restores the previous layout, menus, canvas colors and navigation.
+
+- **Browser:** Bodies, Sketches, Origin, Named Views and construction geometry are
+  grouped by purpose. Search filters this design. Eye icons change native
+  visibility; a selected face highlights its body. Double-click a sketch to edit,
+  or a body to activate it. Right-click for Properties, Isolate and Restore
+  visibility. The small sliders button opens native properties.
+- **Timeline:** Compact icons select features; double-click edits them and
+  right-click offers rollback/suppression. Previous/Next step through the selected
+  body's actual solid history; the first control goes to its first solid. A marker
+  identifies the rolled-back Body Tip. The right-hand settings menu can show
+  feature labels. Multiple bodies require selecting the intended body.
+- **Navigation:** Home, Orbit, Pan, Fit and Zoom use the native camera. Orbit/Pan
+  buttons enable left-button dragging; Esc returns to selection. Middle button
+  pans and Shift + middle button orbits as before. Display settings include native
+  shaded/edge/wireframe styles, orthographic/perspective cameras and an optional
+  10 mm construction grid. Grid geometry is transient and excluded from Home/Fit.
+- **Canvas right-click:** While idle in Solid, eight radial tools offer Sketch,
+  Extrude, Press/Pull, Fillet, Hole, Move, Undo and Redo. Click a tool or press Esc.
+  Active tasks and sketch drawing retain native right-click/cancel behavior.
+- **Document tabs:** Switch native designs from the application bar. Closing uses
+  FreeCAD's native unsaved-document confirmation. Finish active tasks before
+  switching or closing a design.
+
+This is a repo-owned Qt workspace over FreeCAD's native model/document engine.
+The installable module delivers the same source without requiring a full fork
+build. Core changes remain available when an API or native UI boundary requires
+one. The layout follows familiar CAD conventions described in the
+[Autodesk interface guide](https://help.autodesk.com/cloudhelp/ENU/Fusion-GetStarted/files/GS-THE-FUSION-INTERFACE.htm);
+its code and SVG artwork are independently implemented. Advanced tasks still use
+native FreeCAD dialogs. History reordering and full Fusion feature parity remain
+future work. Linux/FreeCAD 1.0/Qt5 is tested; Windows 1.1/Qt6 acceptance is pending.
+
+## First sketch fix included from 0.2.2
 
 Create Sketch now opens a visible design automatically when none is open. You do
 not need to choose New first. Az's hidden geometry calculator is never used as
@@ -33,7 +73,7 @@ Windows/FreeCAD 1.1 update and full workflow retest remain pending.
 
 ## Startup fix included from 0.2.1
 
-If 0.2.0 reports `name '__file__' is not defined` in `InitGui.py`, install 0.2.2
+If 0.2.0 reports `name '__file__' is not defined` in `InitGui.py`, install 0.3.0
 with the same macro and restart FreeCAD. The update keeps a backup of the old
 installation. Both startup entry scripts now import a normal package module;
 they no longer assume FreeCAD defines `__file__` for its executed init scripts.

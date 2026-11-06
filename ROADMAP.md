@@ -16,8 +16,10 @@
 
 **Gate:** reproduce a representative shop part on the intended Windows machine and confirm save/reopen, Undo/Redo, export, Az/native feature interoperability, cancellation and install/upgrade/rollback.
 
-## Stage 1 — Reliable everyday CAD speed (next active work)
+## Stage 1 — Reliable everyday CAD speed (active)
 
+- [x] 0.3.0 workspace layout and visuals: top design tabs, grouped Browser, light canvas/readable sketches, compact timeline, navigation/display controls and idle Solid radial tools; 85 desktop checks passed on Linux.
+- [ ] Owner review of the 0.3.0 layout and behavior on Windows/1.1, including DPI and Qt version.
 - [ ] Expand sketch constraints/dimensions and context-aware profile selection; measure time and clicks versus familiar Fusion workflows.
 - [ ] Consistent Az task UI for key tools currently delegated to native dialogs: Revolve, Hole, Fillet/Chamfer, Shell, Loft, Sweep, patterns and mirror.
 - [ ] Improve selection feedback, failures, reference recovery, multi-body operations and ergonomics for real parts.

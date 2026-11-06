@@ -8,6 +8,8 @@ from .qt import QtCore, QtGui, QtWidgets
 from .catalog import TOOLS, SOLID_KEYS, SKETCH_KEYS
 from . import modeling, commands
 from .ui import Ribbon, History
+from .workspace import Browser, Navigation, RadialMenu
+from .appearance import Appearance
 
 _session = None
 
@@ -51,12 +53,30 @@ class InteractionFilter(QtCore.QObject):
         # Coin's Quarter widget is the actual CAD viewport. Other Qt widgets,
         # including Tasks, palettes and the object tree, must keep their input.
         name = widget.metaObject().className()
-        return any(part in name for part in ("QuarterWidget", "View3DInventorViewer", "QGLWidget"))
+        return any(
+            part in name
+            for part in ("QuarterWidget", "View3DInventorViewer", "QGLWidget", "QOpenGLWidget")
+        )
 
     def eventFilter(self, watched, event):
         if not self.session.active or self.forwarding:
             return False
         kind = event.type()
+        if kind == QtCore.QEvent.Resize and watched == self.session.mdi.viewport():
+            self.session.navigation.place()
+        if kind == QtCore.QEvent.ContextMenu and self.is_viewport(watched):
+            if not Gui.Control.activeDialog() and not modeling.in_sketch():
+                self.session.radial.popup(event.globalPos())
+                event.accept()
+                return True
+        if (
+            kind == QtCore.QEvent.KeyPress
+            and event.key() == QtCore.Qt.Key_Escape
+            and self.session.navigation.mode
+        ):
+            self.session.navigation.set_mode(None)
+            event.accept()
+            return True
         if kind == QtCore.QEvent.MouseButtonDblClick and event.button() == QtCore.Qt.LeftButton:
             parent = watched if isinstance(watched, QtWidgets.QWidget) else None
             in_browser = False
@@ -103,7 +123,31 @@ class InteractionFilter(QtCore.QObject):
             QtCore.QEvent.MouseMove,
         ):
             return False
-        if not self.session.remap_mouse or not self.is_viewport(watched):
+        if not self.is_viewport(watched):
+            return False
+        mode = self.session.navigation.mode
+        if mode and (
+            event.button() == QtCore.Qt.LeftButton or event.buttons() & QtCore.Qt.LeftButton
+        ):
+            modifiers = event.modifiers()
+            if mode == "orbit":
+                modifiers |= QtCore.Qt.ShiftModifier
+            else:
+                modifiers &= ~QtCore.Qt.ShiftModifier
+            if self.session.remap_mouse:
+                modifiers ^= QtCore.Qt.ShiftModifier
+            button = (
+                QtCore.Qt.MiddleButton
+                if event.button() == QtCore.Qt.LeftButton
+                else QtCore.Qt.NoButton
+            )
+            buttons = (
+                QtCore.Qt.MiddleButton
+                if event.buttons() & QtCore.Qt.LeftButton
+                else QtCore.Qt.NoButton
+            )
+            return self.forward_mouse(watched, event, button, buttons, modifiers)
+        if not self.session.remap_mouse:
             return False
         middle = event.button() == QtCore.Qt.MiddleButton or bool(
             event.buttons() & QtCore.Qt.MiddleButton
@@ -116,12 +160,15 @@ class InteractionFilter(QtCore.QObject):
         # the Shift modifier gives MMB=pan and Shift+MMB=orbit without replacing
         # picking, camera maths or geometry selection.
         modifiers = event.modifiers() ^ QtCore.Qt.ShiftModifier
+        return self.forward_mouse(watched, event, event.button(), event.buttons(), modifiers)
+
+    def forward_mouse(self, watched, event, button, buttons, modifiers):
         position = event.position() if hasattr(event, "position") else event.localPos()
         global_position = (
             event.globalPosition() if hasattr(event, "globalPosition") else event.screenPos()
         )
         forwarded = QtGui.QMouseEvent(
-            kind, position, global_position, event.button(), event.buttons(), modifiers
+            event.type(), position, global_position, button, buttons, modifiers
         )
         self.forwarding = True
         try:
@@ -136,6 +183,15 @@ class Session:
         self.main = Gui.getMainWindow()
         self.active = False
         self.original_state = self.main.saveState()
+        self.original_style = self.main.styleSheet()
+        self.original_menu_visible = not self.main.menuBar().isHidden()
+        self.original_corners = [
+            (corner, self.main.corner(corner))
+            for corner in (QtCore.Qt.BottomLeftCorner, QtCore.Qt.BottomRightCorner)
+        ]
+        self.mdi = self.main.findChild(QtWidgets.QMdiArea)
+        self.native_tabs = []
+        self.appearance = Appearance()
         self.original_bars = [
             (bar, not bar.isHidden()) for bar in self.main.findChildren(QtWidgets.QToolBar)
         ]
@@ -147,6 +203,7 @@ class Session:
         self.remap_mouse = False
         self.last_edit = None
         self.last_problem = None
+        self.last_task = False
         self.model_dock = None
         self.tasks_dock = None
         for dock in self.main.findChildren(QtWidgets.QDockWidget):
@@ -162,6 +219,15 @@ class Session:
         self.ribbon = Ribbon()
         self.toolbar.addWidget(self.ribbon)
         self.main.addToolBar(QtCore.Qt.TopToolBarArea, self.toolbar)
+        self.browser_dock = QtWidgets.QDockWidget("Browser", self.main)
+        self.browser_dock.setObjectName("AzDesignBrowserDock")
+        self.browser_dock.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea)
+        self.browser_dock.setFeatures(QtWidgets.QDockWidget.NoDockWidgetFeatures)
+        self.browser_dock.setTitleBarWidget(QtWidgets.QWidget())
+        self.browser = Browser()
+        self.browser_dock.setWidget(self.browser)
+        self.browser_dock.setMinimumWidth(235)
+        self.main.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.browser_dock)
         self.history_dock = QtWidgets.QDockWidget("Az Feature History", self.main)
         self.history_dock.setObjectName("AzDesignHistoryDock")
         self.history_dock.setAllowedAreas(QtCore.Qt.BottomDockWidgetArea)
@@ -169,10 +235,25 @@ class Session:
         self.history_dock.setTitleBarWidget(QtWidgets.QWidget())
         self.history = History()
         self.history_dock.setWidget(self.history)
-        self.history_dock.setMinimumHeight(93)
-        self.history_dock.setMaximumHeight(125)
+        self.history_dock.setMinimumHeight(47)
+        self.history_dock.setMaximumHeight(66)
         self.main.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.history_dock)
-        self.main.resizeDocks([self.history_dock], [98], QtCore.Qt.Vertical)
+        self.main.resizeDocks([self.history_dock], [50], QtCore.Qt.Vertical)
+        self.navigation = Navigation(self, self.mdi.viewport())
+        self.radial = RadialMenu(self.main)
+        for label, name in (
+            ("Python console", "Python console"),
+            ("Report view", "Report view"),
+            ("Native Browser / Properties", "Model"),
+        ):
+            dock = self.main.findChild(QtWidgets.QDockWidget, name)
+            if dock:
+                self.ribbon.advanced_menu.addAction(
+                    label, lambda dock=dock: dock.setVisible(not dock.isVisible())
+                )
+        menus = self.ribbon.advanced_menu.addAction("FreeCAD menu bar")
+        menus.setCheckable(True)
+        menus.toggled.connect(self.main.menuBar().setVisible)
         self.filter = InteractionFilter(self)
         self.timer = QtCore.QTimer(self.main)
         self.timer.setInterval(350)
@@ -180,6 +261,19 @@ class Session:
 
     def activate(self):
         self.active = True
+        self.appearance.activate()
+        self.main.setStyleSheet(self.original_style + """
+QToolBar#AzDesignRibbonBar { border: 0; padding: 0; spacing: 0; background: #f7f8f9; }
+QDockWidget#AzDesignBrowserDock { background: #f8f9fa; border-right: 1px solid #d3dae0; }
+QDockWidget#AzDesignHistoryDock { background: #e8ecef; border-top: 1px solid #cdd5dc; }
+QDockWidget#Tasks { color: #41515d; background: #f7f8fa; }
+QStatusBar { background: #e8ecef; color: #657583; font-size: 10px; }
+""")
+        self.main.menuBar().hide()
+        for dock, _title, _width in self.native_docks:
+            dock.hide()
+        for corner, _area in self.original_corners:
+            self.main.setCorner(corner, QtCore.Qt.BottomDockWidgetArea)
         for bar, _visible in self.original_bars:
             bar.hide()
             # FreeCAD saves visibility only for toolbars whose toggle action is
@@ -187,17 +281,22 @@ class Session:
             # never written into the user's native toolbar preferences.
             bar.toggleViewAction().setVisible(False)
         if self.model_dock:
-            self.model_dock.setWindowTitle("Browser")
+            self.model_dock.setWindowTitle("Native Properties")
             self.main.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.model_dock)
-            self.model_dock.show()
+            self.model_dock.hide()
         if self.tasks_dock:
             self.main.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.tasks_dock)
             self.tasks_dock.setMinimumWidth(280)
             self.tasks_dock.hide()
         self.toolbar.show()
+        self.browser_dock.show()
         self.history_dock.show()
+        self.main.resizeDocks([self.browser_dock], [260], QtCore.Qt.Horizontal)
+        if not modeling.current_document() and not Gui.Control.activeDialog():
+            modeling.document()
         QtWidgets.QApplication.instance().installEventFilter(self.filter)
         self.timer.start()
+        QtWidgets.QApplication.instance().aboutToQuit.connect(self.appearance.deactivate)
         self.tick()
         commands.notify("Az Design ready. Create Sketch to start, or S to find a tool.")
 
@@ -233,13 +332,28 @@ class Session:
                 self.ribbon.update_context(bool(sketch))
                 self.last_edit = editing
             self.history.refresh()
+            self.browser.refresh()
+            self.ribbon.documents.refresh()
+            self.appearance.update()
+            self.navigation.place()
+            for tab in self.mdi.findChildren(QtWidgets.QTabBar):
+                if tab.parentWidget() == self.mdi:
+                    if not any(saved == tab for saved, _visible in self.native_tabs):
+                        self.native_tabs.append((tab, not tab.isHidden()))
+                    tab.hide()
             self.ribbon.update_enabled()
             if self.tasks_dock:
                 wants_tasks = bool(
                     Gui.Control.activeDialog()
                     or (Gui.activeDocument() and Gui.activeDocument().getInEdit())
                 )
+                if wants_tasks != self.last_task:
+                    self.navigation.set_mode(None)
+                    self.last_task = wants_tasks
                 self.tasks_dock.setVisible(wants_tasks)
+                self.tasks_dock.setWindowTitle("Sketch Palette" if sketch else "Tasks")
+                if wants_tasks:
+                    self.style_tasks()
             # Some native commands reveal their old toolbar while editing.
             for bar, _visible in self.original_bars:
                 if not bar.isHidden():
@@ -251,12 +365,42 @@ class Session:
                 App.Console.PrintError("Az Design refresh:\n" + problem)
                 self.last_problem = problem
 
+    def style_tasks(self, restore=False):
+        if not self.tasks_dock:
+            return
+        for widget in self.tasks_dock.findChildren(QtWidgets.QWidget):
+            saved = widget.property("_az_original_style")
+            if restore:
+                if saved is not None:
+                    widget.setStyleSheet(saved)
+                    widget.setProperty("_az_original_style", None)
+                continue
+            if saved is not None:
+                continue
+            name = widget.metaObject().className()
+            style = None
+            if widget.property("class") == "header":
+                style = "background: #e5ebf0; color: #405567; border: 0; border-bottom: 1px solid #ccd6de;"
+            elif name in ("QSint::ActionPanel", "QSint::TaskGroup", "Gui::TaskView::TaskPanel"):
+                style = "background: #f7f8fa; color: #405567; border: 0;"
+            if style:
+                widget.setProperty("_az_original_style", widget.styleSheet())
+                widget.setStyleSheet(style)
+
     def deactivate(self):
         from .tasks import cancel_active
 
         cancel_active()
         self.active = False
         self.timer.stop()
+        try:
+            QtWidgets.QApplication.instance().aboutToQuit.disconnect(self.appearance.deactivate)
+        except RuntimeError:
+            pass
+        self.appearance.deactivate()
+        self.style_tasks(restore=True)
+        self.navigation.hide()
+        self.radial.close()
         QtWidgets.QApplication.instance().removeEventFilter(self.filter)
         # FreeCAD activates the destination C++ toolbars before calling this
         # Python hook. Keep those newly visible bars when restoring the layout.
@@ -280,17 +424,29 @@ class Session:
         self.views = []
         self.main.removeToolBar(self.toolbar)
         self.main.removeDockWidget(self.history_dock)
+        self.main.removeDockWidget(self.browser_dock)
         self.toolbar.hide()
         self.history_dock.hide()
+        self.browser_dock.hide()
         # Detach before deferred deletion. A user can re-enter the workbench in
         # the same event-loop turn; its next layout snapshot must not capture
         # these retired widgets or retain dangling toolbar wrappers.
         self.toolbar.setParent(None)
         self.history_dock.setParent(None)
+        self.browser_dock.setParent(None)
         for dock, title, width in self.native_docks:
             dock.setWindowTitle(title)
             dock.setMinimumWidth(width)
         self.main.restoreState(self.original_state)
+        self.main.setStyleSheet(self.original_style)
+        self.main.menuBar().setVisible(self.original_menu_visible)
+        for corner, area in self.original_corners:
+            self.main.setCorner(corner, area)
+        for tab, visible in self.native_tabs:
+            try:
+                tab.setVisible(visible)
+            except RuntimeError:
+                pass
         for bar, visible in self.original_bars:
             destination_visible = destination_bars.get(bar.objectName(), False)
             bar.setVisible(visible or (switching_workbench and destination_visible))
@@ -304,6 +460,9 @@ class Session:
             self.tasks_dock.show()
         self.toolbar.deleteLater()
         self.history_dock.deleteLater()
+        self.browser_dock.deleteLater()
+        self.navigation.deleteLater()
+        self.radial.deleteLater()
         self.filter.deleteLater()
         self.timer.deleteLater()
 

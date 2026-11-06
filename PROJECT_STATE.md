@@ -1,11 +1,11 @@
 # FreeCAD-Az — project state
 
-**Inspected:** 2026-11-05
+**Inspected:** 2026-11-06
 **Repository:** https://github.com/Mr-Azrack/FreeCAD-Az
 **Development branch:** codex/az-design-workbench
 **Implementation baseline reviewed:** dac67fee9cebb9cb7e342a45098fd913510f10f6 (Az Design 0.2)
 **Draft PR:** https://github.com/Mr-Azrack/FreeCAD-Az/pull/1
-**Status:** Az Design 0.2.2 first-document fix implemented on the feature branch; production Windows validation and comprehensive workflow parity remain outstanding.
+**Status:** Az Design 0.3.0 workspace redesign implemented and locally verified; Windows/1.1 acceptance and comprehensive workflow parity remain outstanding.
 
 ## Objective
 
@@ -13,7 +13,7 @@ Build an independently maintainable FreeCAD-based CAD workflow approaching Fusio
 
 ## Observed code in Az Design 0.2
 
-- Installable add-on in addons/AzDesign with packaged addons/releases/AzDesign-0.2.2.zip and local installer with backup.
+- Installable add-on in addons/AzDesign with packaged addons/releases/AzDesign-0.3.0.zip and local installer with backup.
 - Solid/Sketch/Utilities ribbon, native Browser/Tasks arrangement, shortcuts, search, camera/navigation handling and bottom feature history.
 - Sketches with separately selectable exact planar regions (including nested/overlapping/divided profiles), live extrude/cut/intersect/join/new body previews, distance handles, signed distances, symmetric/two-sided extents, taper, offsets, Through all and To face.
 - Press/Pull for supported extrusion end caps, some prismatic faces, source sketch circles, and supported native cylinder/hole dimensions. Unsupported ambiguous geometry reports an error instead of silently changing the wrong feature.
@@ -125,3 +125,38 @@ FreeCAD 1.1 workstation, and try Create Sketch from the Start page without New.
 Then complete the representative shop-part acceptance workflow. The New-document
 workaround remains valid for an installation that has not yet been updated.
 Linux evidence does not establish the Windows/1.1 acceptance gate.
+
+## Workspace redesign — 0.3.0, 2026-11-06
+
+Owner confirmed their existing setup works (installed version unspecified) and
+requested Fusion-like work-area layout, visuals and behavior, with freedom to
+modify the whole fork. That report is useful user feedback, not a completed
+Windows acceptance matrix. The new repo-owned Qt workspace replaces the surrounding
+work area while retaining native FreeCAD documents and geometry. It is packaged
+as an installable module so a Windows application rebuild is not required.
+
+Implemented: top native-design tabs; left Design selector; original editable SVG
+icon family; grouped searchable Browser with visibility, native selection, isolate
+and properties access; compact Body-aware timeline with real previous/next Tip
+steps and optional labels; light canvas and readable edit-mode sketch colors;
+matching native task headers; bottom-center navigation, camera/display options and
+a presentation-only grid; idle Solid radial tools. Native CAD restores previous
+menus, layout, styles, navigation and changed canvas preferences. Closed document
+requests use FreeCAD's own save confirmation. Core changes remain available for
+future API boundaries, but this milestone modifies no C++ geometry/core code.
+
+Fresh validation: 28 workspace, 27 v0.2 and 30 original desktop checks; 26 native
+modeling, 13 document-context, 5 startup and 4 installer tests all passed. An
+installed full restart registered Az and opened a visible Design automatically.
+The final sketch-contrast follow-up was installed/reloaded and all 85 GUI checks
+were rerun successfully. See `validation-workspace-0.3.0.json` for provenance and
+manual visual observations. Environment: Linux FreeCAD 1.0/Qt5/PySide2. Native
+advanced tasks remain; radial gestures during sketching, full timeline reordering,
+and a complete Fusion clone are not claimed. Windows/1.1/Qt6 remains pending.
+
+Final restoration hardening: Sketcher can use its current cached edit color as
+the default after a preference is removed. The cleanup now primes native sketch
+color defaults before removing keys that were originally absent. Two focused
+Python lifecycle regressions pass for absent/default and existing custom colors;
+package CI includes them. The 85 GUI suites above preceded this deactivation-only
+hardening; do not relabel it as a separate native GUI rerun.

@@ -26,6 +26,13 @@ def notify(message, error=False):
 
 def invoke(command):
     try:
+        if command == "Std_ViewFitAll":
+            from .session import current
+
+            session = current()
+            if session and modeling.current_document():
+                session.appearance.fit(Gui.activeDocument().activeView().fitAll)
+                return True
         if command not in Gui.listCommands():
             notify(
                 "This tool is not available in your FreeCAD version. Use Find a Tool for alternatives.",
@@ -47,7 +54,7 @@ def home():
         view = Gui.activeDocument().activeView()
         if view:
             view.viewAxonometric()
-            view.fitAll()
+            invoke("Std_ViewFitAll")
 
 
 def native():
@@ -95,7 +102,7 @@ def help_dialog():
     FreeCAD's task dialogs. The Tasks panel is on the right.</p>
     <p><b>Return:</b> Utilities → Native CAD restores your previous layout.
     This is an independent interface, not an Autodesk product.</p>"""
-    QtWidgets.QMessageBox.information(Gui.getMainWindow(), "Az Design 0.2", text)
+    QtWidgets.QMessageBox.information(Gui.getMainWindow(), "Az Design 0.3", text)
 
 
 def dispatch(key):
