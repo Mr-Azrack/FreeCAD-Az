@@ -394,3 +394,37 @@ Outer and inner ZIP CRC checks passed; both macro files and edited code were ver
 ## 2026-11-06 — Owner confirmation: 0.3.4 modeled Hole editing
 
 The owner installed/tested Az Design 0.3.4 after the modeled-thread editing fixes and reported **"ok that works great"**. Earlier owner testing confirmed that the Az Hole panel generated visible real helical threads on Windows without crashing. This is owner-reported GUI acceptance of the updated editing workflow, not a claim that every thread standard, size, save/reopen, downstream dependency, or native crash scenario has been tested. The 0.3.4 package/native CI checks previously passed; PR #1 remains a draft. Continue collecting exact repro cases for any remaining UX or geometry bugs.
+
+## 0.3.5 incremental Hole task workflow polish — 2026-11-06
+
+Owner confirmed that 0.3.4 modeled-thread creation and editing work well in
+the Windows Az Hole panel, and instructed us to proceed without approvals:
+"we break fix as we go." Keep iterations modest, working, backed by CI,
+and preserve the modeled-thread diagnostic boundary.
+
+Implemented:
+- `hole.py` task now groups Placement, Geometry and Thread settings with
+  readable labels, a short always-visible hint, and an experimental danger
+  note displayed only for opted-in geometric threads.
+- Human-readable thread standard names map to unmodified FreeCAD native
+  enums. Threaded Hole diameter is disabled in the task because thread
+  standard/size controls nominal diameter natively.
+- Thread sizes load immediately when a standard is selected; no extra dummy
+  Show result button press. The center sketch remains changeable during
+  preliminary size discovery; changing it cancels the unpreviewed temporary
+  native Hole transaction and rebuilds the options for the new source.
+- 350 ms debounced optional live previews are on by default for complete
+  plain/cosmetic holes only. `hole_ui_policy.can_live_preview` refuses
+  modeled threads, originally modeled Holes and a recent modeled preview,
+  as well as incomplete/invalid specs. Modeled previews retain manual
+  Update preview, explicit warning and fsynced diagnostic logging.
+- Show original, accept, cancel and cleanup stop pending preview timers.
+  Existing identical modeled features remain no-op on accepting.
+- New headless Qt interaction smoke test and pure policy tests cover
+  signal wiring, one-step size lookup, safe auto preview and source switching.
+
+Safety/verification: This is **not** a new geometry kernel or modeled thread
+crash fix. GitHub package tests pass for the current increment, but platform
+acceptance of the actual 0.3.5 task layout on Windows FreeCAD 1.1 still
+requires the owner. Check latest exact GitHub HEAD, CI native/modeling job,
+artifact bytes and source tests before declaring final release success.
