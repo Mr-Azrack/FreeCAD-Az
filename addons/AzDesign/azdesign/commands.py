@@ -99,12 +99,12 @@ def help_dialog():
     <p><b>Parameters:</b> Utilities → Parameters edits native feature dimensions
     and user parameters. Use expressions such as Parameters.Width / 2.</p>
     <p><b>Hole:</b> The Az task makes native, editable holes. Threads use cosmetic
-    specifications; modeled helical threads are temporarily disabled for stability.</p>
+    specifications; real helical threads are available only with experimental consent and crash logs.</p>
     <p><b>Native tools:</b> Fillet, Shell, Revolve and other advanced tools use
     FreeCAD's task dialogs. The Tasks panel is on the right.</p>
     <p><b>Return:</b> Utilities → Native CAD restores your previous layout.
     This is an independent interface, not an Autodesk product.</p>"""
-    QtWidgets.QMessageBox.information(Gui.getMainWindow(), "Az Design 0.3.2", text)
+    QtWidgets.QMessageBox.information(Gui.getMainWindow(), "Az Design 0.3.3", text)
 
 
 def dispatch(key):
