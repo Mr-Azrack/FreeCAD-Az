@@ -1,4 +1,4 @@
-# Az Design — modeled-thread crash lab (0.3.4)
+# Az Design — modeled-thread crash lab (0.3.5)
 
 This is a deliberately **dangerous but opt-in** diagnostic build. It restores
 the FreeCAD native `PartDesign::Hole.ModelThread` switch for diagnosis; it does
@@ -6,7 +6,7 @@ not claim to correct the crash inside FreeCAD/OpenCASCADE.
 
 ## Safest reproduction procedure (Windows FreeCAD 1.1)
 
-1. Install Az Design 0.3.4 using `Install_AzDesign.FCMacro`, fully close and
+1. Install Az Design 0.3.5 using `Install_AzDesign.FCMacro`, fully close and
    restart FreeCAD.
 2. Save and close unrelated CAD work. **Launch a separate FreeCAD process** for
    the experiment. Verify it is a second process in Windows Task Manager;
@@ -33,9 +33,9 @@ termination is not catchable with `try/except`.
 ## Reproduce using the normal Az Hole panel
 
 Create a **disposable** test document with a block and circular sketch.
-Select Hole → thread standard → Show result once to populate actual thread sizes.
+Select Hole → thread standard; native thread sizes populate immediately.
 Pick the intended size, check **Actually model helical threads — EXPERIMENTAL**,
-then choose Show result and explicitly confirm the crash warning. Normal holes
+then choose **Update preview** and explicitly confirm the crash warning. Normal holes
 stay cosmetic. The status/Report view points at the experiment's JSONL trace.
 Clicking OK after a valid unchanged preview does not rebuild the helix again.
 
@@ -80,3 +80,11 @@ geometry test. The same durable stages are recorded. If a Python error
 appears, copy the first error message and the latest JSONL log. **Cancel**
 reverts edits through a FreeCAD transaction; it cannot catch a process-level
 OCCT crash. Save before changing the geometry.
+
+## Automatic preview in 0.3.5
+
+The **Automatically update plain and cosmetic holes** option is never used for
+real modeled threads or for an edit operation that began with modeled geometry.
+The experimental checkbox always requires **Update preview** and separate
+consent. Automatic previews are debounced to limit unnecessary recomputation;
+**Show original** and closing the task cancel pending timer callbacks.
