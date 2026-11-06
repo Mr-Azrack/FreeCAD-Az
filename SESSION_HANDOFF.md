@@ -1,6 +1,6 @@
 # FreeCAD-Az — recovery handoff
 
-**Updated:** 2026-11-05
+**Updated:** 2026-11-06
 **Repository:** https://github.com/Mr-Azrack/FreeCAD-Az
 **Development branch:** codex/az-design-workbench
 **Reviewed implementation commit:** dac67fee9cebb9cb7e342a45098fd913510f10f6 (Az Design 0.2)
@@ -257,3 +257,55 @@ FreeCAD 1.1, tests a fresh extrusion in One side/Symmetric/Two sides, confirms
 workspace exit without Boolean errors, and reviews default grids in modeling and
 sketching. Record any remaining full traceback. Linux native checks plus modern
 API contracts do not establish Windows/1.1 kernel acceptance.
+
+## 2026-11-06 — Az Design 0.3.2 Hole stabilization handoff
+
+Source parent inspected when starting: b481b386212c5d69521e5ed8f6c4cc7305925b9d;
+work continues on codex/az-design-workbench, draft PR #1. The next agent MUST
+retrieve its actual HEAD, latest Git history, tests, PR and local status instead
+of treating this paragraph as current HEAD. No reset, merge or force push.
+
+Implementation committed on branch:
+- azdesign/hole_spec.py: validates dimensions/thread standard/size and forbids
+  ModelThread=True; version-tolerant optional CosmeticThread property.
+- azdesign/hole_operation.py: new/edit tip Hole transaction, valid shape checks,
+  base-solid fallback, cancellation, accept with native objects.
+- azdesign/hole.py: Az Qt Hole task for a sketch, diameter, depth/Through all,
+  native cosmetic thread standard and explicit size, Show result/Show original,
+  Cancel/Accept. No actual geometric helix generation.
+- catalog.py, commands.py, workspace.py, ui.py, session.py: route Hole command
+  and supported edit paths through Az without a native workbench jump.
+- tests/test_hole_spec.py and test_hole_operation.py (7 offline tests);
+  tests/test_workflow.py (two native Hole tests); CI workflow runs both.
+- package.xml and __init__.py updated to 0.3.2. README and release guide
+  distinguish the Actions review artifact from checked-in 0.3.1 ZIP.
+
+Evidence: run 42248055124, on pre-version-bump Hole code, passed package and
+native modeling (28 tests) on Linux FreeCAD 1.0. The earlier run 42247401143
+caught FreeCAD 1.0 missing CosmeticThread; source fixed and revalidated. Build
+0.3.2's own CI artifact from the newest successful Az Design workflow; do not
+claim this documentation-only update reexecuted CAD tests.
+
+Next owner Windows/FreeCAD 1.1 checklist:
+1. Download AzDesign-installer 0.3.2 CI artifact from PR #1's latest passing
+   Az Design add-on run; extract nested AzDesign-0.3.2.zip and run
+   Install_AzDesign.FCMacro. Restart FreeCAD fully.
+2. Model a block; sketch at least one circle center on its top face; finish
+   sketch, invoke Hole (H), set a blind or Through all depth, Show result.
+   Verify canvas and Az ribbon remain intact, model is visible and valid.
+3. Show original solid then Show result; Cancel and confirm original geometry,
+   history, visibility and undo. Repeat and Accept; reopen Hole from Browser
+   and timeline and verify changes without switching workbenches.
+4. On a fresh test body create cosmetic ISO thread with an explicit size;
+   verify native Threaded=True, ModelThread=False. Do not attempt actual
+   modeled threads through Az; test only with disposable documents and
+   independently validated native geometry workflows.
+5. Test save/reopen, Native CAD return/restoration, STEP export and reopening,
+   feature-history edits, and different UI scaling. Note the exact version,
+   traceback, screenshot and steps for failures.
+
+Limitations: no Windows/1.1 or live Qt GUI acceptance was personally executed.
+The geometric thread crash root cause is still unknown. Advanced Hole settings
+and editing a Hole with downstream features are intentionally delegated to
+Native CAD. Package CI creates an Actions artifact; as of source checkpoint,
+no checked-in addons/releases/AzDesign-0.3.2.zip exists.
