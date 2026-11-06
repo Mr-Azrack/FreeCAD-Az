@@ -64,3 +64,10 @@
 - A checked item means implemented with repository-backed evidence; it does not imply all edge cases are covered.
 - Do not mark Windows or future Fusion parity complete on Linux tests alone.
 - After each milestone update PROJECT_STATE.md, DECISIONS.md if relevant, and SESSION_HANDOFF.md with branch, commit, tests and remaining work.
+
+- [x] 0.3.4 modeled Hole editing path removes stale geometric-thread refusal,
+      preserves initial thread state, avoids unchanged recompute and retains
+      transactional Cancel; native/cosmetic regression coverage added.
+- [ ] Owner Windows/FreeCAD 1.1 acceptance for **edit existing modeled Hole**:
+      change thread size and depth, preview, cancel/accept, save/reopen; capture
+      actual error traces if another failure occurs.
