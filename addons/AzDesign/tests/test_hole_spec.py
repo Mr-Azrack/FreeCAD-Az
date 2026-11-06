@@ -85,6 +85,53 @@ class HoleSpecTest(unittest.TestCase):
                     settings.apply(hole)
                 self.assertEqual(hole.writes, [])
 
+    def test_experimental_model_requires_authorization_and_durable_checkpoint(self):
+        hole = NativeHole()
+        settings = HoleSpec(diameter=4, depth=8, thread_type="ISOMetricProfile",
+                            thread_size="M4", model_thread=True, experimental=True)
+        with self.assertRaisesRegex(ValueError, "diagnostic"):
+            settings.apply(hole)
+        self.assertFalse(hole.writes)
+
+        class LabHole(NativeHole):
+            def __setattr__(self, name, value):
+                if name == "ModelThread" and value:
+                    if hasattr(self, "writes"):
+                        self.writes.append((name, value))
+                    object.__setattr__(self, name, value)
+                else:
+                    super().__setattr__(name, value)
+
+        lab = LabHole()
+        stages = []
+
+        def checkpoint():
+            self.assertTrue(lab.Threaded)
+            self.assertEqual(lab.ThreadSize, "M4")
+            self.assertFalse(lab.ModelThread)
+            self.assertFalse(lab.CosmeticThread)
+            stages.append("checkpoint")
+
+        settings.apply(lab, before_model=checkpoint)
+        self.assertTrue(lab.ModelThread)
+        self.assertEqual(stages, ["checkpoint"])
+        self.assertEqual(lab.writes[-1], ("ModelThread", True))
+
+    def test_modeled_thread_rejects_implicit_or_incomplete_opt_in(self):
+        cases = (
+            HoleSpec(model_thread=True),
+            HoleSpec(model_thread=True, experimental=True),
+            HoleSpec(model_thread=True, experimental=True,
+                     thread_type="ISOMetricProfile"),
+        )
+        for settings in cases:
+            with self.subTest(settings=settings):
+                hole = NativeHole()
+                hole.writes.clear()
+                with self.assertRaises(ValueError):
+                    settings.apply(hole)
+                self.assertEqual(hole.writes, [])
+
     def test_invalid_size_rejected_without_turning_on_threads(self):
         hole = NativeHole()
         with self.assertRaisesRegex(ValueError, "not available"):
