@@ -10,6 +10,8 @@ import Part
 import PartDesign
 import Sketcher
 from azdesign import features, profiles, operations, history, presspull, parameters
+from azdesign.hole_operation import HoleOperation
+from azdesign.hole_spec import HoleSpec
 
 RECT = [(0, 0, 10, 0), (10, 0, 10, 10), (10, 10, 0, 10), (0, 10, 0, 0)]
 
@@ -439,6 +441,27 @@ class WorkflowTest(unittest.TestCase):
         self.assertNotIn("Invalid", fillet.State)
         self.assertTrue(fillet.Shape.isValid())
         self.assertGreater(fillet.Shape.Volume, 700)
+
+    def test_native_hole_preview_reveals_base_and_cancels_cleanly(self):
+        body, source, base = self.base()
+        centers = sketch(self.doc, [], body=body, z=6)
+        centers.addGeometry(Part.Circle(App.Vector(5, 5, 0), App.Vector(0, 0, 1), 2))
+        self.doc.recompute()
+        original_tip = body.Tip
+        original_objects = {o.Name for o in self.doc.Objects}
+        op = HoleOperation(self.doc, centers)
+        volume = op.preview(HoleSpec(diameter=3, depth=6, through_all=True))
+        self.assertLess(volume, base.Shape.Volume)
+        self.assertTrue(op.hole.Shape.isValid())
+        self.assertFalse(op.hole.ModelThread)
+        self.assertEqual(body.Tip, op.hole)
+        op.show_base()
+        self.assertEqual(body.Tip, original_tip)
+        self.assertTrue(op.show_result())
+        self.assertEqual(body.Tip, op.hole)
+        op.cancel()
+        self.assertEqual(body.Tip, original_tip)
+        self.assertEqual({o.Name for o in self.doc.Objects}, original_objects)
 
     def test_native_pad_can_follow_an_az_feature(self):
         body, source, base = self.base()
