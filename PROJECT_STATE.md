@@ -5,7 +5,7 @@
 **Development branch:** codex/az-design-workbench
 **Implementation baseline reviewed:** dac67fee9cebb9cb7e342a45098fd913510f10f6 (Az Design 0.2)
 **Draft PR:** https://github.com/Mr-Azrack/FreeCAD-Az/pull/1
-**Status:** Az Design 0.3.1 extrusion/preference compatibility fixes and default-visible grids implemented; Windows/1.1 acceptance remains outstanding.
+**Status:** Az Design 0.3.2 Hole stabilization review build in development; native FreeCAD 1.0 and offline Hole tests passed, Windows/1.1 GUI acceptance outstanding. The checked-in installer ZIP remains 0.3.1.
 
 ## Objective
 
@@ -238,3 +238,47 @@ FreeCAD 1.1, tests a fresh extrusion in One side/Symmetric/Two sides, confirms
 workspace exit without Boolean errors, and reviews default grids in modeling and
 sketching. Record any remaining full traceback. Linux native checks plus modern
 API contracts do not establish Windows/1.1 kernel acceptance.
+
+
+## Hole task stabilization — 0.3.2 review build, 2026-11-06
+
+The owner reported that invoking native Hole changed the Az workspace, Show result
+could make the solid disappear, and geometric threads crashed FreeCAD. These are
+user-reported symptoms, not a verified crash backtrace or identified OCCT defect.
+
+The new native Hole workflow uses Az_Hole, a repo-owned Qt task panel and native
+PartDesign::Hole features. It supports sketch circle/arc centers, hole diameter,
+dimensional/through-all depth, and specified cosmetic threads. Hole creation and
+tip-feature editing use transactional previews. Show original solid and invalid
+previews restore the prior Body Tip and base visibility; Cancel aborts the
+transaction. The Browser, feature timeline and native-tree double-click path
+route to the Az task. The native geometry remains editable without Az in FreeCAD.
+
+IMPORTANT: ModelThread=True is deliberately blocked in Az because an in-process
+OCCT thread-geometry crash cannot be caught by Python. Cosmetic thread metadata
+is not a substitute for modeled helical faces. Advanced Hole options,
+non-tip feature edits and previously modeled-thread features remain native CAD
+paths. No full root-cause geometric-thread crash fix is claimed.
+
+Compatibility: FreeCAD 1.0 lacks CosmeticThread; hole_spec.py detects its presence
+rather than assigning a nonexistent property. The first native run failed on
+this missing property; the corrected run passed. The final source-only 0.3.2
+build is packaged by CI, not yet committed as a ZIP under addons/releases.
+
+Verified evidence:
+- [Native/package run 42248055124](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42248055124)
+  passed **28 native modeling tests** on headless Linux FreeCAD 1.0, including
+  valid native Hole preview/cancel and native cosmetic-thread metadata.
+- Package checks passed 4 HoleSpec and 3 HoleOperation offline tests, along
+  with the previous installer, startup, context, appearance, compatibility,
+  source and XML checks.
+- Real Az Hole Qt dialog, FreeCAD 1.1/Qt6, Windows display scaling, native-tree
+  edit interception, STEP/save/reopen and geometric-thread crash reproduction
+  are **not yet validated on the owner's Windows workstation**.
+
+Next: download the 0.3.2 AzDesign-installer artifact from the latest passing
+Az Design add-on CI, install with the backup macro, fully restart Windows
+FreeCAD 1.1 and test hole Create/Show result/Show original/Cancel/Accept,
+cosmetic thread standard+explicit size, subsequent Hole editing, save/reopen,
+STEP export and Native CAD restoration. Capture exact traceback and versions
+for failures. PR #1 remains draft; do not merge to main.
