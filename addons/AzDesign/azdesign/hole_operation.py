@@ -47,6 +47,7 @@ class HoleOperation:
         self.closed = False
         self.valid = False
         self.last_spec = None
+        self.last_diagnostic = None
 
     def _start(self):
         if self.started:
@@ -102,11 +103,36 @@ class HoleOperation:
             raise features.DesignError("Invalid Hole settings.")
         spec.validate()  # Do not touch the document until input is sane.
         self.valid = False
+        diagnostic = None
         try:
+            if spec.model_thread:
+                from .hole_diagnostics import start_for_freecad
+
+                # Create and flush this file BEFORE touching the native model.
+                # Even an access violation inside OCCT leaves our last stage.
+                diagnostic = start_for_freecad(App, scenario="Az interactive Hole")
+                self.last_diagnostic = str(diagnostic.path)
+                diagnostic.record_spec("before_transaction", spec)
+                App.Console.PrintWarning(
+                    "Az modeled-thread experiment log: " + self.last_diagnostic + "\\n"
+                )
             self._start()
             self.body.Tip = self.hole
-            spec.apply(self.hole)
+            if diagnostic:
+                diagnostic.record_spec("before_property_configuration", spec, feature=self.hole)
+            spec.apply(
+                self.hole,
+                before_model=(
+                    lambda: diagnostic.record_spec(
+                        "before_model_thread_enable", spec, feature=self.hole
+                    )
+                ) if diagnostic else None,
+            )
+            if diagnostic:
+                diagnostic.record_spec("before_native_recompute", spec, feature=self.hole)
             self.doc.recompute()
+            if diagnostic:
+                diagnostic.record_spec("after_native_recompute", spec, feature=self.hole)
             shape = self.hole.Shape
             if shape.isNull() or not shape.isValid() or len(shape.Solids) != 1:
                 raise features.DesignError(
@@ -119,10 +145,17 @@ class HoleOperation:
                     "and direction before accepting."
                 )
             self.last_spec = spec
+            if diagnostic:
+                diagnostic.record(
+                    "valid_solid", volume=float(shape.Volume),
+                    solids=len(shape.Solids), valid=True
+                )
             self.valid = True
             self.show_result()
             return shape.Volume
-        except Exception:
+        except Exception as exc:
+            if diagnostic:
+                diagnostic.record("python_exception", error=repr(exc))
             self.valid = False
             self.show_base()
             raise
