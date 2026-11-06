@@ -25,7 +25,8 @@
 - [ ] Expand sketch constraints/dimensions and context-aware profile selection; measure time and clicks versus familiar Fusion workflows.
 - [x] 0.3.2 Az-managed native Hole UI for diameter, depth, through-all and cosmetic threads; preview/rollback; Linux FreeCAD 1.0 native and offline checks passed.
 - [ ] Windows/1.1 visual and workflow sign-off for Hole, save/reopen, STEP and compatibility.
-- [ ] Root-cause native modeled/helical thread crash and restore safely validated geometric threads (currently disabled in Az).
+- [x] 0.3.3 explicit experimental modeled/helical thread opt-in, fsynced pre-crash logs and disposable probe macro; real kernel crash path excluded from CI.
+- [ ] Reproduce Windows FreeCAD 1.1 modeled thread failure using the isolated 0.3.3 probe; analyze checkpoint and (if needed) C++ crash dump, fix root cause, then test production-safe geometric threads.
 - [ ] Consistent Az task UI for remaining native dialogs: Revolve, Fillet/Chamfer, Shell, Loft, Sweep, patterns and mirror.
 - [ ] Improve selection feedback, failures, reference recovery, multi-body operations and ergonomics for real parts.
 - [ ] Extend Press/Pull to more safely identifiable solids and surfaces without silently changing design intent.
