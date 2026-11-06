@@ -1,4 +1,4 @@
-# Az Design — modeled-thread crash lab (0.3.3)
+# Az Design — modeled-thread crash lab (0.3.4)
 
 This is a deliberately **dangerous but opt-in** diagnostic build. It restores
 the FreeCAD native `PartDesign::Hole.ModelThread` switch for diagnosis; it does
@@ -6,7 +6,7 @@ not claim to correct the crash inside FreeCAD/OpenCASCADE.
 
 ## Safest reproduction procedure (Windows FreeCAD 1.1)
 
-1. Install Az Design 0.3.3 using `Install_AzDesign.FCMacro`, fully close and
+1. Install Az Design 0.3.4 using `Install_AzDesign.FCMacro`, fully close and
    restart FreeCAD.
 2. Save and close unrelated CAD work. **Launch a separate FreeCAD process** for
    the experiment. Verify it is a second process in Windows Task Manager;
@@ -69,3 +69,14 @@ identify the exact crashing native function.
   requires Native CAD.
 - Modeled thread geometry can be slow even when it does not crash. This
   feature remains experimental until repeatable safe behavior is established.
+
+## Editing an existing modeled Hole in 0.3.4
+
+Double-click a modeled Hole in the Az Browser or timeline. The experimental
+checkbox stays checked and the actual standard/size are preserved. Opening
+and accepting unchanged makes no native recompute. To edit a size or depth,
+change the value, press **Show result** and explicitly approve the native
+geometry test. The same durable stages are recorded. If a Python error
+appears, copy the first error message and the latest JSONL log. **Cancel**
+reverts edits through a FreeCAD transaction; it cannot catch a process-level
+OCCT crash. Save before changing the geometry.
