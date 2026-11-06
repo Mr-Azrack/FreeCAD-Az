@@ -134,7 +134,7 @@ class HoleOperationTest(unittest.TestCase):
 
     def test_existing_modeled_hole_can_be_edited_with_guarded_diagnostics(self):
         previous = types.SimpleNamespace(
-            Name="Hole", Profile=self.sketch, BaseFeature=self.base,
+            Name="Hole", Profile=(self.sketch, [""]), BaseFeature=self.base,
             Shape=Shape(80), ModelThread=True, Threaded=True,
             CosmeticThread=False, ThreadType="ISOMetricProfile",
             ThreadSize="M4", Diameter=4, Depth=8, DepthType="Dimension",
@@ -169,9 +169,18 @@ class HoleOperationTest(unittest.TestCase):
             op.cancel()
             self.doc.abortTransaction.assert_called_once()
 
+    def test_native_profile_source_accepts_direct_and_linksub(self):
+        feature = types.SimpleNamespace(Profile=self.sketch)
+        resolve = self.module.hole_profile_sketch
+        self.assertIs(resolve(feature), self.sketch)
+        feature.Profile = (self.sketch, ["Edge1"])
+        self.assertIs(resolve(feature), self.sketch)
+        feature.Profile = (None, [])
+        self.assertIsNone(resolve(feature))
+
     def test_existing_modeled_hole_no_preview_or_transaction_on_open(self):
         previous = types.SimpleNamespace(
-            Name="Hole", Profile=self.sketch, BaseFeature=self.base,
+            Name="Hole", Profile=(self.sketch, [""]), BaseFeature=self.base,
             Shape=Shape(80), ModelThread=True, ViewObject=None,
         )
         previous.isDerivedFrom = lambda cls: cls == "PartDesign::Hole"
