@@ -424,3 +424,31 @@ Outer and inner ZIP CRC checks passed; both macro files and edited code were ver
 ## 2026-11-06 — Owner confirmation: 0.3.4 modeled Hole editing
 
 The owner installed/tested Az Design 0.3.4 after the modeled-thread editing fixes and reported **"ok that works great"**. Earlier owner testing confirmed that the Az Hole panel generated visible real helical threads on Windows without crashing. This is owner-reported GUI acceptance of the updated editing workflow, not a claim that every thread standard, size, save/reopen, downstream dependency, or native crash scenario has been tested. The 0.3.4 package/native CI checks previously passed; PR #1 remains a draft. Continue collecting exact repro cases for any remaining UX or geometry bugs.
+
+## 2026-11-06 — 0.3.5 Hole UX iteration
+
+Owner said no need to ask permission, prefers to break/fix incrementally.
+Recovered draft PR #1 on `codex/az-design-workbench`, base head
+`5f4fae1ece39ebe68459db3c5024a0338aeb5fa3`. Read AGENTS.md and all
+continuity files. User-confirmed Windows 0.3.4 modeled-thread creation/edit
+is the working baseline; do not regress this.
+
+Incremental changes: new pure `hole_ui_policy.py` with auto-preview gates
+and test; grouped native Hole UI, 350 ms Qt timer, editable initial source,
+automatic native thread-size lookup, human standard labels, derived diameter
+disabled when threaded, conditional helical danger warning, timer cleanup,
+reversible temporary Hole on source changes, and headless Qt signal smoke
+tests. `package.xml` and `__init__.py` now 0.3.5; docs updated.
+
+Do not conflate package success with Windows GUI sign-off. ModelThread still
+requires explicit Update preview + crash confirmation and durable stages.
+Always inspect exact current branch, latest Az CI jobs, package artifact,
+version, and newly pushed commits before continuing.
+
+Follow-up: once both native/package CI pass, download the workflow artifact,
+extract the inner `AzDesign-0.3.5.zip`, verify ZIP contents, CRC and offline
+tests, record SHA256/bytes and artifact ID here. Keep draft PR #1 unmerged.
+Owner should try standard-size selection, simple auto preview, original toggle,
+switching center sketches before preview, then modeled thread edit (still
+manual) on Windows. Next project slice can polish the Extrude task and timeline
+without changing geometry engine unexpectedly.
