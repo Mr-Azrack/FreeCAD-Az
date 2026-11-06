@@ -82,3 +82,14 @@ Windows shop-part workflow. Do not reuse the known-broken 0.2.0 startup entry fi
 The modeling engine is unchanged by this hotfix. Full Windows/1.1 modeling support
 must not be inferred from the startup fix or earlier Linux results. Read current
 branch HEAD and PR #1 before resuming; keep the branch under review.
+
+### Published 0.2.1 verification checkpoint
+
+Startup fix/source commit: `0242b3a6f7b23026a2b33e63ad6e04ac5c5763e0`.
+[Add-on CI run 42162682276](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42162682276)
+passed for that commit, including the new startup regressions and native modeling/
+installer/package jobs. The ZIP is `addons/releases/AzDesign-0.2.1.zip`, SHA256
+`c65900d15c337f619e34a8d2fb719bdd75426ad4a68b8b39f8ec9e0e2ee0bd8d`.
+PR #1 remains draft and main is unchanged. The inherited Dependency Review setting
+issue persists. The remaining immediate action is the owner's Windows/1.1 reinstall
+and startup/modeling retest; Linux startup validation does not close that gate.
