@@ -63,8 +63,8 @@ class HoleTask:
             self.source.addItem(obj.Label, obj.Name)
         if selected in self.sketches:
             self.source.setCurrentIndex(self.sketches.index(selected) + 1)
-        elif len(self.sketches) == 1:
-            self.source.setCurrentIndex(1)
+        # Do not guess the single available sketch: it might be the Pad
+        # profile rather than a deliberate sketch of hole centers.
         self.source.setEnabled(not editing)
         center_form.addRow("Centers", self.source)
         layout.addWidget(center_group)
