@@ -20,7 +20,7 @@
 
 - [x] 0.3.0 workspace layout and visuals: top design tabs, grouped Browser, light canvas/readable sketches, compact timeline, navigation/display controls and idle Solid radial tools; 85 desktop checks passed on Linux; add-on CI 42231553398 passed native modeling/package checks.
 - [x] Owner gave positive 0.3.0 visual feedback; requested default-visible grids.
-- [x] 0.3.1 uses modern extrusion sides where available, restores native Boolean preferences, and shows persistent modeling/sketch grids by default.
+- [x] 0.3.1 uses modern extrusion sides where available, restores native Boolean preferences, and shows persistent modeling/sketch grids by default. Add-on CI 42237616994 passed.
 - [ ] Full owner workflow acceptance on Windows/1.1, including DPI and Qt version.
 - [ ] Expand sketch constraints/dimensions and context-aware profile selection; measure time and clicks versus familiar Fusion workflows.
 - [ ] Consistent Az task UI for key tools currently delegated to native dialogs: Revolve, Hole, Fillet/Chamfer, Shell, Loft, Sweep, patterns and mirror.

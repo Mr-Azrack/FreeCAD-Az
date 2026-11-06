@@ -238,3 +238,22 @@ Native evidence: Linux FreeCAD 1.0/Qt5/PySide2. FreeCAD 1.1 API checked from sou
 and sentinel contracts only; Windows/1.1 runtime retest remains pending. At this
 checkpoint, package integrity/publication/CI are next. Keep PR #1 draft, lease the
 branch head and preserve concurrent work. No merge to main is authorized here.
+
+### Published 0.3.1 verification checkpoint
+
+Source/package commit: `f08150dd6f1b2d13770d0d387050eef12f9b19fa`.
+[Add-on CI run 42237616994](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42237616994)
+passed native modeling and package jobs, including modern/legacy extrusion
+contracts and native preference type regressions. ZIP: AzDesign-0.3.1.zip,
+149,792 bytes, SHA256
+`33d44a9fd3515506292e62ed836024232a12518511dc606e68c89966ce8f74fd`.
+Remote blob `d6f4774dca28518818884935be59702799d641ea` matches local verification.
+PR #1 and guides target 0.3.1; PR remains draft and main is unchanged. Inherited
+Dependency Review remains a separate fork-setting failure. No implementation
+changes remain uncommitted.
+
+Next: owner updates with Install_AzDesign.FCMacro and fully restarts Windows
+FreeCAD 1.1, tests a fresh extrusion in One side/Symmetric/Two sides, confirms
+workspace exit without Boolean errors, and reviews default grids in modeling and
+sketching. Record any remaining full traceback. Linux native checks plus modern
+API contracts do not establish Windows/1.1 kernel acceptance.
