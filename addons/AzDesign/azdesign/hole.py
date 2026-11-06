@@ -4,7 +4,7 @@
 import FreeCADGui as Gui
 from .qt import QtCore, QtWidgets
 from . import modeling, features
-from .hole_spec import HoleSpec, THREAD_TYPES, thread_sizes
+from .hole_spec import HoleSpec, THREAD_TYPES, THREAD_LABELS, thread_sizes
 from .hole_operation import HoleOperation, hole_profile_sketch
 from .hole_ui_policy import can_live_preview
 
@@ -77,6 +77,10 @@ class HoleTask:
         self.diameter.setDecimals(3)
         self.diameter.setSuffix(" mm")
         self.diameter.setValue(mm(editing.Diameter) if editing else 6)
+        self.diameter.setToolTip(
+            "For threaded holes the selected native thread size determines "
+            "the diameter. Choose None to edit the plain-hole diameter."
+        )
         geometry_form.addRow("Diameter", self.diameter)
         self.depth_type = QtWidgets.QComboBox()
         self.depth_type.addItems(["Distance", "Through all"])
@@ -102,11 +106,12 @@ class HoleTask:
         self.standard = QtWidgets.QComboBox()
         self.standard.setObjectName("AzHoleThreadStandard")
         for value in THREAD_TYPES:
-            self.standard.addItem(value, value)
+            self.standard.addItem(THREAD_LABELS.get(value, value), value)
         initial = str(editing.ThreadType) if editing and editing.Threaded else "None"
         self.standard.setCurrentIndex(
             THREAD_TYPES.index(initial) if initial in THREAD_TYPES else 0
         )
+        self.diameter.setEnabled(initial == "None")
         thread_form.addRow("Standard", self.standard)
         self.size = QtWidgets.QComboBox()
         self.size.setObjectName("AzHoleThreadSize")
@@ -263,6 +268,7 @@ class HoleTask:
             return
         self.preview_timer.stop()
         standard = self.standard.currentData()
+        self.diameter.setEnabled(standard == "None")
         self.modeled.setEnabled(standard != "None")
         if standard == "None":
             self.modeled.setChecked(False)
