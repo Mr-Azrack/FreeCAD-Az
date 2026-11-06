@@ -1,6 +1,21 @@
 # Az Design installer packages
 
-## 0.3.4 editable modeled-thread Hole review build
+## 0.3.5 compact Hole panel and safe live preview review build
+
+The Hole task groups its controls, loads native thread sizes when selecting a
+standard, and debounces automatic previews for **plain/cosmetic** Holes only.
+Existing or previously modeled helical features remain manual-only with an
+explicit crash warning and durable logs. Windows FreeCAD 1.1 acceptance remains
+pending. Source code, install guidance and limitations are in
+`addons/AzDesign/README.md`.
+
+Get the **AzDesign-installer** artifact from the
+[Az Design add-on workflow](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)
+after both package and modeling jobs pass. Extract `AzDesign-0.3.5.zip` and
+execute `Install_AzDesign.FCMacro`. Checked-in release ZIP is still 0.3.1.
+
+
+## 0.3.4 editable modeled-thread Hole review build (previous)
 
 This review build fixes the explicit edit prohibition left over from 0.3.2.
 Existing native modeled Holes now reopen with their geometric-thread setting
