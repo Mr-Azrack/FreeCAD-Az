@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
-"""Validated, non-destructive settings for native PartDesign Hole features.
+"""Validated native Hole settings with opt-in modeled-thread diagnostics.
 
-Real helical threading can crash the OCCT process, bypassing Python exception
-handling. Az Design deliberately produces native cosmetic/thread-metadata holes
-and never enables ModelThread from the interactive task.
+Modeled geometry can crash the native OCCT process. The default is cosmetic;
+helical threads require explicit experimental authorization and a durable log.
 """
 
 from dataclasses import dataclass
@@ -24,6 +23,7 @@ class HoleSpec:
     thread_type: str = "None"
     thread_size: str = ""
     model_thread: bool = False
+    experimental: bool = False
 
     def validate(self):
         if not isfinite(self.diameter) or self.diameter <= 0:
@@ -32,19 +32,28 @@ class HoleSpec:
             raise ValueError("Hole depth must be a positive finite number.")
         if self.thread_type not in THREAD_TYPES:
             raise ValueError("Unsupported thread standard: " + str(self.thread_type))
-        if self.model_thread:
+        if self.model_thread and not self.experimental:
             raise ValueError(
-                "Modeled helical threads are disabled in Az Design because native "
-                "thread geometry has crashed FreeCAD. Use cosmetic threads for "
-                "manufacturing intent."
+                "Modeled threads require explicit experimental authorization and "
+                "crash logging. Normal Hole previews remain cosmetic."
+            )
+        if self.model_thread and (self.thread_type == "None" or not self.thread_size):
+            raise ValueError(
+                "Choose a thread standard and an explicit size to model a thread."
             )
         if self.thread_size and self.thread_type == "None":
             raise ValueError("Choose a thread standard before choosing a thread size.")
         return self
 
-    def apply(self, feature):
-        """Set all native properties without ever entering modeled-thread mode."""
+    def apply(self, feature, before_model=None):
+        """Apply dimensions first; enable the risky geometry switch last.
+
+        Modeled-thread callers must supply a callback that durably records the
+        exact pre-switch state. No log means no risky native calculation.
+        """
         self.validate()
+        if self.model_thread and before_model is None:
+            raise ValueError("Modeled threads require an active diagnostic recorder.")
         # All dimension updates happen while unthreaded; FreeCAD can make the
         # diameter read-only once a standard thread has been selected.
         feature.ModelThread = False
@@ -64,13 +73,16 @@ class HoleSpec:
             if self.thread_size:
                 feature.ThreadSize = self.thread_size
             if hasattr(feature, "CosmeticThread"):
-                feature.CosmeticThread = True
+                feature.CosmeticThread = not self.model_thread
             feature.Threaded = True
         else:
             if hasattr(feature, "CosmeticThread"):
                 feature.CosmeticThread = False
-        # Native geometry is kept native and editable in ordinary FreeCAD.
-        feature.ModelThread = False
+        if self.model_thread:
+            before_model()
+            feature.ModelThread = True
+        else:
+            feature.ModelThread = False
 
 
 def thread_sizes(feature, thread_type):
