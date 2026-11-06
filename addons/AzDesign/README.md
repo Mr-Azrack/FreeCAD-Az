@@ -22,7 +22,9 @@ stops pending preview timers to keep the unmodified base visible.
 
 If no sketch is selected, Az requires an explicit choice rather than guessing
 that the only sketch drives hole centers; it may instead be the existing Pad's
-profile. The editor continues to preserve existing modeled-thread settings and
+profile. Changing the center sketch while loading a native thread-size list
+rolls back the temporary Hole and switches to the newly selected sketch; the
+source locks only after an actual valid preview. The editor continues to preserve existing modeled-thread settings and
 does not recompute unchanged features. No underlying geometry kernel was
 replaced, and FreeCAD 1.1 Windows GUI acceptance is still required for this
 polish build.
