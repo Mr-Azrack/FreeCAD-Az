@@ -328,3 +328,26 @@ Implemented on `codex/az-design-workbench`:
 Windows/FreeCAD 1.1 reproduction and provide checkpoint/fault details. The
 ordinary 0.3.2 modeled-thread safety restriction is superseded by this
 experimental mode only, not removed from normal use. PR #1 remains draft.
+
+### Verified 0.3.3 experimental crash-lab review artifact
+
+[Az Design CI 42253489192](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42253489192)
+passed both **package** and **native modeling** jobs on the source commit
+`0d251aa10eba7ea64f16f74964e6dbbb8516668b`. The native FreeCAD 1.0
+suite passed 28 modeling tests (cosmetic-thread and preview only); packaging
+passed six HoleSpec, four HoleOperation and one durable-diagnostic offline test,
+plus prior baseline checks. Running a real ModelThread helix is **not** part of
+CI because it may crash the worker.
+
+Download the [AzDesign-installer artifact 13521627224](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42253489192/artifacts/13521627224).
+It contains `AzDesign-0.3.3.zip`: **172,372 bytes**,
+SHA256 `b4a126826650fb6d9555266c1a6618406e1613f418191ce6ff1332f56b5f7fe0`.
+The outer/inner ZIP CRC checks passed, and the extracted 11 dedicated offline
+Hole tests passed again. `Probe_Modeled_Thread.FCMacro` is at the ZIP root
+and under `AzDesign/Tools`; it was syntax-checked but **not run**.
+Its SHA256 is
+`af658bc61f1d3ac36a09f5dfd2fbfd4f96bea9ed0119bf30a8a29a4f8ab22e79`.
+
+Important: Windows FreeCAD 1.1 GUI acceptance and modeled-thread crash
+reproduction remain outstanding. The first real crash should be reproduced
+in a separate disposable FreeCAD process, followed by log analysis.
