@@ -179,3 +179,26 @@ color defaults before removing keys that were originally absent. Two focused
 Python lifecycle regressions pass for absent/default and existing custom colors;
 package CI includes them. The 85 GUI suites above preceded this deactivation-only
 hardening; do not relabel it as a separate native GUI rerun.
+
+### Published 0.3.0 verification checkpoint
+
+Workspace source/package commit: `1d35f35398c57e89ba0c7464447c36e3f04caa2d`.
+[Add-on CI run 42231553398](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42231553398)
+passed package and native modeling jobs, including the new two cached-color
+restoration regressions. Local desktop evidence remains the 28+27+30 checks and
+installed startup/visual observations in validation-workspace-0.3.0.json; those
+GUI checks are not CI checks. The report explicitly records the later Python-only
+cleanup hardening. ZIP: `addons/releases/AzDesign-0.3.0.zip`, 142,854 bytes, SHA256
+`ea6870ebc16d51d22a0fffde9d7be2cb4573efb6adff4e4ca58de9755e9a34b5`.
+Remote blob `50e5d4564e3761253ab056087b2de53ec0b60a1d` matches the verified local
+artifact. PR #1 title/body and installation guides point to 0.3.0; it remains
+draft and main is unchanged. The inherited Dependency Review setting failure
+remains unrelated and unresolved. Source, assets, package and evidence are
+committed; no CAD implementation changes remain uncommitted.
+
+Next: owner installs 0.3.0 through Install_AzDesign.FCMacro, restarts, selects Az
+Design and reviews the workspace on Windows/1.1 at their actual display scaling.
+Verify sketch readability, Browser/selection, document tabs, native task behavior,
+undo/save/reopen and Native CAD restoration on a representative shop part. Use
+that feedback to choose the next visual/ergonomic gap; do not mark complete Fusion
+parity or Windows/Qt6 acceptance from this Linux checkpoint.
