@@ -34,10 +34,15 @@ class HoleOperationTest(unittest.TestCase):
         sys.path.insert(0, str(ADDON))
         app = types.ModuleType("FreeCAD")
         app.GuiUp = False
-        self.mock_modules = patch.dict(sys.modules, {"FreeCAD": app})
+        fake = types.ModuleType("azdesign.features")
+        fake.DesignError = ValueError
+        fake.owner_body = lambda obj: next((x for x in obj.InList if x.isDerivedFrom("PartDesign::Body")), None)
+        fake.body_tip = Mock()
+        fake.begin_transaction = Mock()
+        self.mock_modules = patch.dict(sys.modules, {"FreeCAD": app, "azdesign.features": fake})
         self.mock_modules.start()
         self.module = importlib.import_module("azdesign.hole_operation")
-        self.features = importlib.import_module("azdesign.features")
+        self.features = sys.modules["azdesign.features"]
         self.features.begin_transaction = Mock()
         self.doc = types.SimpleNamespace(Objects=[], openTransaction=Mock(),
                                          commitTransaction=Mock(), abortTransaction=Mock(),
@@ -85,9 +90,6 @@ class HoleOperationTest(unittest.TestCase):
 
     def test_invalid_result_preserves_existing_tip_and_cancel_reverts(self):
         op = self.module.HoleOperation(self.doc, self.sketch)
-        self.body.newObject("PartDesign::Hole", "probe").Shape = Shape(100)
-        self.objects.pop("probe")
-        self.doc.Objects.pop()
         def invalid(kind, name):
             obj = types.SimpleNamespace(Name=name, Shape=Shape(100), ViewObject=None)
             obj.getEnumerationsOfProperty = lambda key: []
