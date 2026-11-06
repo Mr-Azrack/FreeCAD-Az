@@ -5,7 +5,7 @@ import FreeCADGui as Gui
 from .qt import QtWidgets
 from . import modeling, features
 from .hole_spec import HoleSpec, THREAD_TYPES, thread_sizes
-from .hole_operation import HoleOperation
+from .hole_operation import HoleOperation, hole_profile_sketch
 
 
 def selected_sketch(doc):
@@ -31,7 +31,7 @@ class HoleTask:
             if obj.isDerivedFrom("Sketcher::SketchObject") and features.owner_body(obj)
         ]
         if editing:
-            selected = editing.Profile
+            selected = hole_profile_sketch(editing)
             if selected not in self.sketches:
                 raise features.DesignError("This Hole has no usable source sketch.")
 
