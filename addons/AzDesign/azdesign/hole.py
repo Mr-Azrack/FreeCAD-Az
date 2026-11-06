@@ -196,6 +196,20 @@ class HoleTask:
         if self.closed:
             return False
         try:
+            # Populate native thread-size choices without turning on modeled
+            # geometry or asking for crash consent prematurely.
+            preliminary = self.settings()
+            if preliminary.thread_type != "None" and not preliminary.thread_size:
+                operation = self.ensure_operation()
+                operation._start()
+                options = thread_sizes(operation.hole, preliminary.thread_type)
+                self.populate_sizes(preliminary.thread_type)
+                for value in options:
+                    self.size.addItem(value, value)
+                operation.valid = False
+                operation.show_base()
+                self.message("Choose the actual thread size, then Show result.", True)
+                return False
             if self.modeled.isChecked():
                 choice = QtWidgets.QMessageBox.warning(
                     self.form,
@@ -215,18 +229,6 @@ class HoleTask:
                     return False
             spec = self.settings(experimental=self.modeled.isChecked()).validate()
             operation = self.ensure_operation()
-            if spec.thread_type != "None" and not spec.thread_size:
-                # Options depend on the native Hole standard and FreeCAD version.
-                # Never silently choose the first tap size.
-                operation._start()
-                options = thread_sizes(operation.hole, spec.thread_type)
-                self.populate_sizes(spec.thread_type)
-                for value in options:
-                    self.size.addItem(value, value)
-                operation.valid = False
-                operation.show_base()
-                self.message("Choose the actual thread size, then Show result.", True)
-                return False
             volume = operation.preview(spec)
             status = "Valid Hole · result volume {:.3f} mm³".format(volume)
             if spec.model_thread:
