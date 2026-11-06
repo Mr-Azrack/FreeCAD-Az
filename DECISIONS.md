@@ -93,3 +93,19 @@ Owner prefers a visible grid over blank canvas. Default Az grid visibility to tr
 and persist its toggle in Az's own preference group. Use native aligned sketch
 grid while editing; keep modeling floor unpickable, outside saved geometry and
 outside native scene bounds. No geometry kernel change is needed.
+
+## 2026-11-06 — Hole preview and thread-safety decision
+
+- A native Hole must use an Az-owned task surface while Az is active. Native
+  geometry/document properties remain authoritative; no copied modeling kernel.
+- Invalid Hole previews must reveal the previous real solid, not merely report
+  an error while leaving the viewport empty; Reject rolls the transaction back.
+- Do not call FreeCAD's modeled helical thread path from Az until its crash and
+  performance are independently characterized. Keep ModelThread=False, while
+  allowing native thread standards/sizes as cosmetic/machining intent.
+- Require a deliberate thread size; never choose the first native size without
+  informing the user. Check FreeCAD feature capabilities rather than assuming
+  a property exists on every FreeCAD version.
+- Restrict Az Hole editing to the Body Tip for now; native workbench handles
+  advanced options, downstream-history changes and previously modeled threads.
+  This is an interim stability gate, not a commitment to abandon real threads.
