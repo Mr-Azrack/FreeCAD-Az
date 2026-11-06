@@ -381,3 +381,31 @@ Its SHA256 is
 Important: Windows FreeCAD 1.1 GUI acceptance and modeled-thread crash
 reproduction remain outstanding. The first real crash should be reproduced
 in a separate disposable FreeCAD process, followed by log analysis.
+
+## 2026-11-06 — 0.3.4 edit-mode bugfix handoff
+
+Reported by owner: Az 0.3.3 interactive Hole panel successfully created real
+spiral-thread geometry with no crash; no macro was run. Editing those threads
+then showed many errors (error text not captured yet). Actual inspected source
+confirmed two deliberate outdated rejections: `HoleTask.__init__` and
+`HoleOperation.__init__` both blocked `editing.ModelThread`; UI also defaulted
+experimental checkbox False and could strip modeled state on subsequent edit.
+
+Changed in source on `codex/az-design-workbench` (draft PR #1):
+- Removed outdated rejections, retained pre-existing Body Tip and source constraints.
+- `HoleTask` reads `editing.ModelThread` and snapshots native input settings.
+  Opening/accepting an unchanged modeled Hole does not enter a native transaction
+  or recompute. Clicking Show result on unchanged settings also skips recompute.
+  A modified modeled thread still prompts and goes through fsynced diagnostics.
+- `HoleOperation` labels edit diagnostic scenarios separately.
+- Stub tests check existing modeled Hole can enter the editor unchanged and
+  that a changed preview logs before native recompute. Added FreeCAD 1.0 native
+  geometry test for safe, cosmetic threaded-hole edit and cancellation rollback.
+- Incremented package/add-on to 0.3.4 and documented remaining risks in READMEs.
+
+Next: inspect latest branch SHA and new CI run. Download and verify actual
+0.3.4 package from successful Actions run before releasing. Owner should back
+up their FCStd, install 0.3.4, and test opening/editing modeled Hole. If errors
+recur request exact first traceback or screenshot and latest experimental log.
+The original 0.3.3 creation success does not prove that modeled-thread edit
+itself is safe or that save/reopen works. No fork merge.
