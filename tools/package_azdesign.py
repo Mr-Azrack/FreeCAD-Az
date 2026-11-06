@@ -25,6 +25,10 @@ def package(output=None):
     for path in required:
         if not path.is_file():
             raise FileNotFoundError(path)
+    probe = addon / "Tools" / "Probe_Modeled_Thread.FCMacro"
+    if not probe.is_file():
+        raise FileNotFoundError(probe)
+    ast.parse(probe.read_text(encoding="utf-8"), filename=str(probe))
     files = sorted(
         p
         for p in addon.rglob("*")
@@ -37,6 +41,7 @@ def package(output=None):
         for path in files:
             archive.write(path, "AzDesign/" + path.relative_to(addon).as_posix())
         archive.write(repo / "addons" / "Install_AzDesign.FCMacro", "Install_AzDesign.FCMacro")
+        archive.write(probe, "Probe_Modeled_Thread.FCMacro")
         archive.write(addon / "README.md", "START_HERE.md")
     return output
 
