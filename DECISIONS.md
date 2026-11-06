@@ -134,3 +134,16 @@ remain explicitly consented, transactionally reversible, and durably logged.
 Keep the restriction against editing holes with downstream features until
 history-aware downstream recompute can be validated. New 0.3.4 paths remain
 under owner Windows acceptance and draft PR review.
+
+## 2026-11-06 — Small reversible UI improvements over working CAD behavior
+
+After successful owner Windows 0.3.4 modeled Hole editing, continue in
+deliberate increments ("we break fix as we go"), not a disruptive top-to-bottom
+rewrite. For 0.3.5 polish the existing native Hole panel first: compact grouped
+controls, readable FreeCAD thread standard labels, native-derived threaded
+diameter lock, immediate standard-dependent size choices and optional debounced
+plain/cosmetic live previews. Never auto-run real modeled helix generation,
+including after changing an originally modeled Hole or toggling modeled mode
+off. Preserve explicit consent, logs, native transactions, original geometry,
+reversible sketch selection before preview, and no-op edits. Maintain Windows
+GUI testing as separate evidence from Linux/Qt-stub test results.
