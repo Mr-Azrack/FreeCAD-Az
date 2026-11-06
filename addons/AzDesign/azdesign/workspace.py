@@ -311,6 +311,10 @@ class Browser(QtWidgets.QWidget):
             from .tasks import edit_feature
 
             edit_feature(obj)
+        elif obj.isDerivedFrom("PartDesign::Hole"):
+            from .hole import edit_feature
+
+            edit_feature(obj)
         else:
             self.properties()
 
