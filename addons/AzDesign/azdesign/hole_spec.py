@@ -72,9 +72,11 @@ class HoleSpec:
                 )
             if self.thread_size:
                 feature.ThreadSize = self.thread_size
+            feature.Threaded = True
+            # FreeCAD 1.1 may keep this property read-only until Threaded
+            # becomes true. Set it only after enabling the thread standard.
             if hasattr(feature, "CosmeticThread"):
                 feature.CosmeticThread = not self.model_thread
-            feature.Threaded = True
         else:
             if hasattr(feature, "CosmeticThread"):
                 feature.CosmeticThread = False
