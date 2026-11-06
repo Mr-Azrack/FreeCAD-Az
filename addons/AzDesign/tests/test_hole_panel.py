@@ -230,6 +230,8 @@ class HolePanelSmokeTest(unittest.TestCase):
     def test_thread_sizes_populate_on_standard_change_without_preview(self):
         task = self.hole.HoleTask(self.doc, selected=self.sketch)
         task.standard.setCurrentIndex(1)
+        self.assertEqual(task.standard.items[1][0], "ISO metric · coarse")
+        self.assertFalse(task.diameter.enabled)
         self.assertEqual(task.size.count(), 4)  # placeholder plus native 3
         self.assertTrue(Operation.instances[0].started)
         self.assertEqual(Operation.instances[0].calls, [])
