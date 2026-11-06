@@ -12,7 +12,7 @@
 - [x] Confirm add-on native modeling and package CI for v0.2 (run 42100114683).
 - [x] Reproduce and fix the Windows-reported missing `__file__` startup error in 0.2.1; add startup regression CI.
 - [x] Reproduce and fix Create Sketch with no visible document in 0.2.2; validate automatic document creation, hidden calculator separation, and existing GUI workflows. Add-on CI run 42165160134 passed.
-- [ ] Owner acceptance and full Windows/FreeCAD 1.1 integration and document round-trip using 0.3.1.
+- [ ] Owner acceptance and full Windows/FreeCAD 1.1 integration and document round-trip using 0.3.2.
 
 **Gate:** reproduce a representative shop part on the intended Windows machine and confirm save/reopen, Undo/Redo, export, Az/native feature interoperability, cancellation and install/upgrade/rollback.
 
@@ -23,7 +23,7 @@
 - [x] 0.3.1 uses modern extrusion sides where available, restores native Boolean preferences, and shows persistent modeling/sketch grids by default. Add-on CI 42237616994 passed.
 - [ ] Full owner workflow acceptance on Windows/1.1, including DPI and Qt version.
 - [ ] Expand sketch constraints/dimensions and context-aware profile selection; measure time and clicks versus familiar Fusion workflows.
-- [ ] Consistent Az task UI for key tools currently delegated to native dialogs: Revolve, Hole, Fillet/Chamfer, Shell, Loft, Sweep, patterns and mirror.
+- [x] 0.3.2 Az-managed native Hole UI for diameter, depth, through-all and cosmetic threads; preview/rollback; Linux FreeCAD 1.0 native and offline checks passed.\n- [ ] Windows/1.1 visual and workflow sign-off for Hole, save/reopen, STEP and compatibility.\n- [ ] Root-cause native modeled/helical thread crash and restore safely validated geometric threads (currently disabled in Az).\n- [ ] Consistent Az task UI for remaining native dialogs: Revolve, Fillet/Chamfer, Shell, Loft, Sweep, patterns and mirror.
 - [ ] Improve selection feedback, failures, reference recovery, multi-body operations and ergonomics for real parts.
 - [ ] Extend Press/Pull to more safely identifiable solids and surfaces without silently changing design intent.
 - [ ] Test realistic design scenarios including feature edit propagation, unit conversion, invalid profiles, and repeated undo/redo.
