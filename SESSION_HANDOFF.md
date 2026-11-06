@@ -309,3 +309,19 @@ The geometric thread crash root cause is still unknown. Advanced Hole settings
 and editing a Hole with downstream features are intentionally delegated to
 Native CAD. Package CI creates an Actions artifact; as of source checkpoint,
 no checked-in addons/releases/AzDesign-0.3.2.zip exists.
+
+### Verified packaged review build — 0.3.2
+
+[CI run 42248286120](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42248286120)
+passed native modeling and installer/package jobs. Artifact
+[AzDesign-installer 13519427193](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42248286120/artifacts/13519427193)
+contains `AzDesign-0.3.2.zip`. Extracted inner ZIP: **160,781 bytes**,
+SHA256 `23a308cbf2dc0d50396b95156851fbde115d7e15b3c25a9b792b337208130e11`.
+The downloaded ZIP's CRC check passed and its packaged offline HoleSpec
+(4) and HoleOperation (3) tests all passed separately on Python 3.13.
+These package checks do not substitute for a Windows/FreeCAD 1.1 GUI retest.
+
+Last document source commit before this note: a452478c2a3d19edc6f6931047be51aae684dafe.
+The user's chat has also been provided the exact tested package bytes. The
+conversation-file link is not a durable GitHub release; CI artifacts can expire.
+The checked-in ZIP under addons/releases remains version 0.3.1.
