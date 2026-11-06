@@ -282,3 +282,14 @@ FreeCAD 1.1 and test hole Create/Show result/Show original/Cancel/Accept,
 cosmetic thread standard+explicit size, subsequent Hole editing, save/reopen,
 STEP export and Native CAD restoration. Capture exact traceback and versions
 for failures. PR #1 remains draft; do not merge to main.
+
+### Verified packaged review build — 0.3.2
+
+[CI run 42248286120](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42248286120)
+passed native modeling and installer/package jobs. Artifact
+[AzDesign-installer 13519427193](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42248286120/artifacts/13519427193)
+contains `AzDesign-0.3.2.zip`. Extracted inner ZIP: **160,781 bytes**,
+SHA256 `23a308cbf2dc0d50396b95156851fbde115d7e15b3c25a9b792b337208130e11`.
+The downloaded ZIP's CRC check passed and its packaged offline HoleSpec
+(4) and HoleOperation (3) tests all passed separately on Python 3.13.
+These package checks do not substitute for a Windows/FreeCAD 1.1 GUI retest.
