@@ -479,6 +479,41 @@ class WorkflowTest(unittest.TestCase):
         self.assertFalse(op.hole.ModelThread)
         op.cancel()
 
+    def test_native_threaded_hole_edit_is_transactional_and_cancel_restores_it(self):
+        body, source, base = self.base()
+        centers = sketch(self.doc, [], body=body, z=6)
+        centers.addGeometry(Part.Circle(App.Vector(5, 5, 0), App.Vector(0, 0, 1), 2))
+        self.doc.recompute()
+        create = HoleOperation(self.doc, centers)
+        create._start()
+        sizes = thread_sizes(create.hole, "ISOMetricProfile")
+        self.assertTrue(sizes)
+        settings = HoleSpec(
+            diameter=3, depth=6, through_all=True,
+            thread_type="ISOMetricProfile", thread_size=sizes[0],
+        )
+        self.assertLess(create.preview(settings), base.Shape.Volume)
+        native = create.accept()
+        original_volume = native.Shape.Volume
+        original_depth_mode = str(native.DepthType)
+        self.assertFalse(native.ModelThread)
+
+        edit = HoleOperation(self.doc, centers, editing=native)
+        self.assertFalse(edit.started)  # Just opening the editor never mutates.
+        new_settings = HoleSpec(
+            diameter=3, depth=2, through_all=False,
+            thread_type="ISOMetricProfile", thread_size=sizes[0],
+        )
+        changed_volume = edit.preview(new_settings)
+        self.assertLess(changed_volume, base.Shape.Volume)
+        self.assertNotAlmostEqual(changed_volume, original_volume, places=5)
+        self.assertEqual(body.Tip, native)
+        edit.cancel()
+        restored = self.doc.getObject(native.Name)
+        self.assertIsNotNone(restored)
+        self.assertEqual(str(restored.DepthType), original_depth_mode)
+        self.assertAlmostEqual(restored.Shape.Volume, original_volume, places=5)
+
     def test_native_pad_can_follow_an_az_feature(self):
         body, source, base = self.base()
         circle = sketch(self.doc, [], body=body, z=6)
