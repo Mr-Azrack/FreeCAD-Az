@@ -109,3 +109,16 @@ outside native scene bounds. No geometry kernel change is needed.
 - Restrict Az Hole editing to the Body Tip for now; native workbench handles
   advanced options, downstream-history changes and previously modeled threads.
   This is an interim stability gate, not a commitment to abandon real threads.
+
+## 2026-11-06 — Opt-in geometric thread crash investigation
+
+The owner explicitly wants native helical threads re-enabled for reproduction
+and debugging. Keep the everyday Hole path cosmetic by default; expose
+`ModelThread=True` only through explicit, per-preview experimental consent
+and a durable diagnostic checkpoint. Never run the potentially crashing OCCT
+helix creation in ordinary CI. Provide a disposable test macro and recommend a
+separate FreeCAD process to avoid losing work. Preserve FreeCAD-native Hole
+objects and the exact options used; capture C++ dumps separately if Python
+fault logs cannot reveal the native failure site. This is a diagnostic enable,
+not a verified kernel crash repair. Do not silently enable modelled threads on
+an existing part or merge the draft PR without owner testing.
