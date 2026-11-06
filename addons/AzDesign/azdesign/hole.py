@@ -204,7 +204,13 @@ class HoleTask:
     def source_changed(self, _index):
         if self._initializing or self.closed:
             return
-        if self.standard.currentData() != "None" and self.size.count() <= 1:
+        # A native temporary Hole used solely to discover thread sizes must
+        # not lock us into the wrong sketch. Roll that transaction back and
+        # build a new temporary feature for the newly selected sketch.
+        if self.operation and self.operation.started and not self.operation.valid:
+            self.operation.cancel()
+            self.operation = None
+        if self.standard.currentData() != "None":
             self.standard_changed(self.standard.currentIndex())
         else:
             self.changed()
@@ -289,6 +295,10 @@ class HoleTask:
             choices = thread_sizes(operation.hole, standard)
             operation.valid = False
             operation.show_base()
+            # Source selection is still reversible until an actual valid
+            # shape has been previewed; only committed preview locks it.
+            if not self.editing:
+                self.source.setEnabled(True)
         except Exception as exc:
             self.populate_sizes(standard)
             self.message(str(exc), True)
