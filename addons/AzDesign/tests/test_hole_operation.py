@@ -132,6 +132,57 @@ class HoleOperationTest(unittest.TestCase):
             start.assert_called_once()
             op.cancel()
 
+    def test_existing_modeled_hole_can_be_edited_with_guarded_diagnostics(self):
+        previous = types.SimpleNamespace(
+            Name="Hole", Profile=self.sketch, BaseFeature=self.base,
+            Shape=Shape(80), ModelThread=True, Threaded=True,
+            CosmeticThread=False, ThreadType="ISOMetricProfile",
+            ThreadSize="M4", Diameter=4, Depth=8, DepthType="Dimension",
+            ViewObject=None,
+        )
+        previous.isDerivedFrom = lambda cls: cls == "PartDesign::Hole"
+        previous.getEnumerationsOfProperty = lambda key: ["M3", "M4"]
+        self.doc.Objects.append(previous)
+        self.objects[previous.Name] = previous
+        self.body.Tip = previous
+
+        diagnostic = Mock()
+        diagnostic.path = "/fake/edited-native-hole.jsonl"
+        with patch("azdesign.hole_diagnostics.start_for_freecad",
+                   return_value=diagnostic) as start:
+            op = self.module.HoleOperation(self.doc, self.sketch, editing=previous)
+            self.assertIs(op.hole, previous)
+            self.assertFalse(op.started)  # Opening must not recompute the model.
+            self.assertTrue(op.original_model_thread)
+            self.assertEqual(op.preview(self.module.HoleSpec(
+                diameter=4, depth=8, thread_type="ISOMetricProfile",
+                thread_size="M3", model_thread=True, experimental=True,
+            )), 80)
+            self.assertEqual(previous.ThreadSize, "M3")
+            self.assertTrue(previous.ModelThread)
+            self.assertIs(self.body.Tip, previous)
+            self.assertTrue(op.show_result())
+            self.assertEqual(op.last_diagnostic, str(diagnostic.path))
+            self.assertIn("before_native_recompute",
+                          [x.args[0] for x in diagnostic.record_spec.call_args_list])
+            start.assert_called_once()
+            op.cancel()
+            self.doc.abortTransaction.assert_called_once()
+
+    def test_existing_modeled_hole_no_preview_or_transaction_on_open(self):
+        previous = types.SimpleNamespace(
+            Name="Hole", Profile=self.sketch, BaseFeature=self.base,
+            Shape=Shape(80), ModelThread=True, ViewObject=None,
+        )
+        previous.isDerivedFrom = lambda cls: cls == "PartDesign::Hole"
+        self.body.Tip = previous
+        op = self.module.HoleOperation(self.doc, self.sketch, editing=previous)
+        self.assertFalse(op.started)
+        self.assertIs(op.hole, previous)
+        op.cancel()
+        self.features.begin_transaction.assert_not_called()
+        self.doc.abortTransaction.assert_not_called()
+
     def test_bad_dimensions_create_no_feature_or_transaction(self):
         op = self.module.HoleOperation(self.doc, self.sketch)
         with self.assertRaisesRegex(ValueError, "diameter"):
