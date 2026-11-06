@@ -428,3 +428,22 @@ crash fix. GitHub package tests pass for the current increment, but platform
 acceptance of the actual 0.3.5 task layout on Windows FreeCAD 1.1 still
 requires the owner. Check latest exact GitHub HEAD, CI native/modeling job,
 artifact bytes and source tests before declaring final release success.
+
+### Verified 0.3.5 package and automated evidence — 2026-11-06
+
+[Az Design CI run 42280673897](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42280673897)
+passed both **package** and **native modeling** jobs. The GitHub artifact
+[AzDesign-installer 13535765583](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42280673897/artifacts/13535765583)
+contains `AzDesign-0.3.5.zip`: **182,196 bytes**, SHA256
+`eea0c276d6bc18e2b7a1d5a215a597d714ddbfaa87df643f06cbea065369c50c`.
+The outer and inner ZIP CRC checks passed. It contains installer, optional
+modeled-thread probe, new `hole_ui_policy.py`, reworked task and tests.
+The extracted package's **five focused Hole tests** (`test_hole_spec`,
+`test_hole_operation`, `test_hole_diagnostics`, `test_hole_ui_policy`,
+`test_hole_panel`) all passed independently on Python in the container.
+
+The native geometry check is FreeCAD 1.0 Linux, not a Windows FreeCAD 1.1 GUI
+validation. It does not execute unsafe modeled-thread helices. Owner Windows
+acceptance is needed for the new grouped Qt task, debounced preview and
+thread-size/source switching. The earlier Windows 0.3.4 modeled-thread
+edit confirmation is still valuable, but should not be treated as a 0.3.5 test.
