@@ -49,7 +49,7 @@ TOOLS = {
     "revolve": Tool("Revolve", "PartDesign_Revolution", "Revolve a selected sketch about an axis."),
     "loft": Tool("Loft", "PartDesign_AdditiveLoft", "Join sketch sections with a solid loft."),
     "sweep": Tool("Sweep", "PartDesign_AdditivePipe", "Sweep a profile along a selected path."),
-    "hole": Tool("Hole", "PartDesign_Hole", "H · Make a hole from a selected sketch."),
+    "hole": Tool("Hole", "Az_Hole", "H · Native holes with safe previews and cosmetic threads.", "PartDesign_Hole"),
     "fillet": Tool(
         "Fillet", "PartDesign_Fillet", "F · Select solid edges and set a rounding radius."
     ),
