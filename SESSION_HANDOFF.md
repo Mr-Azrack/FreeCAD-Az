@@ -325,3 +325,36 @@ Last document source commit before this note: a452478c2a3d19edc6f6931047be51aae6
 The user's chat has also been provided the exact tested package bytes. The
 conversation-file link is not a durable GitHub release; CI artifacts can expire.
 The checked-in ZIP under addons/releases remains version 0.3.1.
+
+## 2026-11-06 — 0.3.3 modeled-thread crash-lab handoff
+
+User tested the 0.3.2 Hole UI and says it works, though still not as polished as
+Fusion. User requested real modeled threads enabled so the native crash can be
+reproduced and debugged. Existing 0.3.2 automated Linux success does not
+establish safe native threads on Windows.
+
+This session inspected PR #1 and all four continuity docs on branch
+`codex/az-design-workbench` (starting HEAD `561aa6d3227742dc0ea6afff14cb7d4d02cb7b1c`).
+Committed implementation changes in several small commits: explicit opt-in
+HoleSpec, fsynced checkpoint/fault logger, instrumented HoleOperation, UI
+experimental checkbox with warning, thread-size-first workflow, and disposable
+M4 test macro. Installer packing now includes a top-level copy of the macro.
+Added test_hole_diagnostics.py and updated spec/operation offline regressions;
+package CI runs all three. package.xml/__init__.py mark 0.3.3 and documentation
+includes THREAD_CRASH_LAB.md. Exact latest HEAD must be fetched before editing.
+
+The first full 0.3.3 CI review was run
+[42253489192](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42253489192).
+The package job was observed successful while native modeling was still running
+at this checkpoint. Verify completion and latest run before claiming success.
+Do not execute a live modeled thread in CI. The last checked-in release ZIP is
+0.3.1; the 0.3.3 ZIP is an Actions review artifact, not a local app rebuild.
+
+Next reproducible owner step: install the 0.3.3 review artifact; launch a
+SECOND, isolated Windows FreeCAD 1.1 process with no unsaved work, run the
+root-level `Probe_Modeled_Thread.FCMacro`, and capture the last JSONL stage,
+Python fault text and Windows Event Viewer exception. The input FCStd is saved
+before native recomputation. To identify an OCCT C++ crash frame, follow
+`THREAD_CRASH_LAB.md` for an optional ProcDump capture, avoiding public
+sharing of dumps containing process memory. Only after evidence exists should
+we patch FreeCAD C++ or mark geometric threads production-safe. No main merge.
