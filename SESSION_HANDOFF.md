@@ -119,3 +119,23 @@ the corrected ZIP and source on the existing feature branch with a head lease;
 update PR #1 and inspect add-on CI. Do not merge main or claim repository-wide
 CI success. Preserve any concurrent changes if the branch advances. Local desktop
 helpers and FCStd models outside the checkout are transient test artifacts.
+
+### Published 0.2.2 verification checkpoint
+
+First-document fix/source commit: `b9b1c52fcaed354035fb88079df09e9caa156ff0`.
+[Add-on CI run 42165160134](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42165160134)
+passed both package and native modeling jobs, including all 13 context, 5 startup,
+4 installer and 26 modeling regressions. The separate local GUI suite passed
+27 checks; a manual first sketch/extrusion without New also passed.
+The published package is `addons/releases/AzDesign-0.2.2.zip` (95,924 bytes), SHA256
+`803a684579bd9dcf5aeba1081784d43a256c8948b22b1ba8017cad3796442a66`; its
+remote Git blob matches the verified local artifact. The releases folder guide
+now points to this package. PR #1 is updated and remains draft; main is unchanged.
+The inherited Dependency Review setting issue persists. No CAD implementation
+changes remain uncommitted at this checkpoint.
+
+Next owner action: install 0.2.2 with Install_AzDesign.FCMacro, restart the Windows
+FreeCAD 1.1 workstation, and try Create Sketch from the Start page without New.
+Then complete the representative shop-part acceptance workflow. The New-document
+workaround remains valid for an installation that has not yet been updated.
+Linux evidence does not establish the Windows/1.1 acceptance gate.
