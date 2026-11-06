@@ -104,7 +104,7 @@ def help_dialog():
     FreeCAD's task dialogs. The Tasks panel is on the right.</p>
     <p><b>Return:</b> Utilities → Native CAD restores your previous layout.
     This is an independent interface, not an Autodesk product.</p>"""
-    QtWidgets.QMessageBox.information(Gui.getMainWindow(), "Az Design 0.3.3", text)
+    QtWidgets.QMessageBox.information(Gui.getMainWindow(), "Az Design 0.3.4", text)
 
 
 def dispatch(key):
