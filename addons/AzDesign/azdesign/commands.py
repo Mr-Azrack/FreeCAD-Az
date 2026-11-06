@@ -108,13 +108,14 @@ def help_dialog():
 def dispatch(key):
     # Resolve functions at invocation time so developer reloads do not leave
     # registered FreeCAD commands holding stale modeling implementations.
-    from . import tasks, presspull, parameters, history
+    from . import tasks, presspull, parameters, history, hole
 
     adapters = {
         "sketch": modeling.create_sketch,
         "extrude": tasks.show_extrude,
         "cut": lambda: tasks.show_extrude(cut=True),
         "presspull": presspull.start,
+        "hole": hole.show_hole,
         "parameters": parameters.show,
         "resume": history.resume_all,
         "dimension": smart_dimension,
@@ -187,6 +188,7 @@ def menu_commands():
             "extrude",
             "cut",
             "presspull",
+            "hole",
             "parameters",
             "resume",
             "dimension",
