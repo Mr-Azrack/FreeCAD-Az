@@ -141,6 +141,7 @@ class FakeHole:
 
 class Operation:
     instances = []
+    cancelled = 0
 
     def __init__(self, doc, sketch, editing=None):
         self.doc, self.sketch, self.editing = doc, sketch, editing
@@ -164,11 +165,16 @@ class Operation:
 
     def show_base(self): pass
     def show_result(self): pass
+    def cancel(self):
+        self.started = False
+        self.closed = True
+        Operation.cancelled += 1
 
 
 class HolePanelSmokeTest(unittest.TestCase):
     def setUp(self):
         Operation.instances = []
+        Operation.cancelled = 0
         self.old_path = list(sys.path)
         self.old_modules = {
             name: obj for name, obj in sys.modules.items()
@@ -206,7 +212,9 @@ class HolePanelSmokeTest(unittest.TestCase):
         self.sketch = types.SimpleNamespace(Name="Centers", Label="Centers", Body=object())
         self.sketch.isDerivedFrom = lambda name: name == "Sketcher::SketchObject"
         self.doc = types.SimpleNamespace(Objects=[self.sketch])
-        self.doc.getObject = lambda name: self.sketch if name == "Centers" else None
+        self.doc.getObject = lambda name: next(
+            (obj for obj in self.doc.Objects if obj.Name == name), None
+        )
 
     def tearDown(self):
         self.patched.stop()
@@ -232,12 +240,28 @@ class HolePanelSmokeTest(unittest.TestCase):
         task.standard.setCurrentIndex(1)
         self.assertEqual(task.standard.items[1][0], "ISO metric · coarse")
         self.assertFalse(task.diameter.enabled)
+        self.assertTrue(task.source.enabled)  # Thread-size discovery is reversible.
         self.assertEqual(task.size.count(), 4)  # placeholder plus native 3
         self.assertTrue(Operation.instances[0].started)
         self.assertEqual(Operation.instances[0].calls, [])
         self.assertFalse(task.preview_timer.active)
         task.size.setCurrentIndex(2)
         self.assertTrue(task.preview_timer.active)  # cosmetic, not modeled
+
+    def test_change_center_sketch_before_preview_cancels_temporary_hole(self):
+        another = types.SimpleNamespace(Name="OtherCenters", Label="OtherCenters",
+                                        Body=object())
+        another.isDerivedFrom = lambda cls: cls == "Sketcher::SketchObject"
+        self.doc.Objects.append(another)
+        task = self.hole.HoleTask(self.doc, selected=self.sketch)
+        task.standard.setCurrentIndex(1)
+        self.assertEqual(len(Operation.instances), 1)
+        self.assertTrue(task.source.enabled)
+        task.source.setCurrentIndex(2)
+        self.assertEqual(Operation.cancelled, 1)
+        self.assertEqual(len(Operation.instances), 2)
+        self.assertIs(Operation.instances[-1].sketch, another)
+        self.assertTrue(task.source.enabled)
 
     def test_modeled_edit_does_not_schedule_any_automatic_recompute(self):
         native = types.SimpleNamespace(
