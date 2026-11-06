@@ -63,10 +63,12 @@ class HoleSpec:
                 )
             if self.thread_size:
                 feature.ThreadSize = self.thread_size
-            feature.CosmeticThread = True
+            if hasattr(feature, "CosmeticThread"):
+                feature.CosmeticThread = True
             feature.Threaded = True
         else:
-            feature.CosmeticThread = False
+            if hasattr(feature, "CosmeticThread"):
+                feature.CosmeticThread = False
         # Native geometry is kept native and editable in ordinary FreeCAD.
         feature.ModelThread = False
 
