@@ -89,11 +89,18 @@ class InteractionFilter(QtCore.QObject):
             if (
                 in_browser
                 and len(selected) == 1
-                and selected[0].isDerivedFrom("Sketcher::SketchObject")
                 and not Gui.Control.activeDialog()
+                and (
+                    selected[0].isDerivedFrom("Sketcher::SketchObject")
+                    or selected[0].isDerivedFrom("PartDesign::Hole")
+                )
             ):
-                sketch = selected[0]
-                QtCore.QTimer.singleShot(0, lambda: modeling.edit_sketch(sketch))
+                feature = selected[0]
+                if feature.isDerivedFrom("Sketcher::SketchObject"):
+                    QtCore.QTimer.singleShot(0, lambda: modeling.edit_sketch(feature))
+                else:
+                    from .hole import edit_feature
+                    QtCore.QTimer.singleShot(0, lambda: edit_feature(feature))
                 event.accept()
                 return True
         if kind in (QtCore.QEvent.ShortcutOverride, QtCore.QEvent.KeyPress):
