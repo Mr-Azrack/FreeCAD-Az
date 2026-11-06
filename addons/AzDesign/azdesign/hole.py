@@ -196,25 +196,101 @@ class HoleTask:
                     self.size.addItem(str(value), str(value))
         self.size.blockSignals(False)
 
+    def source_changed(self, _index):
+        if self._initializing or self.closed:
+            return
+        if self.standard.currentData() != "None" and self.size.count() <= 1:
+            self.standard_changed(self.standard.currentIndex())
+        else:
+            self.changed()
+
+    def mode_changed(self, checked):
+        self.notice.setVisible(checked)
+        original_modeled = bool(self.original_spec and self.original_spec.model_thread) if hasattr(self, "original_spec") else False
+        self.live.setEnabled(not checked and not original_modeled)
+        if checked:
+            self.preview_timer.stop()
+        self.changed()
+
+    def changed(self, *_args):
+        if self._initializing or self.closed:
+            return
+        self.preview_timer.stop()
+        current = self.settings(experimental=self.modeled.isChecked())
+        if self.editing and current == self.original_spec:
+            self.message("No changes · original native Hole is intact.")
+            return
+        previously_modeled = bool(
+            self.operation and self.operation.last_spec and self.operation.last_spec.model_thread
+        )
+        original_modeled = bool(self.original_spec and self.original_spec.model_thread)
+        ready = can_live_preview(
+            current,
+            enabled=self.live.isChecked(),
+            has_sketch=bool(self.source.currentData()),
+            original_modeled=original_modeled,
+            previously_modeled=previously_modeled,
+        )
+        if ready:
+            self.message("Updating preview…")
+            self.preview_timer.start()
+        elif not self.source.currentData():
+            self.message("Choose a hole-center sketch.")
+        elif current.thread_type != "None" and not current.thread_size:
+            self.message("Choose a thread size before previewing.")
+        elif current.model_thread or original_modeled or previously_modeled:
+            self.message("Geometric thread changes require Update preview and confirmation.")
+        else:
+            self.message("Changes ready · click Update preview.")
+
+    def auto_preview(self):
+        if self._initializing or self.closed:
+            return
+        current = self.settings(experimental=self.modeled.isChecked())
+        if can_live_preview(
+            current,
+            enabled=self.live.isChecked(),
+            has_sketch=bool(self.source.currentData()),
+            original_modeled=bool(self.original_spec and self.original_spec.model_thread),
+            previously_modeled=bool(
+                self.operation and self.operation.last_spec and self.operation.last_spec.model_thread
+            ),
+        ):
+            self.preview(auto=True)
+
     def standard_changed(self, _index):
+        if self._initializing or self.closed:
+            return
+        self.preview_timer.stop()
         standard = self.standard.currentData()
         self.modeled.setEnabled(standard != "None")
         if standard == "None":
             self.modeled.setChecked(False)
-        if self.operation and self.operation.started:
-            self.operation.valid = False
-            self.operation.show_base()
-            try:
-                choices = thread_sizes(self.operation.hole, standard)
-            except Exception as exc:
-                self.message(str(exc), True)
-                return
             self.populate_sizes(standard)
-            for value in choices:
-                self.size.addItem(value, value)
-        else:
+            if self.operation and self.operation.started:
+                self.operation.valid = False
+                self.operation.show_base()
+            self.changed()
+            return
+
+        if not self.source.currentData():
             self.populate_sizes(standard)
-        self.message("Choose Show result to refresh the Hole.")
+            self.message("Choose a center sketch to load available thread sizes.")
+            return
+        try:
+            operation = self.ensure_operation()
+            operation._start()
+            choices = thread_sizes(operation.hole, standard)
+            operation.valid = False
+            operation.show_base()
+        except Exception as exc:
+            self.populate_sizes(standard)
+            self.message(str(exc), True)
+            return
+        self.populate_sizes(standard)
+        for value in choices:
+            self.size.addItem(value, value)
+        self.message("Choose a thread size; the original solid remains visible.")
 
     def message(self, message, error=False):
         self.status.setText(message)
@@ -244,9 +320,11 @@ class HoleTask:
         self.source.setEnabled(False)
         return self.operation
 
-    def preview(self):
+    def preview(self, auto=False):
         if self.closed:
             return False
+        if not auto:
+            self.preview_timer.stop()
         try:
             # An existing native Hole already has valid geometry. Do not
             # regenerate its helix just because Show result was clicked.
@@ -275,6 +353,11 @@ class HoleTask:
                 operation.show_base()
                 self.message("Choose the actual thread size, then Show result.", True)
                 return False
+            if auto and (
+                self.modeled.isChecked()
+                or bool(self.original_spec and self.original_spec.model_thread)
+            ):
+                return False  # Never auto-run the helical geometry path.
             if self.modeled.isChecked():
                 choice = QtWidgets.QMessageBox.warning(
                     self.form,
@@ -308,6 +391,7 @@ class HoleTask:
             return False
 
     def show_base(self):
+        self.preview_timer.stop()
         if self.operation:
             self.operation.show_base()
         self.message("Original solid displayed; preview not accepted.")
@@ -316,6 +400,7 @@ class HoleTask:
         return int(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
 
     def accept(self):
+        self.preview_timer.stop()
         # A simple open/close (or returning settings to their starting
         # values) must not regenerate an existing helical Hole. Discard
         # any intermediate in-transaction modifications before closing.
@@ -352,6 +437,7 @@ class HoleTask:
         return True
 
     def reject(self):
+        self.preview_timer.stop()
         if self.operation:
             self.operation.cancel()
         self.cleanup()
@@ -360,6 +446,7 @@ class HoleTask:
 
     def cleanup(self):
         if not self.closed:
+            self.preview_timer.stop()
             self.closed = True
             from .tasks import forget
             forget(self)
