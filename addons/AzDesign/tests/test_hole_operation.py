@@ -34,6 +34,7 @@ class HoleOperationTest(unittest.TestCase):
         sys.path.insert(0, str(ADDON))
         app = types.ModuleType("FreeCAD")
         app.GuiUp = False
+        app.Console = types.SimpleNamespace(PrintWarning=Mock())
         fake = types.ModuleType("azdesign.features")
         fake.DesignError = ValueError
         fake.owner_body = lambda obj: next((x for x in obj.InList if x.isDerivedFrom("PartDesign::Body")), None)
@@ -105,6 +106,31 @@ class HoleOperationTest(unittest.TestCase):
         op.cancel()
         self.doc.abortTransaction.assert_called_once()
         self.assertEqual(self.body.Tip, self.base)
+
+    def test_opt_in_modeled_preview_logs_before_risky_recompute(self):
+        # The offline fake permits modeled geometry; live modeled Hole tests
+        # stay out of CI because the native kernel may terminate the process.
+        diagnostic = Mock()
+        diagnostic.path = "/fake/model-thread-debug.jsonl"
+        with patch("azdesign.hole_diagnostics.start_for_freecad",
+                   return_value=diagnostic) as start:
+            op = self.module.HoleOperation(self.doc, self.sketch)
+            spec = self.module.HoleSpec(
+                diameter=4, depth=8, thread_type="ISOMetricProfile",
+                thread_size="M4", model_thread=True, experimental=True,
+            )
+            self.assertEqual(op.preview(spec), 80)
+            self.assertTrue(op.hole.ModelThread)
+            self.assertEqual(op.last_diagnostic, str(diagnostic.path))
+            stages = [call.args[0] for call in diagnostic.record_spec.call_args_list]
+            self.assertEqual(
+                stages,
+                ["before_transaction", "before_property_configuration",
+                 "before_model_thread_enable", "before_native_recompute",
+                 "after_native_recompute"],
+            )
+            start.assert_called_once()
+            op.cancel()
 
     def test_bad_dimensions_create_no_feature_or_transaction(self):
         op = self.module.HoleOperation(self.doc, self.sketch)
