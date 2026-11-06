@@ -15,6 +15,22 @@ THREAD_TYPES = (
 )
 
 
+# Human-readable controls, native enum IDs remain intact for FreeCAD storage.
+THREAD_LABELS = {
+    "None": "None (plain hole)",
+    "ISOMetricProfile": "ISO metric · coarse",
+    "ISOMetricFineProfile": "ISO metric · fine",
+    "UNC": "UNC · unified coarse",
+    "UNF": "UNF · unified fine",
+    "UNEF": "UNEF · extra fine",
+    "NPT": "NPT · tapered pipe",
+    "BSP": "BSP · pipe",
+    "BSW": "BSW · Whitworth",
+    "BSF": "BSF · fine Whitworth",
+    "ISOTyre": "ISO tyre valve",
+}
+
+
 @dataclass(frozen=True)
 class HoleSpec:
     diameter: float = 6.0
