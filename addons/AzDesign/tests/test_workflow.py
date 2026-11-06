@@ -11,7 +11,7 @@ import PartDesign
 import Sketcher
 from azdesign import features, profiles, operations, history, presspull, parameters
 from azdesign.hole_operation import HoleOperation
-from azdesign.hole_spec import HoleSpec
+from azdesign.hole_spec import HoleSpec, thread_sizes
 
 RECT = [(0, 0, 10, 0), (10, 0, 10, 10), (10, 10, 0, 10), (0, 10, 0, 0)]
 
@@ -462,6 +462,22 @@ class WorkflowTest(unittest.TestCase):
         op.cancel()
         self.assertEqual(body.Tip, original_tip)
         self.assertEqual({o.Name for o in self.doc.Objects}, original_objects)
+
+    def test_native_cosmetic_thread_metadata_without_helical_geometry(self):
+        body, source, base = self.base()
+        centers = sketch(self.doc, [], body=body, z=6)
+        centers.addGeometry(Part.Circle(App.Vector(5, 5, 0), App.Vector(0, 0, 1), 2))
+        self.doc.recompute()
+        op = HoleOperation(self.doc, centers)
+        op._start()
+        options = thread_sizes(op.hole, "ISOMetricProfile")
+        self.assertTrue(options)
+        result = op.preview(HoleSpec(diameter=3, depth=6, through_all=True,
+                                     thread_type="ISOMetricProfile", thread_size=options[0]))
+        self.assertLess(result, base.Shape.Volume)
+        self.assertTrue(op.hole.Threaded)
+        self.assertFalse(op.hole.ModelThread)
+        op.cancel()
 
     def test_native_pad_can_follow_an_az_feature(self):
         body, source, base = self.base()
