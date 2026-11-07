@@ -199,6 +199,47 @@ class WorkflowTest(unittest.TestCase):
         self.assertNotIn("Invalid", result.State)
         self.assertAlmostEqual(new_body.Shape.Volume, 400)
 
+    def test_edit_older_extrude_migrates_local_links_and_cancel_restores_them(self):
+        source_body, source, first = self.base()
+        target = self.doc.addObject("PartDesign::Body", "Other")
+        obj = features.create_extrude(target, (source, []), whole=True,
+                                      operation="New body")
+        obj.Length = 3
+        self.doc.recompute()
+        name = obj.Name
+        # Simulate a 0.4.1 saved feature whose local Source reaches
+        # into another Body and raises the allowed-scope warning.
+        current = obj.Source
+        obj.removeProperty("Source")
+        obj.addProperty("App::PropertyLinkSub", "Source", "Profiles")
+        obj.Source = current
+        self.assertEqual(obj.getTypeIdOfProperty("Source"), "App::PropertyLinkSub")
+        edit = operations.Operation(self.doc, obj)
+        self.assertEqual(obj.getTypeIdOfProperty("Source"), "App::PropertyLinkSubGlobal")
+        self.assertEqual(obj.Source[0], source)
+        edit.cancel()
+        restored = self.doc.getObject(name)
+        self.assertEqual(restored.getTypeIdOfProperty("Source"), "App::PropertyLinkSub")
+        self.assertEqual(restored.Source[0], source)
+
+    def test_edit_older_extrude_commits_global_link_scope_with_same_geometry(self):
+        body, source, base = self.base()
+        obj = base
+        name = obj.Name
+        original = obj.Shape.Volume
+        old_source = obj.Source
+        obj.removeProperty("Source")
+        obj.addProperty("App::PropertyLinkSub", "Source", "Profiles")
+        obj.Source = old_source
+        edit = operations.Operation(self.doc, obj)
+        self.assertEqual(obj.getTypeIdOfProperty("Source"), "App::PropertyLinkSubGlobal")
+        edit.update(operations.spec_for(obj))
+        edit.accept()
+        current = self.doc.getObject(name)
+        self.assertEqual(current.getTypeIdOfProperty("Source"), "App::PropertyLinkSubGlobal")
+        self.assertEqual(current.Source[0], source)
+        self.assertAlmostEqual(current.Shape.Volume, original)
+
     def test_disconnected_profiles_create_separate_bodies(self):
         source = sketch(
             self.doc, RECT + [(20, 0, 30, 0), (30, 0, 30, 10), (30, 10, 20, 10), (20, 10, 20, 0)]
