@@ -831,3 +831,33 @@ this handoff with exact evidence and PR #1 metadata. Do not merge.
 Owner is on 0.4.2 with working Update Az. Windows acceptance should verify
 multi-profile selection no longer blanks the block and invalid preview
 returns original Body. Hasher mismatch may be a separate issue.
+
+
+### Verified 0.4.3 release artifact (owner video regression) — November 7, 2026
+
+[Az Design CI run 42411861600](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42411861600)
+passed **both package and native modeling** jobs on the corrected
+deterministic invalid-preview native regression. The package suite includes
+four GUI-stub checks for preserving Body visibility, no-preview for zero
+profiles, no timer racing while picking, and cleanup after failed preview.
+Native FreeCAD tests cover disjoint Intersect invalid preview, returning
+to original Body Tip/volume/object inventory, successful retry, discarded
+valid preview and Cancel. Actual Windows 1.1 GUI acceptance still pending.
+
+[Artifact 13590115605](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42411861600/artifacts/13590115605)
+contains `AzDesign-0.4.3.zip`: **221,092 bytes** SHA256
+`5f17639234f7be0035f34f3b75104f46ff1ba150a6463adf5358e6dc0cd77e0c`.
+Outer and inner ZIP CRC passed, contains `Install_AzDesign.FCMacro`,
+`azdesign/tasks.py`, `azdesign/operations.py`, new
+`test_extrude_preview_ui.py` and `package.xml`.
+Six focused extracted tests passed in local Python:
+`test_extrude_preview_ui`, `test_qt_buttons`,
+`test_updater`, `test_hole_panel`, `test_interaction`,
+`test_hole_operation`.
+
+Owner can upgrade installed 0.4.2 via **Update Az → 0.4.3 → full FreeCAD
+restart**. Test selecting no profile, switching between two sketch regions,
+choosing Pick profiles in view and attempting a nonconnecting Join: the
+original block should remain visible when no valid preview exists.
+`TopoShapeExpansion` hasher mismatch may require a separate follow-up if
+still reported. Keep PR #1 draft and unmerged.
