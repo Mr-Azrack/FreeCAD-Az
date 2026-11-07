@@ -371,18 +371,8 @@ class FeatureButton(QtWidgets.QToolButton):
             return
         self.select()
         try:
-            if obj.isDerivedFrom("Sketcher::SketchObject"):
-                modeling.edit_sketch(obj)
-            elif getattr(obj, "AzType", "") == "AzExtrude":
-                from .tasks import edit_feature
-
-                edit_feature(obj)
-            elif obj.isDerivedFrom("PartDesign::Hole"):
-                from .hole import edit_feature
-
-                edit_feature(obj)
-            else:
-                Gui.activeDocument().setEdit(obj.Name)
+            from .feature_edit import edit
+            edit(obj)
         except Exception as exc:
             commands.notify("Could not edit " + obj.Label + ": " + str(exc), True)
 
@@ -408,6 +398,7 @@ class FeatureButton(QtWidgets.QToolButton):
         if obj and obj.isDerivedFrom("PartDesign::Feature"):
             menu.addSeparator()
             menu.addAction("Roll back here", self.roll_back)
+            menu.addAction("Show dependents…", self.show_dependents)
             menu.addAction("Resume latest history", lambda: commands.invoke("Az_ResumeHistory"))
             if "Suppressed" in obj.PropertiesList:
                 menu.addAction("Unsuppress" if obj.Suppressed else "Suppress", self.suppress)
@@ -460,6 +451,20 @@ class FeatureButton(QtWidgets.QToolButton):
             self.history.refresh()
         except Exception as exc:
             commands.notify(str(exc), True)
+
+    def show_dependents(self):
+        obj = self.object()
+        if not obj:
+            return
+        downstream = model_history.dependents(obj)
+        items = [item.Label + " · " + item.TypeId for item in downstream[:25]]
+        if len(downstream) > 25:
+            items.append("… and " + str(len(downstream) - 25) + " more")
+        QtWidgets.QMessageBox.information(
+            self,
+            "Dependents of " + obj.Label,
+            "\n".join(items) if items else "No dependent features or references.",
+        )
 
     def roll_back(self):
         if Gui.Control.activeDialog():
@@ -543,6 +548,24 @@ class History(QtWidgets.QWidget):
             "QScrollArea, QScrollArea > QWidget > QWidget {background: transparent; border: 0;}"
         )
         layout.addWidget(self.scroll, 1)
+        scrub_box = QtWidgets.QWidget()
+        scrub_box.setObjectName("AzHistoryScrubber")
+        scrub_layout = QtWidgets.QVBoxLayout(scrub_box)
+        scrub_layout.setContentsMargins(3, 0, 4, 0)
+        scrub_layout.setSpacing(0)
+        label = QtWidgets.QLabel("HISTORY")
+        label.setToolTip("Drag the marker to roll back to an earlier solid.")
+        label.setStyleSheet("color: #657b8b; font-size: 9px; font-weight: 600;")
+        scrub_layout.addWidget(label)
+        self.scrub = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.scrub.setObjectName("AzHistoryScrub")
+        self.scrub.setMinimum(0)
+        self.scrub.setMaximum(0)
+        self.scrub.setFixedWidth(135)
+        self.scrub.setToolTip("Drag, then release to move the real Body Tip. Undo is available.")
+        self.scrub.sliderReleased.connect(self.scrub_released)
+        scrub_layout.addWidget(self.scrub)
+        layout.addWidget(scrub_box)
         self.edit_selected_button = QtWidgets.QPushButton("Edit")
         self.edit_selected_button.setObjectName("AzTimelineEdit")
         self.edit_selected_button.setToolTip("Edit the selected timeline feature (double-click a feature to edit it).")
@@ -571,6 +594,27 @@ class History(QtWidgets.QWidget):
         layout.addWidget(settings)
         self.labels_visible = False
         self.refresh()
+
+    def scrub_released(self):
+        if Gui.Control.activeDialog() or modeling.in_sketch():
+            commands.notify("Finish or cancel the current operation before rolling history.", True)
+            return
+        doc = modeling.current_document()
+        if not doc:
+            return
+        body = modeling.active_body()
+        if body is None:
+            bodies = [o for o in doc.Objects if o.isDerivedFrom("PartDesign::Body")]
+            if len(bodies) != 1:
+                commands.notify("Activate a Body before moving its history marker.", True)
+                return
+            body = bodies[0]
+        try:
+            model_history.move_history_marker(body, self.scrub.value())
+            self.signature = None
+            self.refresh()
+        except Exception as exc:
+            commands.notify(str(exc), True)
 
     def selected_button(self):
         selected = {(o.Document.Name, o.Name) for o in Gui.Selection.getSelection()}
@@ -703,3 +747,20 @@ class History(QtWidgets.QWidget):
         selection_available = self.selected_button() is not None
         self.edit_selected_button.setEnabled(selection_available)
         self.delete_selected_button.setEnabled(selection_available)
+        body = modeling.active_body() if doc else None
+        if body is None and doc:
+            bodies = [o for o in doc.Objects if o.isDerivedFrom("PartDesign::Body")]
+            body = bodies[0] if len(bodies) == 1 else None
+        entries, position, rolled_back = (
+            model_history.history_position(body) if body else ([], -1, False)
+        )
+        self.scrub.blockSignals(True)
+        self.scrub.setEnabled(bool(entries) and not Gui.Control.activeDialog())
+        self.scrub.setMaximum(max(0, len(entries) - 1))
+        self.scrub.setValue(max(0, position))
+        self.scrub.setToolTip(
+            (body.Label + " · " + str(position + 1) + "/" + str(len(entries))
+             + (" · rolled back" if rolled_back else " · latest"))
+            if entries else "Choose a Body to inspect and roll back its history."
+        )
+        self.scrub.blockSignals(False)
