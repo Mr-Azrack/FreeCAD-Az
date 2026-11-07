@@ -361,7 +361,12 @@ class ExtrudeTask:
             self.extent.currentText() == "To face"
         )
         self.distance.setEnabled(self.extent.currentText() == "Distance")
-        self.timer.start(160)
+        # Clicking profile overlays or choosing a face must not start a
+        # competing timer that deletes/shows solids during selection.
+        if self.picking:
+            self.timer.stop()
+        else:
+            self.timer.start(160)
 
     def message(self, message, error=False):
         self.status.setText(message)
