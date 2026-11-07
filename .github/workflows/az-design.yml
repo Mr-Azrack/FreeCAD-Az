@@ -50,6 +50,8 @@ jobs:
         run: python addons/AzDesign/tests/test_compat.py
       - name: Test Qt5 / Qt6 task-panel button compatibility
         run: python addons/AzDesign/tests/test_qt_buttons.py
+      - name: Test Extrude preview keeps Body visible while choosing profiles
+        run: python addons/AzDesign/tests/test_extrude_preview_ui.py
       - name: Test Hole safety contracts and reversible preview
         run: |
           python addons/AzDesign/tests/test_hole_spec.py
