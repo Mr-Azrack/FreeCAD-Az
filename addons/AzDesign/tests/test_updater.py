@@ -50,8 +50,8 @@ class FakeGithub:
             return {
                 "truncated": False,
                 "tree": [
-                    {"path": key, "type": "blob", "size": len(data),
-                     "sha": self.sha(data)}
+                    {"path": key, "type": "blob", "mode": "100644",
+                     "size": len(data), "sha": self.sha(data)}
                     for key, data in self.files.items()
                 ]
             }
@@ -133,6 +133,18 @@ class UpdaterTest(unittest.TestCase):
             updater.update_installed(self.install, fetch_json=failure,
                                      fetch_bytes=gh.bytes)
         self.assertFalse(gh.downloads)
+        self.assertEqual(updater.local_version(self.install), "0.3.6")
+
+    def test_symlink_file_mode_is_rejected(self):
+        gh = FakeGithub()
+        def bad_mode(url):
+            result = gh.json(url)
+            if "/git/trees/" in url:
+                result["tree"][0]["mode"] = "120000"
+            return result
+        with self.assertRaisesRegex(updater.UpdateError, "file mode"):
+            updater.update_installed(self.install, fetch_json=bad_mode,
+                                     fetch_bytes=gh.bytes)
         self.assertEqual(updater.local_version(self.install), "0.3.6")
 
     def test_untrusted_paths_are_rejected(self):
