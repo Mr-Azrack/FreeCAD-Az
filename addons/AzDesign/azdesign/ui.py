@@ -404,6 +404,10 @@ class FeatureButton(QtWidgets.QToolButton):
         menu = QtWidgets.QMenu(self)
         obj = self.object()
         menu.addAction("Edit feature", self.edit)
+        if obj:
+            from .quick_dimension import dimension_property
+            if dimension_property(obj):
+                menu.addAction("Quick Dimension…", self.quick_dimension)
         menu.addAction("Select in model", self.select)
         if obj and (
             obj.isDerivedFrom("PartDesign::Feature")
@@ -468,6 +472,19 @@ class FeatureButton(QtWidgets.QToolButton):
             self.history.refresh()
         except Exception as exc:
             commands.notify(str(exc), True)
+
+    def quick_dimension(self):
+        obj = self.object()
+        if not obj or Gui.Control.activeDialog():
+            return
+        try:
+            from .quick_dimension import prompt
+            if prompt(obj, self):
+                self.history.signature = None
+                self.history.refresh()
+                commands.notify("Dimension updated. Undo is available.")
+        except Exception as exc:
+            commands.notify("Quick Dimension: " + str(exc), True)
 
     def show_dependents(self):
         obj = self.object()
