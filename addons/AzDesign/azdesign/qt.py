@@ -14,3 +14,17 @@ QAction = getattr(QtWidgets, "QAction", None) or QtGui.QAction
 
 def menu_exec(menu, position):
     return (getattr(menu, "exec", None) or menu.exec_)(position)
+
+def standard_button_bits(*buttons):
+    """C++ FreeCAD task dialog mask compatible with PySide2 and PySide6.
+
+    PySide6 StandardButton is a Python enum.Flag: direct int(flag) raises
+    TypeError, while its .value contains the native C++ bit mask. Older
+    PySide bindings expose an integer-convertible flag object instead.
+    """
+    if not buttons:
+        return 0
+    flags = buttons[0]
+    for button in buttons[1:]:
+        flags |= button
+    return int(getattr(flags, "value", flags))
