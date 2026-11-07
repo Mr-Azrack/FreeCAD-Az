@@ -1,4 +1,53 @@
-# Az Design 0.4.2
+# Az Design 0.4.3
+
+## 0.4.3 — Prevent disappearing solids during Extrude profile selection
+
+A real **eight-second Windows FreeCAD 1.1 screen recording** showed the
+existing threaded block repeatedly vanish while the user selected between
+two profiles in `Sketch001`. The Extrude task reported "Select at least
+one closed profile" when none was checked, and "This operation must produce
+one connected solid per body" with one small region selected; FreeCAD's
+report view also printed "Body: Tip shape is empty" during the disappearing
+solid, and some earlier `TopoShapeExpansion.cpp(983): hasher mismatch`
+messages. These are observed video facts, not a claim that every prior
+TopoShape warning has been fixed.
+
+Root causes:
+- The panel automatically enabled **Pick profiles in view** on multi-region
+  sketches when none was selected. The pick-mode implementation explicitly
+  **hid every PartDesign Body and ordinary solid**, leaving a blank canvas.
+- A preview timer could run while the user was picking profiles or faces.
+  A failed new Extrude left its temporary FeaturePython result as the active
+  Body Tip, triggering empty-shape warnings and making the original part
+  vanish.
+
+Fix:
+- **No automatic profile-picking mode.** For multi-profile sketches, the
+  original solid remains visible and the user explicitly checks a region in
+  the list (or clicks Pick profiles in view).
+- Profile picking now displays temporary selection overlays over the
+  existing part, **never hides the entire Body**.
+- A 160 ms preview timer cannot recompute while picking a region or face.
+- Zero selected sketch profiles produces a gentle prompt **without running
+  a geometry preview**.
+- A failed **new** Extrude preview discards temporary results, restores
+  original Body Tip and original visibility, and recomputes. The task
+  remains open for the user to choose another profile or direction.
+- Existing-feature edits retain native Cancel transaction semantics. A
+  failed edit's original property values are only guaranteed on Cancel;
+  this change does not implement arbitrary edit savepoints.
+
+Native FreeCAD tests cover a disconnected Join extrusion failing, disposal
+of the temporary feature, restoration of the previous volume, successful
+re-preview in the same transaction, and deselecting a previously valid
+preview then cancelling. GUI behavior and exact Windows 1.1 rendering
+still need owner acceptance after **Update Az** and full restart.
+
+A genuine disconnected Join remains invalid: a narrow profile entirely
+within a through-hole may not connect to the block in the chosen direction.
+Try **Cut**, **New body** or reverse the direction only if that is
+consistent with the intended geometry. The patch avoids destroying the
+visible base model while reporting that issue.
 
 ## 0.4.2 — FreeCAD 1.1 Qt button and cross-Body Extrude fixes
 
@@ -226,7 +275,7 @@ Autodesk code and artwork are not included.
 
 ## Install or update
 
-1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.4.2.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
+1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.4.3.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
 3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
