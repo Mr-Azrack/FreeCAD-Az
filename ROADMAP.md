@@ -152,3 +152,25 @@ until the specific FreeCAD-native graph and transaction cases pass tests.
 Do not advance versions for planning-only changes. 0.3.7 remains the latest
 owner-confirmed updater bootstrap; actual network upgrade to a later release
 must be tested after the next passing build.
+
+## Consolidated 0.4.0 delivery — November 7, 2026
+
+Owner overrode the six-release schedule: build all major UX work in one
+reviewable batch. The source changes cover each area, but not every deep
+Fusion feature-parity promise; keep explicit scope distinction.
+
+- [x] Actual Body Tip history scrub slider and referenced-dependency inspector.
+- [x] Contextual Sketch Palette with native property capability detection,
+      sketch tools and constraint/geometry count.
+- [x] Shared native/Az feature edit dispatcher and coherent right-side Tasks.
+- [x] Contextual selected-face/edge/sketch/feature actions on the canvas
+      and on right-click; parametric Quick Dimension for known types with Undo.
+- [x] Body-grouped Browser native feature/sketch hierarchy and active marker.
+- [x] Unified ribbon hints, task styling, timeline slider, canvas overlay.
+- [ ] Owner Windows FreeCAD 1.1 end-to-end test and real 0.3.7 → 0.4.0 Update
+      Az network install followed by full restart.
+- [ ] Full native robust dependency-preserving drag reorder/repair of arbitrary
+      middle features; do not pretend marker scrub does this.
+- [ ] Full custom advanced feature panels and arbitrary in-canvas
+      direct-edit handles (native FreeCAD dialogs and existing manipulator
+      remain until separately validated).
