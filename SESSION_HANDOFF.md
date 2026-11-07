@@ -527,3 +527,34 @@ from the extracted ZIP in the working container. The latest checked-in repo
 release ZIP remains 0.3.1; use the passing Actions artifact for 0.3.6.
 **Windows FreeCAD 1.1 timeline GUI validation is still pending.** PR #1
 remains draft and unmerged.
+
+## 2026-11-07 — 0.3.7 in-app update bootstrap
+
+User asks if Az can avoid recurring manual ZIP downloads. Project startup
+confirmed public `Mr-Azrack/FreeCAD-Az`, draft PR #1 on branch
+`codex/az-design-workbench` at `50a0433ad1fe5dd56be56a86399fdc5256a44e90`.
+Read AGENTS.md and all continuity docs, inspected existing installer,
+package CI and registered commands. Existing ZIP installer already preserves
+previous installations as dated backups.
+
+Implemented independent `azdesign/updater.py` with public GitHub API run
+selection (completed successful Az Design PR workflow on the exact branch),
+SHA-pinned raw source, Git Trees isolated addon manifest (not whole huge fork),
+strict path/mode/size checks, Git blob verification and staged full download,
+Python syntax checks and existing installer. `commands.py` adds checked,
+confirmed updater dialog and safe progress/cancel, full restart warning;
+`ui.py` adds visible ribbon/File entry; `catalog.py` adds Utilities and
+Find a Tool command. Local module/version now 0.3.7. CI package runs new
+`test_updater.py` with mocked successful/failed CI, corruption, cancellation,
+same-version noop, symlink/path rejection and installed-backup recovery.
+
+Owner must manually install 0.3.7 once via the zipped macro, then click
+Update Az in future. Native FreeCAD UI/WIndows network fetch not tested in CI.
+This is not a silent updater, does not use personal GitHub credentials, and
+does not claim to hot reload Python in an open FreeCAD process.
+
+Next: review final Az Design 0.3.7 CI run from latest source commit, verify
+modeling AND package jobs. Download Actions AzDesign-installer artifact,
+inspect ZIP CRC/package version/contents and rerun extracted offline updater
+tests before shipping link. Record exact artifact ID and SHA256 in state and
+handoff. PR #1 must remain draft/unmerged.
