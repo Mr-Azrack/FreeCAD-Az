@@ -59,6 +59,8 @@ jobs:
         run: python addons/AzDesign/tests/test_updater.py
       - name: Test unified edit routes and canvas selection policy
         run: python addons/AzDesign/tests/test_interaction.py
+      - name: Test compact native Sketch Palette controls and theme-safe layout
+        run: python addons/AzDesign/tests/test_sketch_palette.py
       - name: Validate Python and XML, then build installer ZIP
         run: python tools/package_azdesign.py
       - uses: actions/upload-artifact@v4
