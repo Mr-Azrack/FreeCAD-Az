@@ -765,3 +765,57 @@ Previously saved legacy features are repaired on a user-initiated **Edit →
 valid preview → OK**, then Save; merely opening old files is nonmutating.
 Actual user Windows 1.1 GUI acceptance is **not yet observed**. Keep PR #1
 draft/unmerged.
+
+
+## 2026-11-07 — Owner video: Extrude model disappears during profile selection (0.4.3)
+
+Owner uploaded an ~8-second Windows FreeCAD 1.1 recording after 0.4.2.
+Visible: a threaded block with Body sketches, Extrude panel showing
+`Sketch001` and two selectable profile regions. The solid repeatedly
+vanishes and reappears while the user changes profile/pick mode. The panel
+shows `0 selected` / "Select at least one closed profile", and a later
+one-region attempt reports "This operation must produce one connected
+solid per body. Check profiles, direction and extent." The FreeCAD
+Report view shows `Body: Tip shape is empty` and some earlier
+`TopoShapeExpansion.cpp(983): hasher mismatch` messages. Do not assume
+the hasher warning is entirely caused by the preview problem.
+
+Code root causes confirmed:
+- `tasks.ExtrudeTask.__init__` automatically enabled profile picking
+  when multiple regions were present and none was checked.
+- `apply_pick_visibility` looped over all `PartDesign::Body` and
+  `Part::Feature` objects and explicitly set Visibility=False, blanking
+  the canvas by design.
+- `schedule` allowed a 160ms timer to recompute while selecting profiles.
+- `operations.Operation.update` could create/activate a transient
+  invalid FeaturePython Body Tip and then raise, leaving the failed result
+  in the open transaction.
+
+0.4.3 corrective code:
+- Removed automatic pick-mode activation; picking is opt-in.
+- Overlay profile selection no longer hides Bodies/solids.
+- Suppressed competing timer preview while picking sketch regions or faces.
+- Added `Operation.discard_preview`: new Extrude previews remove created
+  transient objects and restore native Body tips/visibility followed by
+  recompute while retaining the task transaction. Existing-feature edits
+  remain non-disposable with native full Cancel rollback.
+- `ExtrudeTask.preview` now gates zero selected sketch profiles (no
+  computation) and invokes cleanup after invalid previews.
+- Added native geometry tests for invalid disjoint Intersect cleanup,
+  preserving Body Tip/volume/document inventory, subsequent valid retry
+  and a valid preview discarded before Cancel. The initial test tried a
+  distant Join; native FreeCAD allowed a no-op rather than throwing, so the
+  test was corrected to a deterministic disjoint Intersect case.
+- Added `tests/test_extrude_preview_ui.py` with four behavioral stubs
+  checking the no-profile path, invalid preview cleanup, persistent Body
+  visibility in overlay mode and timer gating; registered in CI.
+
+Version 0.4.3 source and release notes staged. Real Windows GUI acceptance
+is pending. A genuinely disconnected Join is still invalid; choosing a
+different profile or operation is not an engine fault. Repeated historical
+`TopoShapeExpansion` hasher mismatch messages may need separate analysis.
+
+Latest targeted run for final combined source: `42411861600`; package
+passed, native geometry job still running at last check. Confirm both
+passes and exact tested ZIP before user Update Az instruction. PR #1 stays
+draft/unmerged.
