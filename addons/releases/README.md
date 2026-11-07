@@ -1,6 +1,23 @@
 # Az Design installer packages
 
-## 0.3.6 timeline Edit/Delete review build
+## 0.3.7 in-app updater bootstrap review build
+
+Install `AzDesign-0.3.7.zip` **one final time**, using the same
+`Install_AzDesign.FCMacro` process. After restarting FreeCAD, use the
+**Update Az** ribbon button or **File → Check for Az Design updates…**.
+Az checks the latest successful Az Design CI commit on the public development
+branch, downloads hash-verified files directly, backs up the previous local
+version and installs only after confirmation. Restart FreeCAD after updates.
+No further ZIP downloads or separate installer macro are required for
+subsequent versions of this workbench.
+
+This is a preview feature tested with offline GitHub API fixtures and the
+usual Linux FreeCAD CI; the first live Windows/FreeCAD 1.1 network update
+still requires owner acceptance. A public network connection is needed.
+
+
+
+## 0.3.6 timeline Edit/Delete review build (previous)
 
 Selected features in the bottom timeline have visible Edit/Delete actions.
 Native one-step deletion is allowed only for features without live dependent
