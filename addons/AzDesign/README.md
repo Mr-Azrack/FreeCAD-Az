@@ -1,4 +1,30 @@
-# Az Design 0.3.5
+# Az Design 0.3.6
+
+## Timeline editing and deletion — 0.3.6
+
+The bottom design timeline now has explicit **Edit** and **Delete** buttons for
+its selected feature. Double-click a feature to edit it; right-click offers
+**Edit feature**, **Delete feature…**, **Delete from here…**, **Roll back here**
+and other existing options. Press Delete while focused on a feature tile to
+open a confirmation. The Az Browser also opens the native FreeCAD edit task
+for native Pad/Pocket/Fillet features rather than just the Properties dock.
+
+Delete feature removes one step **only when no other live object references
+it**; otherwise it refuses with the dependent name and offers an explicit
+Delete from here alternative. Delete from here lists the following solid
+features/sketches in that one Body and requires a confirmation; deleting
+steps referenced by other bodies or unscheduled objects is blocked. All
+deletions are committed as native FreeCAD transactions and can be undone.
+Neither command silently reorders features or rewires unknown topology.
+
+Earlier native Hole features can now be edited from the timeline even when
+later features exist. Az temporarily previews the older Hole, then restores
+the original Body Tip, recomputes and checks downstream solids on acceptance.
+Invalid downstream results are refused, and Cancel retains the previous
+geometry. Actual modeled-helical changes still require an explicit warning
+and diagnostic log; they are not exercised in ordinary CI. Native FreeCAD
+1.0 geometry tests cover leaf delete/undo, guarded cascading deletion, and
+earlier Hole edit/rollback. Windows FreeCAD 1.1 GUI testing remains necessary.
 
 ## Hole workflow polish — 0.3.5
 
@@ -53,7 +79,7 @@ Autodesk code and artwork are not included.
 
 ## Install or update
 
-1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.3.5.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
+1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.3.6.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
 3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
