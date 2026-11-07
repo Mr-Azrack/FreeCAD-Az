@@ -82,8 +82,12 @@ class Operation:
         # Existing 0.4.1 Extrudes used local-only LinkSub for profiles
         # belonging to other Bodies. Migrate while the editing transaction
         # is open so Reject/Cancel can roll it back atomically.
-        for obj in self.editing:
-            features.upgrade_extrude_links(obj)
+        try:
+            for obj in self.editing:
+                features.upgrade_extrude_links(obj)
+        except Exception:
+            self.doc.abortTransaction()
+            raise
 
     def _restore_tips(self):
         for name, tip_name in self.original_tips.items():
