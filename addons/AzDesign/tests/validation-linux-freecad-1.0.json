@@ -1,0 +1,68 @@
+{
+  "freecad_version": [
+    "1",
+    "0",
+    "0",
+    "",
+    "https://code.launchpad.net/~vcs-imports/freecad/trunk",
+    "2026/08/25 11:49:11"
+  ],
+  "checks": [
+    "all catalog commands are registered",
+    "one ribbon is visible",
+    "base sketch is fully constrained",
+    "extrude preview creates an exact 80 x 50 x 6 solid",
+    "extrude creates a native Pad",
+    "one Undo removes the complete extrusion",
+    "Redo restores exact volume",
+    "cut preview removes the specified cylinder",
+    "cut creates a native Pocket",
+    "Cancel removes every preview object",
+    "Cancel restores the previous Body Tip",
+    "Cancel restores visibility",
+    "invalid dimensions are rejected",
+    "inch fractions convert exactly",
+    "history follows native features",
+    "editing a sketch stays in Az Design",
+    "sketch editing preference is immediately restored",
+    "native sketch editor opens",
+    "Finish Sketch stays in Az Design",
+    "compatible camera navigation exists",
+    "middle mouse pans without rotating",
+    "Shift plus middle mouse orbits",
+    "leaving restores camera navigation",
+    "leaving removes the ribbon",
+    "re-entry creates exactly one ribbon",
+    "saved objects require no custom proxies",
+    "temporary ribbon hiding preserves native toolbar preferences",
+    "switching to native CAD preserves its modeling toolbar",
+    "switching back restores the Az ribbon",
+    "native file reopens with exact cut geometry"
+  ],
+  "passed": true,
+  "viewport_class": "Gui::View3DInventorViewer",
+  "mouse_pan": {
+    "before": [
+      0.4247081321999479,
+      0.1759200437218226,
+      0.339851090706265,
+      0.8204732639190053
+    ],
+    "after": [
+      0.4247081321999479,
+      0.1759200437218226,
+      0.339851090706265,
+      0.8204732639190053
+    ],
+    "position_before": [
+      66.393798828125,
+      -1.0407695770263672,
+      30.76088523864746
+    ],
+    "position_after": [
+      59.561187744140625,
+      -5.031562805175781,
+      33.602699279785156
+    ]
+  }
+}

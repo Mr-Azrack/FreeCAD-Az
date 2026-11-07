@@ -1,0 +1,71 @@
+name: Az Design add-on
+on:
+  pull_request:
+    paths:
+      - 'addons/AzDesign/**'
+      - 'addons/Install_AzDesign.FCMacro'
+      - 'tools/package_azdesign.py'
+      - '.github/workflows/az-design.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  modeling:
+    runs-on: ubuntu-latest
+    container: debian:trixie-slim
+    steps:
+      - name: Install FreeCAD's native Python runtime
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends git ca-certificates python3 freecad-python3
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: addons/AzDesign
+      - name: Test exact geometry, parameters and history
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: /usr/bin/python3 addons/AzDesign/tests/run_workflow.py
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            addons/AzDesign
+            addons/Install_AzDesign.FCMacro
+            tools/package_azdesign.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Test installer backup and recovery
+        run: python addons/AzDesign/tests/test_install.py
+      - name: Test FreeCAD startup without __file__
+        run: python addons/AzDesign/tests/test_startup.py
+      - name: Test first command and hidden-document lifecycle
+        run: python addons/AzDesign/tests/test_document_context.py
+      - name: Test workspace preference and native sketch-color restoration
+        run: python addons/AzDesign/tests/test_appearance.py
+      - name: Test modern and legacy extrusion property contracts
+        run: python addons/AzDesign/tests/test_compat.py
+      - name: Test Qt5 / Qt6 task-panel button compatibility
+        run: python addons/AzDesign/tests/test_qt_buttons.py
+      - name: Test Hole safety contracts and reversible preview
+        run: |
+          python addons/AzDesign/tests/test_hole_spec.py
+          python addons/AzDesign/tests/test_hole_operation.py
+          python addons/AzDesign/tests/test_hole_diagnostics.py
+          python addons/AzDesign/tests/test_hole_ui_policy.py
+          python addons/AzDesign/tests/test_hole_panel.py
+      - name: Test in-app updater and backups without live GitHub downloads
+        run: python addons/AzDesign/tests/test_updater.py
+      - name: Test unified edit routes and canvas selection policy
+        run: python addons/AzDesign/tests/test_interaction.py
+      - name: Test compact native Sketch Palette controls and theme-safe layout
+        run: python addons/AzDesign/tests/test_sketch_palette.py
+      - name: Validate Python and XML, then build installer ZIP
+        run: python tools/package_azdesign.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AzDesign-installer
+          path: dist/AzDesign-*.zip

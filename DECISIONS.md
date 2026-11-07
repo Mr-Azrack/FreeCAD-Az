@@ -1,0 +1,275 @@
+# FreeCAD-Az — decisions and constraints
+
+## Accepted product direction
+
+1. **Own the platform.** Build on open-source FreeCAD and maintain an editable fork/add-on rather than relying on an unmodifiable proprietary CAD product.
+2. **Fusion 360-like workflow is the goal.** Familiar sketching, modeling, editing, history, navigation, component and manufacturing workflows are required. No cosmetic-only substitute is accepted as the endpoint.
+3. **Full ambition, verified increments.** Work toward comprehensive parity, but label each partial release and its unimplemented features truthfully.
+4. **Independent implementation.** Use FreeCAD-native geometry and document infrastructure; do not copy Autodesk source, branding or artwork.
+5. **GitHub is authoritative continuity.** After timeout or memory loss, reconstruct from actual branch HEAD, history, local diffs and test evidence. Update and commit the four continuity files at milestones.
+6. **Do not throw away work.** No blind reset, unreviewed overwrite or force push after session recovery.
+7. **Human review and evidence.** Respect licenses and FreeCAD AI_POLICY.md, disclose AI assistance, record testing truthfully, and retain owner review.
+
+## Recorded implementation decisions
+
+- **v0.1:** Optional FreeCAD Python workbench provided familiar UI and native Pad/Pocket-based sketch-to-solid operations, plus a reversible installer. Original v0.1 files remain editable without Az Design installed.
+- **v0.2:** Extend that workbench with custom parametric Az extrusion features built using FreeCAD's Pad/Pocket and OCCT algorithms, selected exact sketch regions, viewport manipulators, parameter expressions, supported Press/Pull, and real history rollback/suppression.
+- **v0.2 compatibility consequence:** Custom feature recomputation/editing requires Az Design installed; cached FCStd shapes and STEP exports allow independent consumption. Do not misrepresent these as pure native Pad objects.
+- Use small, independently verified Git commits and preserve the installation/test artifacts and evidence. Keep the CAD work on a reviewable feature branch while draft PR #1 remains open.
+
+## Open architecture decisions (not commitments)
+
+- How far history reordering, advanced dependency repair, direct geometry editing and arbitrary face offsets can go without FreeCAD core modifications.
+- Exact supported platform/version matrix and Windows packaging/release strategy.
+- Full workflow benchmark criteria for sketching, components/assemblies, drawings and CAM.
+- Whether advanced CAM needs only UX integrations over native FreeCAD CAM or a substantial dedicated interface.
+
+For each new accepted decision record date, rationale, alternatives and compatibility/test impact. A design idea is not a decision until grounded in implementation or user instruction.
+
+## Engineering rationale from the implementation session — 2026-11-05
+
+- Stable Az FeaturePython identity allows Join/Cut/Intersect edits without swapping
+  object classes. Geometry remains exact native Pad/Pocket/OCCT; keep the add-on
+  installed to recompute. This is a compatibility tradeoff, not pure-native Pad storage.
+- Reuse an Undo-disabled, hidden temporary GUI calculation document. Closing one
+  per preview committed FreeCAD's application-wide edit transaction and broke Cancel.
+  Keep the user transaction persistent until OK/Cancel and cancel it on workbench exit.
+- Transfer exact geometry through BREP to remove calculation-document topology IDs;
+  this fixed native downstream Fillet on dimension changes. Topology changes can
+  still require native face/edge reselection; no full topology-repair claim is made.
+- Coin owns native viewport dragging; a Qt timer transfers its field values. The
+  shipped Pivy remove*Callback path reproducibly segfaulted, so that API is avoided.
+- Supported Q edits preserve recognized driving dimensions and refuse unsafe
+  arbitrary surface offsets. History insertion preserves explicit source references
+  and rejects branching rather than silently changing downstream design intent.
+
+## Startup module boundary — 0.2.1
+
+Keep Init.py and InitGui.py as import-only entry glue. FreeCAD executes these
+scripts without guaranteeing `__file__` or a stable shared namespace. Define the
+workbench and locate its resources in the normally imported package module.
+Do not fix this by hard-coding a user directory or assuming one FreeCAD version's
+Mod path. CI now tests the actual missing-file/separate-namespace startup contract.
+
+## Visible modeling context — 0.2.2, 2026-11-05
+
+Treat the active Gui document with a view as the modeling context. App-only
+calculation documents must never receive user sketches/bodies/parameters.
+Create Sketch and New Body create a normal visible Design if needed. Reuse an
+existing visible design and synchronize App activation. This fixes the first-use
+failure without requiring the owner to manually create a document or closing the
+persistent calculation document, which would break transaction cancellation.
+Use App.activeDocument() to preserve the native pointer; its Python module
+attribute can remain stale after setActiveDocument(""). Tests model that split.
+
+## Repo-owned workspace frontend — 0.3.0, 2026-11-06
+
+The owner explicitly permits core/fork changes and wants the work area to look
+and behave like familiar Fusion workflows. Own the surrounding Qt workspace while
+retaining FreeCAD's native geometry, documents, selections and transactions. Use
+public native UI APIs where sufficient; change core code when a real boundary
+requires it. The module installer is a delivery mechanism for the repo-owned
+frontend, not a limit on scope. A complete Windows fork build is unnecessary for
+the present layout changes.
+
+Use grouped bodies/sketches in the Browser and ordered features in the timeline.
+Keep native task semantics and save confirmations. Keep sketch edit colors readable
+on the light canvas, and restore changed preferences/styles when leaving Az.
+Scene grid decoration must not become saved/exported document geometry or enlarge
+Az Home/Fit. Idle Solid radial tools must preserve native sketch/task cancellation.
+Artwork is original SVG generated by tools/generate_az_icons.py; no Autodesk
+artwork or code is copied. Timeline controls operate actual Body Tips; label their
+first position as First solid rather than imply an unsupported empty-history state.
+
+## Version compatibility and default grids — 0.3.1, 2026-11-06
+
+Prefer property capabilities over version strings for native extrusion: SideType
+and Type2 on modern features, legacy flags only when SideType is absent. Native
+Press/Pull must classify side mode using the same API. Preserve old FreeCAD
+support without writing deprecated properties on modern builds. Use the actual
+parameter type labels from GetContents and accept empty groups.
+
+Owner prefers a visible grid over blank canvas. Default Az grid visibility to true
+and persist its toggle in Az's own preference group. Use native aligned sketch
+grid while editing; keep modeling floor unpickable, outside saved geometry and
+outside native scene bounds. No geometry kernel change is needed.
+
+## 2026-11-06 — Hole preview and thread-safety decision
+
+- A native Hole must use an Az-owned task surface while Az is active. Native
+  geometry/document properties remain authoritative; no copied modeling kernel.
+- Invalid Hole previews must reveal the previous real solid, not merely report
+  an error while leaving the viewport empty; Reject rolls the transaction back.
+- Do not call FreeCAD's modeled helical thread path from Az until its crash and
+  performance are independently characterized. Keep ModelThread=False, while
+  allowing native thread standards/sizes as cosmetic/machining intent.
+- Require a deliberate thread size; never choose the first native size without
+  informing the user. Check FreeCAD feature capabilities rather than assuming
+  a property exists on every FreeCAD version.
+- Restrict Az Hole editing to the Body Tip for now; native workbench handles
+  advanced options, downstream-history changes and previously modeled threads.
+  This is an interim stability gate, not a commitment to abandon real threads.
+
+## 2026-11-06 — Opt-in geometric thread crash investigation
+
+The owner explicitly wants native helical threads re-enabled for reproduction
+and debugging. Keep the everyday Hole path cosmetic by default; expose
+`ModelThread=True` only through explicit, per-preview experimental consent
+and a durable diagnostic checkpoint. Never run the potentially crashing OCCT
+helix creation in ordinary CI. Provide a disposable test macro and recommend a
+separate FreeCAD process to avoid losing work. Preserve FreeCAD-native Hole
+objects and the exact options used; capture C++ dumps separately if Python
+fault logs cannot reveal the native failure site. This is a diagnostic enable,
+not a verified kernel crash repair. Do not silently enable modelled threads on
+an existing part or merge the draft PR without owner testing.
+
+## 2026-11-06 — Restore editing for opted-in modeled holes
+
+After the owner's Windows Az Hole panel successfully generated real threads,
+editing failed because stale 0.3.2 guards explicitly rejected existing modeled
+holes. Editing must preserve the current `ModelThread` state, thread size and
+standard, not silently convert to cosmetic; unchanged edits should be true
+no-ops to avoid expensive or crash-prone recomputation. Actual geometric edits
+remain explicitly consented, transactionally reversible, and durably logged.
+Keep the restriction against editing holes with downstream features until
+history-aware downstream recompute can be validated. New 0.3.4 paths remain
+under owner Windows acceptance and draft PR review.
+
+## 2026-11-06 — Small reversible UI improvements over working CAD behavior
+
+After successful owner Windows 0.3.4 modeled Hole editing, continue in
+deliberate increments ("we break fix as we go"), not a disruptive top-to-bottom
+rewrite. For 0.3.5 polish the existing native Hole panel first: compact grouped
+controls, readable FreeCAD thread standard labels, native-derived threaded
+diameter lock, immediate standard-dependent size choices and optional debounced
+plain/cosmetic live previews. Never auto-run real modeled helix generation,
+including after changing an originally modeled Hole or toggling modeled mode
+off. Preserve explicit consent, logs, native transactions, original geometry,
+reversible sketch selection before preview, and no-op edits. Maintain Windows
+GUI testing as separate evidence from Linux/Qt-stub test results.
+
+## 2026-11-07 — First reliable editable timeline increment
+
+The owner explicitly requires the bottom strip to be a usable modeling
+history, not only a rollback viewer. Add obvious selected-feature Edit/Delete,
+retain double-click editing and contextual operations, and use FreeCAD's real
+native feature/task/transaction semantics. Deletion is a destructive operation:
+require explicit confirmation, provide Undo, reject single deletion when live
+dependents exist, and offer separately confirmed same-Body Delete from here.
+Refuse external dependencies rather than quietly breaking another body or
+rewiring unknown topological subelements. Allow earlier native Hole editing
+only with original Body Tip restoration and downstream geometry validation;
+retain experimental modeled-thread consent and logs. This is intentionally
+smaller than unrestricted Fusion reordering and all-feature edit parity.
+
+## 2026-11-07 — Verified one-click updater on top of the installed workbench
+
+Avoid forcing the owner to repeatedly download/extract separate installers.
+Ship a 0.3.7 one-time bootstrap adding **Update Az** in the FreeCAD ribbon.
+The updater must never install an untested moving branch HEAD: use the latest
+successfully completed Az Design add-on CI run on the branch, pin all source
+requests to its exact SHA, verify per-file Git blobs and stage the entire
+workbench before replacing anything. Reuse the transaction-safe local installer
+and preserve the previous version in AzDesign-backups; no surprise hot reload,
+credential prompt or editing of open CAD files. A full restart is mandatory.
+Provide clear error/cancellation feedback when GitHub is unavailable. Public
+repo and branch are hard-coded to this project's development source until
+proper signed releases and channels exist. Owner Windows 1.1 acceptance
+remains necessary.
+
+## 2026-11-07 — Consolidated 0.4.0 Fusion-inspired workflow sprint
+
+Owner explicitly requested all six previously proposed layout/workflow/look-and-feel upgrades be delivered **together**, rather than six incremental versions. Source changes committed on `codex/az-design-workbench`; PR #1 remains draft/unmerged. No main-branch modifications. User already tested 0.3.7 Update Az bootstrap.
+
+### Implemented in one review build
+
+- **Timeline**: native `history_position`, draggable slider that moves actual Body Tip on release, native incoming-dependency inspector, shared feature editor. Existing 0.3.6 Edit/Delete/Undo and safety checks retained. Body Tip scrub is **not** arbitrary reorder.
+- **Sketch**: `SketchPalette` right dock, open only during sketch edits; native grid, snap, profile/dimension/constraint display flags enabled only when present on the installed FreeCAD ViewObject; tools for drawing, dimension, construction, projection, Finish Sketch; native Sketcher Tasks/solver still authoritative.
+- **Feature editing**: new `feature_edit.edit` dispatch used by the timeline and Browser, preserving native PartDesign dialogs and existing Az Hole/Extrude panels.
+- **Canvas**: contextual floating tool strip for selected sketches/faces/edges/features/bodies and native right-click selection menu; idle canvas still has existing radial tool menu. `quick_dimension` edits known native Pad/Pocket lengths, Fillet Radius, Chamfer Size and AzExtrude Length transactionally, with recompute and error checks; no modeled-thread shortcuts.
+- **Browser**: nested true Body.Group order with Features/Sketches under each Body, active-body mark, separate unassigned items, suppress labels; active Body control and selection/visibility/isolate preserved.
+- **Presentation**: accessible hint bar, consistent task controls and history slider styling, restored native FreeCAD layout on workbench exit.
+
+### Scope/risk
+
+Native FreeCAD object/geometry/kernel unchanged. We did NOT implement arbitrary drag-reorder of dependent features, implicit topological link rewriting or a custom Az task for every advanced native operation; these are unsafe to promise as completed without real dependency tests. ViewObject sketch flags vary by FreeCAD release and unsupported ones are disabled rather than impersonated. Direct in-canvas arbitrary face handle dragging is not done; native/Az Extrude and Press/Pull handle tools remain. Linux FreeCAD 1.0 CI and offline Qt/selection tests do not prove Windows FreeCAD 1.1 GUI interactions. Verify the exact 0.4.0 CI and artifact before owner upgrade, then test real update via 0.3.7 button and full restart.
+
+### Tests/source
+
+- New `tests/test_interaction.py` stubs selection-policy + feature edit dispatch.
+- Native workflow adds history scrub/real dependency links and Quick Dimension/Undo checks.
+- Existing Hole modeling/transaction, updater, workspace and installer tests remain in CI.
+- `addons/AzDesign/package.xml`, `azdesign/__init__.py`, help dialog bumped to 0.4.0.
+- Documentation updated for this combined build and remaining parity limitations.
+
+
+
+## 2026-11-07 — 0.4.1 owner Windows screenshot: repair nonfunctional oversized Sketch Palette
+
+After installing/testing the consolidated 0.4.0 UI on Windows FreeCAD 1.1,
+owner provided a screenshot showing the custom right palette consumed almost
+the entire available screen height, pushing native Tasks and bottom history
+below the visible area. The custom duplicated Rectangle/Circle/Line/Dimension
+and Finish Sketch from the ribbon; light-on-light labels made some buttons
+unreadable. Several checkboxes tried to write nonexistent Sketcher properties
+(`SnapToGrid`, `ShowConstraints`, `ShowDimensions`, `ShowProfiles`);
+they were visually inert. Owner correctly rejected the result as not
+Fusion-like. We must not present these as completed working controls.
+
+### 0.4.1 fix made on existing draft PR #1 / branch
+
+- **Replaced**, not cosmetically tweaked, `azdesign/sketch_palette.py`.
+  Removed all duplicate ribbon drawing buttons and its duplicate Finish
+  Sketch; native Sketcher Tasks remains the geometry/constraint solver.
+- The compact option-only palette has an explicit themed background,
+  high-contrast labels/checkboxes, 215 px minimum width, 234 px inner
+  maximum height and **210 px QDockWidget maximum height**; its native task
+  dock uses the remaining right-side space. Bottom history dock limited to
+  72 px (initial 58 px). Arrange sketch/native docks on sketch edit entry.
+- Real ViewProviderSketch-backed toggles now only include **Show grid**
+  (synced through Az appearance), **Auto grid spacing** (`GridAuto`),
+  **Auto constraints** (`Autoconstraints`), and **Avoid redundant
+  constraints** (`AvoidRedundant`). In a FreeCAD build supporting an actual
+  checkable `Sketcher_Snap` QAction, **Snap while drawing** toggles that
+  native action and tracks its state. Missing capabilities are hidden, not
+  shown as fake disabled choices. User must test snap *while drawing new
+  geometry*, not against existing lines.
+- `test_sketch_palette.py` has four headless UI-wiring tests: compact
+  control set, concrete provider property mutation, native checked Snap
+  QAction, unsupported option hiding. Registered in CI alongside native
+  modeling and prior installer/updater/Hole tests.
+- Version bumped from 0.4.0 to **0.4.1**. Owner on 0.4.0 can click
+  **Update Az** and restart; no new manual installer needed.
+
+### Evidence and limitations
+
+[CI run 42375950780](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42375950780)
+passed both package and native modeling jobs. Its package job passed all
+four new SketchPalette tests. The
+[AzDesign-installer artifact 13575022990](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42375950780/artifacts/13575022990)
+contains `AzDesign-0.4.1.zip`, 212,070 bytes, SHA256
+`10bb043092f9cabb0a896a4d8e9d9ad8a076279956cdfe9f766e36e0411976e2`.
+Both outer/inner ZIP CRC checks passed, `package.xml` is 0.4.1, and five
+focused extracted tests were rerun successfully in the working container.
+
+**Still pending:** actual owner Windows FreeCAD 1.1 screen-fit/theme
+acceptance of 0.4.1. Mocked Qt wiring and Linux FreeCAD CI cannot certify
+the user's native GUI panel sizing/color behavior or the precise native
+checked Snap action. No custom Show Profiles/Dimensions controls until a
+verified supported native implementation is available. Do not claim full
+Fusion 360 Sketch Palette parity. Keep draft PR #1 unmerged.
+
+
+## 2026-11-07 — Address real FreeCAD 1.1 task and scope failures without kernel changes
+
+The owner's Report view errors take precedence over further visual polish.
+Use one Qt StandardButton mask helper shared by Hole and Extrude for both
+PySide2 and PySide6; enforce with a mocked enum.Flag regression.
+FreeCAD-native Extrude input and limit links may legally cross PartDesign
+Bodies (source sketch in Body A, Extrude in Body B), so declare global-scoped
+source/limit and frame references rather than relying on local-only LinkSub
+and producing scope warnings. Keep native local BaseFeature history.
+Migrate old 0.4.1 feature link types only during a user-requested explicit
+Edit inside the native transaction; preserve Undo/Cancel and do not silently
+rewrite FCStd files on load. Do not claim Windows GUI verification from
+Linux modeling tests.
