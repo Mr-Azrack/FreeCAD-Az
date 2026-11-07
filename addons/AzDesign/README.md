@@ -1,4 +1,35 @@
-# Az Design 0.4.1
+# Az Design 0.4.2
+
+## 0.4.2 — FreeCAD 1.1 Qt button and cross-Body Extrude fixes
+
+Owner's Windows 1.1 report showed two errors during Extrude:
+
+1. `tasks.py:509` raised `TypeError` when `int()` was called on
+   PySide6's `QDialogButtonBox.StandardButton` (an enum flag, unlike the old
+   Qt5 integer-like type). Both **Extrude** and **Hole** tasks now use the
+   same `qt.standard_button_bits` converter, reading `.value` on Qt6 and
+   supporting the old Qt5 type. Task-panel regression tests reproduce the
+   failure and check both handlers.
+2. Native FreeCAD reported `PartDesign::FeaturePython: Link(s) to object(s)
+   'Body Sketch' go out of the allowed scope 'Extrude'`. The Az Extrude's
+   source/limit references were declared as *local-scoped* links even when
+   the sketch or selected end face belonged to another Body. New Extrudes
+   use **App::PropertyLinkSubGlobal** for Source/UpToFace and
+   **App::PropertyLinkGlobal** for SourceFrame/LimitFrame. BaseFeature stays
+   a native local Body history link. This preserves the parametric links
+   without duplicating sketches or changing the geometry engine.
+
+**Previously saved 0.4.1 Extrudes:** Open an affected Extrude through Az's
+Edit command and accept a valid preview to migrate its old local-only link
+properties *within the native edit transaction*. Cancel restores the
+previous properties; just opening an FCStd file does not silently rewrite
+it. As always, save the document after a successful repair. New 0.4.2
+Extrudes have globally scoped references from creation.
+
+Native geometry tests cover a new Body created from a sketch owned by an
+older Body, parametric placement updates, and editing/cancelling an older
+Extrude link migration. Windows GUI acceptance is still necessary.
+Install via **Update Az**, then fully restart FreeCAD.
 
 ## 0.4.1 — Sketch Palette layout and control repair
 
@@ -195,7 +226,7 @@ Autodesk code and artwork are not included.
 
 ## Install or update
 
-1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.4.1.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
+1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.4.2.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
 3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
