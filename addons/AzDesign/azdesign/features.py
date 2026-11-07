@@ -268,7 +268,7 @@ class ExtrudeProxy:
         obj.addProperty("App::PropertyString", "AzType", "Az Design")
         obj.AzType = self.Type
         obj.setEditorMode("AzType", 2)
-        obj.addProperty("App::PropertyLinkSub", "Source", "Profiles")
+        obj.addProperty("App::PropertyLinkSubGlobal", "Source", "Profiles")
         obj.addProperty("App::PropertyStringList", "Regions", "Profiles")
         obj.addProperty("App::PropertyString", "SourceFaceSignature", "Profiles")
         obj.setEditorMode("SourceFaceSignature", 2)
@@ -284,11 +284,11 @@ class ExtrudeProxy:
         obj.addProperty("App::PropertyBool", "Reversed", "Extrude")
         obj.addProperty("App::PropertyEnumeration", "Extent", "Extrude")
         obj.Extent = ["Distance", "Through all", "To face"]
-        obj.addProperty("App::PropertyLinkSub", "UpToFace", "Extrude")
+        obj.addProperty("App::PropertyLinkSubGlobal", "UpToFace", "Extrude")
         obj.addProperty("App::PropertyString", "LimitFaceSignature", "Extrude")
         obj.setEditorMode("LimitFaceSignature", 2)
         for name in ("SourceFrame", "LimitFrame"):
-            obj.addProperty("App::PropertyLink", name, "Az Design")
+            obj.addProperty("App::PropertyLinkGlobal", name, "Az Design")
             obj.setEditorMode(name, 2)
         obj.addProperty("App::PropertyDistance", "StartOffset", "Extrude")
         obj.addProperty("App::PropertyAngle", "TaperAngle", "Extrude")
