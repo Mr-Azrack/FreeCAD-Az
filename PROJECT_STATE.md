@@ -447,3 +447,43 @@ validation. It does not execute unsafe modeled-thread helices. Owner Windows
 acceptance is needed for the new grouped Qt task, debounced preview and
 thread-size/source switching. The earlier Windows 0.3.4 modeled-thread
 edit confirmation is still valuable, but should not be treated as a 0.3.5 test.
+
+## 0.3.6 — Editable and deletable bottom feature timeline (2026-11-07)
+
+Owner reported that the bottom rollback strip did not behave like Fusion:
+features could not be deleted and earlier features could not meaningfully be
+modified. Development branch `codex/az-design-workbench`, draft PR #1. Changes
+are explicitly incremental, not a claim of full Fusion parity.
+
+Implementation:
+- `ui.History` now has visible Edit/Delete controls for the selected timeline
+  step. Feature tile double-click edits; right-click offers Delete feature and
+  Delete from here, plus existing Roll back/Resume/Suppress. Delete key opens
+  a confirmation while a feature tile has focus.
+- Native Pad/Pocket/Fillet and other PartDesign feature double-clicks in the
+  Browser open FreeCAD's native task editor instead of only Properties. Native
+  task fallback remains for timeline features without Az-managed editors.
+- `history.deletion_plan` checks actual FreeCAD incoming references and
+  refuses a single deletion if any live object needs the feature. Explicit
+  Delete from here enumerates later sketches/features within the same Body;
+  cross-body/unscheduled dependencies block it. The confirmation shows the
+  affected steps and explains Undo. `history.delete_feature` uses FreeCAD
+  transactions, updates Body Tip/rollback marker and recomputes; it aborts
+  newly invalid survivors rather than silently corrupting the file.
+- `hole_operation.HoleOperation` now edits an earlier Hole while newer
+  features exist, temporarily previews the Hole, restores the previous final
+  Body Tip and recomputes/validates downstream solids before acceptance.
+  Failed downstream validation prevents commit; Cancel rolls the transaction
+  back. Existing modeled threads still require explicit warnings and logs.
+- Native geometry regressions test deleting leaf Hole with Undo, refusing
+  unsafe individual deletion, explicitly removing later dependent steps,
+  and modifying/cancelling an earlier Hole under a later Pad.
+
+Not implemented: arbitrary dependency repair, drag-reordering, automatic
+reparenting of downstream feature references, or fully customized non-Hole
+native task editors. Unsafe single deletions are rejected, and Delete from
+here is intentionally destructive and confirmed; it is not a general 'remove
+one middle step and magically preserve all geometry' operation.
+
+Verification: see the latest 0.3.6 workflow and artifact; owner Windows 1.1 GUI
+acceptance is pending. Do not claim the UI tested on Windows from Linux CI.
