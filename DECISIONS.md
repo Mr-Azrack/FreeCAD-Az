@@ -258,3 +258,18 @@ the user's native GUI panel sizing/color behavior or the precise native
 checked Snap action. No custom Show Profiles/Dimensions controls until a
 verified supported native implementation is available. Do not claim full
 Fusion 360 Sketch Palette parity. Keep draft PR #1 unmerged.
+
+
+## 2026-11-07 — Address real FreeCAD 1.1 task and scope failures without kernel changes
+
+The owner's Report view errors take precedence over further visual polish.
+Use one Qt StandardButton mask helper shared by Hole and Extrude for both
+PySide2 and PySide6; enforce with a mocked enum.Flag regression.
+FreeCAD-native Extrude input and limit links may legally cross PartDesign
+Bodies (source sketch in Body A, Extrude in Body B), so declare global-scoped
+source/limit and frame references rather than relying on local-only LinkSub
+and producing scope warnings. Keep native local BaseFeature history.
+Migrate old 0.4.1 feature link types only during a user-requested explicit
+Edit inside the native transaction; preserve Undo/Cancel and do not silently
+rewrite FCStd files on load. Do not claim Windows GUI verification from
+Linux modeling tests.
