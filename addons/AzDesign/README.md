@@ -1,4 +1,44 @@
-# Az Design 0.4.0
+# Az Design 0.4.1
+
+## 0.4.1 — Sketch Palette layout and control repair
+
+Windows FreeCAD 1.1 user screenshot of 0.4.0 revealed a **blocking UI
+regression**: an overly tall right Sketch Palette pushed native Tasks and the
+history timeline off-screen, repeated drawing and Finish Sketch buttons already
+available in the ribbon, inherited dark-theme styles yielded unreadable
+labels, and checkboxes for `SnapToGrid`, `ShowConstraints`,
+`ShowDimensions` and `ShowProfiles` were not real Sketcher ViewObject
+settings. This panel did **not** resemble a compact Fusion Sketch Palette.
+The 0.4.1 patch replaces it rather than further decorating those controls.
+
+The right-hand Sketch Palette is now **settings only**, with a maximum dock
+height of 210 px, 215 px minimum width, explicit high-contrast widget and
+checkbox styles, no duplicate sketch tools or Finish Sketch, and a larger
+remaining native Sketcher Tasks/solver area. Native task dock is labeled
+"Sketch Tasks"; bottom timeline returns to a smaller footprint.
+
+Controls now use only genuine native FreeCAD settings:
+- **Show grid**: Az session's grid control, synchronized to native
+  `ViewObject.ShowGrid` on the active sketch.
+- **Auto grid spacing**: `ViewObject.GridAuto` when available.
+- **Auto constraints**: `ViewObject.Autoconstraints` when available.
+- **Avoid redundant constraints**: `ViewObject.AvoidRedundant` when
+  available.
+- **Snap while drawing**: the native `Sketcher_Snap` checkable GUI action
+  **only** when present in that FreeCAD build, never a fictional
+  `ViewObject.SnapToGrid`. Its effect is visible while *drawing new geometry*,
+  not while selecting existing entities.
+
+Unsupported options are **hidden**, not displayed as inert checkboxes.
+Display-only options such as Show Profiles and separately Show Dimensions are
+**not offered** until verified native APIs exist and are implemented.
+No Sketcher solver or underlying model data is replaced by custom code.
+
+The package CI includes a headless UI wiring regression that exercises native
+property mutations, checked snap actions, unsupported controls and compact
+height. Real Windows theme/DPI/screensize behavior is still subject to owner
+acceptance. Upgrade through the existing **Update Az** command and fully
+restart FreeCAD after installing the tested 0.4.1 build.
 
 ## 0.4.0 — consolidated design-workflow preview
 
@@ -155,7 +195,7 @@ Autodesk code and artwork are not included.
 
 ## Install or update
 
-1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.4.0.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
+1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.4.1.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
 3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
