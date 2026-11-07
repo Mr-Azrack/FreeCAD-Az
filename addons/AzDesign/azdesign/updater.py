@@ -191,27 +191,48 @@ def download_source(sha, destination, *, fetch_bytes=_fetch_bytes,
     return package_version((destination / "package.xml").read_bytes())
 
 
-def update_installed(installation, *, fetch_bytes=_fetch_bytes,
-                     fetch_json=_fetch_json, progress=None):
-    """Return (old_version, new_version, backup_path, workflow_link)."""
-    installation = Path(installation)
+def available_update(installation, *, fetch_bytes=_fetch_bytes,
+                     fetch_json=_fetch_json):
+    """Return (installed_version, tested_version, tested_sha, workflow_link)."""
     old = local_version(installation)
     sha, workflow_link = tested_revision(fetch_json=fetch_json)
     remote = package_version(fetch_bytes(source_url(sha, "package.xml")))
-    if _version_number(remote) <= _version_number(old):
-        return old, old, None, workflow_link
+    return old, remote, sha, workflow_link
+
+
+def install_revision(installation, sha, expected_version, *,
+                     fetch_bytes=_fetch_bytes, fetch_json=_fetch_json,
+                     progress=None):
+    """Apply an already confirmed tested SHA, never an untested moving HEAD."""
+    installation = Path(installation)
+    old = local_version(installation)
+    if _version_number(expected_version) <= _version_number(old):
+        return old, old, None
     with tempfile.TemporaryDirectory(prefix="az-design-download-") as temp:
         source = Path(temp) / "AzDesign"
         downloaded_version = download_source(
             sha, source, fetch_bytes=fetch_bytes,
             fetch_json=fetch_json, progress=progress,
         )
-        if downloaded_version != remote:
-            raise UpdateError("Update version changed during download.")
-        # Import the already installed, tested atomic installer. On Windows,
-        # this runs without requiring a shell, Git, admin rights or a token.
+        if downloaded_version != expected_version:
+            raise UpdateError("The downloaded version did not match the reviewed build.")
         from .install import install
         installed, backup = install(source, installation.parent)
         if installed.resolve() != installation.resolve():
             raise UpdateError("Installer returned an unexpected target path.")
-    return old, remote, backup, workflow_link
+    return old, downloaded_version, backup
+
+
+def update_installed(installation, *, fetch_bytes=_fetch_bytes,
+                     fetch_json=_fetch_json, progress=None):
+    """One-call update for automated integrations and offline tests."""
+    old, new, sha, link = available_update(
+        installation, fetch_bytes=fetch_bytes, fetch_json=fetch_json
+    )
+    if _version_number(new) <= _version_number(old):
+        return old, old, None, link
+    before, after, backup = install_revision(
+        installation, sha, new, fetch_bytes=fetch_bytes,
+        fetch_json=fetch_json, progress=progress,
+    )
+    return before, after, backup, link
