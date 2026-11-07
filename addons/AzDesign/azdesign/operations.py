@@ -120,6 +120,25 @@ class Operation:
         self._restore_tips()
         self._restore_visibility()
 
+    def discard_preview(self):
+        """Discard transient *new* Extrudes after a failed or empty preview.
+
+        Keep the modeling transaction alive so the user can choose a
+        different profile. An edited existing feature must not be deleted:
+        its full rollback remains the native Cancel transaction.
+        """
+        if self.closed:
+            return
+        if self.editing:
+            # Existing features are never disposable. We can restore their
+            # visibility/tip but only Cancel guarantees property rollback.
+            self._restore_tips()
+            self._restore_visibility()
+            self.doc.recompute()
+            return
+        self.clear_created()
+        self.doc.recompute()
+
     def _new_body(self):
         before = {o.Name for o in self.doc.Objects}
         body = self.doc.addObject("PartDesign::Body", "Body")
