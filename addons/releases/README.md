@@ -87,3 +87,24 @@ Its SHA256 is
 Important: Windows FreeCAD 1.1 GUI acceptance and modeled-thread crash
 reproduction remain outstanding. The first real crash should be reproduced
 in a separate disposable FreeCAD process, followed by log analysis.
+
+### Verified 0.3.6 timeline Edit/Delete package — 2026-11-07
+
+[Az Design CI run 42342092612](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42342092612)
+passed **package** and **native modeling** jobs for source commit
+`fd513f89e9d938171cefb645038ef5ed9efe9479`. Native FreeCAD 1.0 tests
+cover transaction deletion/Undo, refusing an unsafe single deletion, explicit
+later-branch deletion, and editing an earlier Hole beneath a later native Pad.
+The prior run 42341922863 had a test-only error from dereferencing a deleted
+FreeCAD Python object proxy after native deletion succeeded; the regression
+was corrected to save object names before removal and the latest run passed.
+
+[AzDesign-installer artifact 13562141196](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42342092612/artifacts/13562141196)
+contains the tested `AzDesign-0.3.6.zip`: **186,564 bytes**, SHA256
+`85a6f3ef177bbd501e689fb6683666010803b74f2196156a125cec2b7bff5297`.
+Outer and inner ZIP CRC checks passed; contains the installer, native history,
+Hole editing, UI changes and tests. Five focused Hole test scripts passed again
+from the extracted ZIP in the working container. The latest checked-in repo
+release ZIP remains 0.3.1; use the passing Actions artifact for 0.3.6.
+**Windows FreeCAD 1.1 timeline GUI validation is still pending.** PR #1
+remains draft and unmerged.
