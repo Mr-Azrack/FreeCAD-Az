@@ -55,6 +55,7 @@ class HoleOperationTest(unittest.TestCase):
         self.sketch.isDerivedFrom = lambda cls: cls == "Sketcher::SketchObject"
         self.body.isDerivedFrom = lambda cls: cls == "PartDesign::Body"
         self.body.Tip = self.base
+        self.body.Group = [self.base, self.sketch]
         self.features.body_tip = Mock(return_value=self.base)
         self.doc.Objects = [self.body, self.base, self.sketch]
         self.objects = {"Body": self.body, "Pad": self.base, "Centers": self.sketch}
@@ -145,6 +146,7 @@ class HoleOperationTest(unittest.TestCase):
         self.doc.Objects.append(previous)
         self.objects[previous.Name] = previous
         self.body.Tip = previous
+        self.body.Group.append(previous)
 
         diagnostic = Mock()
         diagnostic.path = "/fake/edited-native-hole.jsonl"
@@ -185,12 +187,60 @@ class HoleOperationTest(unittest.TestCase):
         )
         previous.isDerivedFrom = lambda cls: cls == "PartDesign::Hole"
         self.body.Tip = previous
+        self.body.Group.append(previous)
         op = self.module.HoleOperation(self.doc, self.sketch, editing=previous)
         self.assertFalse(op.started)
         self.assertIs(op.hole, previous)
         op.cancel()
         self.features.begin_transaction.assert_not_called()
         self.doc.abortTransaction.assert_not_called()
+
+    def test_edit_earlier_hole_restores_later_tip_on_accept(self):
+        hole = types.SimpleNamespace(
+            Name="Hole", Label="Hole", Profile=(self.sketch, [""]),
+            BaseFeature=self.base, Shape=Shape(80),
+            ModelThread=False, Threaded=False, ViewObject=None,
+        )
+        hole.isDerivedFrom = lambda name: name == "PartDesign::Hole" or name == "PartDesign::Feature"
+        hole.getEnumerationsOfProperty = lambda key: ["M3", "M4"]
+        latest = types.SimpleNamespace(
+            Name="Latest", Label="Latest", Shape=Shape(75), ViewObject=None,
+            State=(), Error="",
+        )
+        latest.isDerivedFrom = lambda name: name == "PartDesign::Feature"
+        self.body.Group.extend([hole, latest])
+        self.objects.update(Hole=hole, Latest=latest)
+        self.body.Tip = latest
+        op = self.module.HoleOperation(self.doc, self.sketch, editing=hole)
+        self.assertEqual(op.preview(self.module.HoleSpec(diameter=5)), 80)
+        self.assertEqual(self.body.Tip, hole)
+        self.assertIs(op.accept(), hole)
+        self.assertEqual(self.body.Tip, latest)
+        self.doc.commitTransaction.assert_called_once()
+
+    def test_edit_earlier_hole_rejects_newly_invalid_later_feature(self):
+        hole = types.SimpleNamespace(
+            Name="Hole", Label="Hole", Profile=(self.sketch, [""]),
+            BaseFeature=self.base, Shape=Shape(80),
+            ModelThread=False, Threaded=False, ViewObject=None,
+        )
+        hole.isDerivedFrom = lambda name: name in ("PartDesign::Hole", "PartDesign::Feature")
+        hole.getEnumerationsOfProperty = lambda key: ["M3", "M4"]
+        latest = types.SimpleNamespace(
+            Name="Latest", Label="Latest", Shape=Shape(0),
+            State=("Invalid",), Error="Broken", ViewObject=None,
+        )
+        latest.isDerivedFrom = lambda name: name == "PartDesign::Feature"
+        self.body.Group.extend([hole, latest])
+        self.objects.update(Hole=hole, Latest=latest)
+        self.body.Tip = latest
+        op = self.module.HoleOperation(self.doc, self.sketch, editing=hole)
+        op.preview(self.module.HoleSpec(diameter=5))
+        with self.assertRaisesRegex(ValueError, "breaks downstream"):
+            op.accept()
+        self.doc.commitTransaction.assert_not_called()
+        op.cancel()
+        self.doc.abortTransaction.assert_called_once()
 
     def test_bad_dimensions_create_no_feature_or_transaction(self):
         op = self.module.HoleOperation(self.doc, self.sketch)
