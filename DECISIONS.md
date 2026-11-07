@@ -161,3 +161,18 @@ rewiring unknown topological subelements. Allow earlier native Hole editing
 only with original Body Tip restoration and downstream geometry validation;
 retain experimental modeled-thread consent and logs. This is intentionally
 smaller than unrestricted Fusion reordering and all-feature edit parity.
+
+## 2026-11-07 — Verified one-click updater on top of the installed workbench
+
+Avoid forcing the owner to repeatedly download/extract separate installers.
+Ship a 0.3.7 one-time bootstrap adding **Update Az** in the FreeCAD ribbon.
+The updater must never install an untested moving branch HEAD: use the latest
+successfully completed Az Design add-on CI run on the branch, pin all source
+requests to its exact SHA, verify per-file Git blobs and stage the entire
+workbench before replacing anything. Reuse the transaction-safe local installer
+and preserve the previous version in AzDesign-backups; no surprise hot reload,
+credential prompt or editing of open CAD files. A full restart is mandatory.
+Provide clear error/cancellation feedback when GitHub is unavailable. Public
+repo and branch are hard-coded to this project's development source until
+proper signed releases and channels exist. Owner Windows 1.1 acceptance
+remains necessary.
