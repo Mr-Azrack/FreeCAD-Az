@@ -323,9 +323,10 @@ class WorkflowTest(unittest.TestCase):
         self.assertEqual(new_value, 8)
         self.assertAlmostEqual(body.Shape.Volume, 800)
         self.assertEqual(pad.Length.Value, 8)
+        feature_name = pad.Name
         self.doc.undo()
         self.doc.recompute()
-        restored = self.doc.getObject(pad.Name)
+        restored = self.doc.getObject(feature_name)
         self.assertAlmostEqual(restored.Length.Value, 6)
         self.assertAlmostEqual(body.Shape.Volume, 600)
 
