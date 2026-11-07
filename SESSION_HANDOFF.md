@@ -558,3 +558,32 @@ modeling AND package jobs. Download Actions AzDesign-installer artifact,
 inspect ZIP CRC/package version/contents and rerun extracted offline updater
 tests before shipping link. Record exact artifact ID and SHA256 in state and
 handoff. PR #1 must remain draft/unmerged.
+
+### Verified 0.3.7 self-updater bootstrap artifact — November 7, 2026
+
+[Az Design add-on CI 42343163558](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42343163558)
+passed both the **package** and **native modeling** jobs after the exact
+Git-mode/symlink safety patch. Offline updater regressions (7) passed within
+the package job along with installer and earlier CAD tests. Native FreeCAD
+1.0 geometry checks pass in Linux CI; this does not verify HTTPS from the
+owner's Windows FreeCAD 1.1 application.
+
+[AzDesign-installer artifact 13562532527](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42343163558/artifacts/13562532527)
+contains `AzDesign-0.3.7.zip`: **194,721 bytes**, SHA256
+`3c2acf28ca11067d3cdc5ec5a8b872c9aeb176622d5563310cedafb2901776b7`.
+Outer and inner ZIP integrity tests passed, packaging version is 0.3.7,
+contains `Install_AzDesign.FCMacro`, `azdesign/updater.py`, existing
+backup-aware installer, UI command, and updater tests. On extracted package,
+seven dedicated offline test scripts passed: test_install, test_updater,
+test_hole_spec, test_hole_operation, test_hole_diagnostics,
+test_hole_ui_policy, test_hole_panel. Its root FreeCAD-Az repository remains
+large; the updater intentionally fetches only the pinned AzDesign subtree.
+
+**Owner action:** perform one final manual install of 0.3.7 ZIP, restart
+FreeCAD; thereafter use ribbon Update Az or File → Check for updates,
+confirm, and fully restart after installation. When already current, the
+button should report 0.3.7 without modifying installation. For first live
+acceptance, verify this no-op check, then use it to upgrade a future 0.3.8+
+CI-passing build. The official ZIP under `addons/releases` is still older.
+Keep draft PR #1 unmerged; do not claim an actual Windows network update was
+observed.
