@@ -273,3 +273,20 @@ Migrate old 0.4.1 feature link types only during a user-requested explicit
 Edit inside the native transaction; preserve Undo/Cancel and do not silently
 rewrite FCStd files on load. Do not claim Windows GUI verification from
 Linux modeling tests.
+
+
+## 2026-11-07 — Preserve valid solids while choosing Extrude profiles
+
+Owner's FreeCAD 1.1 video shows the entire Body hiding during profile
+selection. This is not appropriate Fusion-style preview semantics.
+The **original valid Body remains visible** until a valid new feature is
+previewed. Multi-profile sketches do not implicitly enter overlay-picking
+mode and no geometry evaluation occurs when zero profiles are selected.
+Explicit profile-picking overlays do not hide Bodies. Suspend pending
+preview timers while picking faces/regions. Failed new extrusion geometry
+discards its temporary results and restores the original Body Tip,
+visibility and recomputed solid without closing the task. Keep original
+editing transactions and Cancel as the full rollback mechanism for edits
+of existing features; avoid deleting an edited object. Do not confuse
+geometrically disconnected Join failures or FreeCAD hasher warnings with
+the visibility bug, and do not claim those are all fixed without evidence.
