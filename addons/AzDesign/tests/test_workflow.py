@@ -9,7 +9,7 @@ import FreeCAD as App
 import Part
 import PartDesign
 import Sketcher
-from azdesign import features, profiles, operations, history, presspull, parameters
+from azdesign import features, profiles, operations, history, presspull, parameters, quick_dimension
 from azdesign.hole_operation import HoleOperation
 from azdesign.hole_spec import HoleSpec, thread_sizes
 
@@ -314,6 +314,27 @@ class WorkflowTest(unittest.TestCase):
         base.Length = 7
         self.doc.recompute()
         self.assertAlmostEqual(body.Shape.Volume, 900)
+
+    def test_quick_dimension_changes_native_parametric_feature_and_undo(self):
+        body, source, pad = self.base(height=6)
+        name, value = quick_dimension.dimension_value(pad)
+        self.assertEqual((name, value), ("Length", 6.0))
+        new_value = quick_dimension.change_dimension(pad, 8)
+        self.assertEqual(new_value, 8)
+        self.assertAlmostEqual(body.Shape.Volume, 800)
+        self.assertEqual(pad.Length.Value, 8)
+        self.doc.undo()
+        self.doc.recompute()
+        restored = self.doc.getObject(pad.Name)
+        self.assertAlmostEqual(restored.Length.Value, 6)
+        self.assertAlmostEqual(body.Shape.Volume, 600)
+
+    def test_quick_dimension_rejects_zero_without_modifying_feature(self):
+        body, source, pad = self.base(height=6)
+        with self.assertRaisesRegex(features.DesignError, "between"):
+            quick_dimension.change_dimension(pad, 0)
+        self.assertEqual(pad.Length.Value, 6)
+        self.assertAlmostEqual(body.Shape.Volume, 600)
 
     def test_history_scrubber_moves_native_tip_and_resumes_latest(self):
         body, source, base = self.base()
