@@ -1,6 +1,22 @@
 # Az Design installer packages
 
-## 0.3.5 compact Hole panel and safe live preview review build
+## 0.3.6 timeline Edit/Delete review build
+
+Selected features in the bottom timeline have visible Edit/Delete actions.
+Native one-step deletion is allowed only for features without live dependent
+references, and explicit **Delete from here** removes later steps in one
+Body with confirmation and Undo. Earlier native Holes can now be edited with
+downstream recomputation and validation before accepting; modeled threads
+retain explicit consent and diagnostics. Native Pad/Pocket/Fillet edit tasks
+are also accessible by double-clicking in the Az Browser.
+
+Get the latest **AzDesign-installer** workflow artifact after CI passes from
+[Az Design CI](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)
+and extract `AzDesign-0.3.6.zip`. The checked-in release ZIP remains 0.3.1.
+
+
+
+## 0.3.5 compact Hole panel and safe live preview review build (previous)
 
 The Hole task groups its controls, loads native thread sizes when selecting a
 standard, and debounces automatic previews for **plain/cosmetic** Holes only.
