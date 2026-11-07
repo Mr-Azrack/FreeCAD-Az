@@ -4,14 +4,14 @@
 import traceback
 import FreeCAD as App
 import FreeCADGui as Gui
-from .qt import QtCore, QtGui, QtWidgets
+from .qt import QtCore, QtGui, QtWidgets, menu_exec
 from .catalog import TOOLS, SOLID_KEYS, SKETCH_KEYS
 from . import modeling, commands
 from .ui import Ribbon, History
 from .workspace import Browser, Navigation, RadialMenu
 from .appearance import Appearance
 from .sketch_palette import SketchPalette
-from .canvas_actions import CanvasActions
+from .canvas_actions import CanvasActions, selection_actions
 
 _session = None
 
@@ -69,7 +69,26 @@ class InteractionFilter(QtCore.QObject):
             self.session.canvas_actions.place()
         if kind == QtCore.QEvent.ContextMenu and self.is_viewport(watched):
             if not Gui.Control.activeDialog() and not modeling.in_sketch():
-                self.session.radial.popup(event.globalPos())
+                selections = Gui.Selection.getSelectionEx()
+                selected = selections[0] if len(selections) == 1 else None
+                actions = (
+                    selection_actions(selected.Object, selected.SubElementNames)
+                    if selected else ()
+                )
+                if actions:
+                    menu = QtWidgets.QMenu(self.session.main)
+                    labels = dict(CanvasActions.ACTIONS)
+                    for key in actions:
+                        item = menu.addAction(labels[key])
+                        item.triggered.connect(
+                            lambda _checked=False, key=key:
+                                self.session.canvas_actions.run(key)
+                        )
+                    menu.addSeparator()
+                    menu.addAction("Find a Tool…", lambda: commands.palette())
+                    menu_exec(menu, event.globalPos())
+                else:
+                    self.session.radial.popup(event.globalPos())
                 event.accept()
                 return True
         if (
