@@ -690,3 +690,49 @@ the user's native GUI panel sizing/color behavior or the precise native
 checked Snap action. No custom Show Profiles/Dimensions controls until a
 verified supported native implementation is available. Do not claim full
 Fusion 360 Sketch Palette parity. Keep draft PR #1 unmerged.
+
+
+## 2026-11-07 — Az Design 0.4.2 FreeCAD 1.1 Qt6 dialogs and cross-Body Extrude links
+
+Owner's Windows 1.1 Report view errors:
+`tasks.py:509 TypeError: int() ... not 'StandardButton'` when opening
+Extrude task, and `PartDesign::FeaturePython: Link(s) to object(s)
+'Body Sketch' go out of the allowed scope 'Extrude'; linked object(s)
+reside within 'Body'` while using a Body-owned sketch.
+
+Root causes and targeted source fixes:
+- Qt6 `QDialogButtonBox.StandardButton` is an enum.Flag and direct
+  `int(Ok | Cancel)` fails. New `azdesign/qt.py:standard_button_bits`
+  uses the combined enum's `.value` (with backward-compatible legacy int).
+  `tasks.py` and `hole.py` both call it. `test_qt_buttons.py`
+  simulates Qt6 and Qt5 mask APIs and verifies both task getters.
+- Extrude `Source` and `UpToFace` were declared local
+  `App::PropertyLinkSub` and `SourceFrame/LimitFrame` local
+  `App::PropertyLink`. New features use their respective
+  `App::PropertyLinkSubGlobal` and `App::PropertyLinkGlobal` types,
+  supporting legitimate references across native Bodies without
+  copying/proxying source sketches. `BaseFeature` remains native
+  local Body history link.
+- Legacy 0.4.1 extrudes are migrated **only when explicitly opened for
+  Edit**, under the existing Undo transaction using
+  `features.upgrade_extrude_links`; the old source/face values are
+  preserved, all four link types corrected and native Cancel rolls
+  them back. No silent mutation merely from opening an old FCStd file.
+  Unexpected property types abort the Edit transaction instead of
+  overwriting unknown metadata.
+- Native FreeCAD workflow tests cover a new body from an existing Body
+  sketch, cross-Body geometry placement, migration+Cancel restoring
+  the old property and an accepted update retaining geometry/identity.
+  Qt compatibility package tests and old Hole-panel stub updated.
+
+Version `0.4.2` and release notes staged; user should use **Update Az**
+from 0.4.1 and completely restart FreeCAD once CI passes.
+Original 0.4.1 files are backed up by updater. Older saved Extrude can
+be repaired by Edit → valid preview → OK → Save.
+
+One early CI job failed **in the mocked Hole panel test** because its
+stand-in `azdesign.qt` did not expose the new helper; that stub was fixed.
+Early native runs including newly added cross-Body and legacy migration
+tests passed (39 geometry tests in 1.23s on Linux FreeCAD 1.0).
+Check final CI run `42377682997` for BOTH package and native success
+and verify artifact before release. Actual Windows 1.1 acceptance pending.
