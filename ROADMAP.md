@@ -174,3 +174,25 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [ ] Full custom advanced feature panels and arbitrary in-canvas
       direct-edit handles (native FreeCAD dialogs and existing manipulator
       remain until separately validated).
+
+
+## 0.4.1 Windows screenshot corrective build — 2026-11-07
+
+- [x] Replace duplicated oversized 0.4.0 right sketch panel with compact
+      options-only Sketch Palette; leave native drawing tools/Finish Sketch in
+      the top ribbon and native solver/tasks in the right side.
+- [x] Real native Sketcher ViewObject controls for grid, auto spacing, auto
+      constraints and avoiding redundant constraints; checkable native Snap
+      action only when supported; remove dead profile/dimension fake toggles.
+- [x] Explicit high-contrast controls; cap sketch-dock height at 210 px,
+      shorten timeline, reserve visible space for FreeCAD Tasks; test actual
+      control wiring and rejected unsupported settings in CI.
+- [x] 0.4.1 Linux package/native modeling CI passed; verified ZIP checksum and
+      reran five extracted focused tests.
+- [ ] Owner Windows 1.1 acceptance: same screen shows full Sketch Tasks and
+      bottom timeline; checkbox text readable; grid toggles visibly; Auto
+      constraints affects geometry drawn after enabling; native Snap, if
+      available, affects drawing cursor.
+- [ ] Audit true Fusion-like sketch task layout further based on actual
+      Windows 0.4.1 screenshots; avoid duplicating native interface without
+      functional benefit.
