@@ -10,6 +10,7 @@ from . import modeling, commands
 from .ui import Ribbon, History
 from .workspace import Browser, Navigation, RadialMenu
 from .appearance import Appearance
+from .sketch_palette import SketchPalette
 
 _session = None
 
@@ -243,9 +244,19 @@ class Session:
         self.history = History()
         self.history_dock.setWidget(self.history)
         self.history_dock.setMinimumHeight(47)
-        self.history_dock.setMaximumHeight(66)
+        self.history_dock.setMaximumHeight(94)
         self.main.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.history_dock)
-        self.main.resizeDocks([self.history_dock], [50], QtCore.Qt.Vertical)
+        self.main.resizeDocks([self.history_dock], [72], QtCore.Qt.Vertical)
+        self.sketch_dock = QtWidgets.QDockWidget("Sketch Palette", self.main)
+        self.sketch_dock.setObjectName("AzSketchPaletteDock")
+        self.sketch_dock.setAllowedAreas(QtCore.Qt.RightDockWidgetArea)
+        self.sketch_dock.setFeatures(QtWidgets.QDockWidget.NoDockWidgetFeatures)
+        self.sketch_dock.setTitleBarWidget(QtWidgets.QWidget())
+        self.sketch_palette = SketchPalette(self.appearance)
+        self.sketch_dock.setWidget(self.sketch_palette)
+        self.sketch_dock.setMinimumWidth(225)
+        self.main.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.sketch_dock)
+        self.sketch_dock.hide()
         self.navigation = Navigation(self, self.mdi.viewport())
         self.radial = RadialMenu(self.main)
         for label, name in (
@@ -273,6 +284,7 @@ class Session:
 QToolBar#AzDesignRibbonBar { border: 0; padding: 0; spacing: 0; background: #f7f8f9; }
 QDockWidget#AzDesignBrowserDock { background: #f8f9fa; border-right: 1px solid #d3dae0; }
 QDockWidget#AzDesignHistoryDock { background: #e8ecef; border-top: 1px solid #cdd5dc; }
+QDockWidget#AzSketchPaletteDock { background: #f7f9fb; border-left: 1px solid #ccd9e4; }
 QDockWidget#Tasks { color: #41515d; background: #f7f8fa; }
 QStatusBar { background: #e8ecef; color: #657583; font-size: 10px; }
 """)
@@ -295,6 +307,9 @@ QStatusBar { background: #e8ecef; color: #657583; font-size: 10px; }
             self.main.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.tasks_dock)
             self.tasks_dock.setMinimumWidth(280)
             self.tasks_dock.hide()
+            self.main.splitDockWidget(
+                self.sketch_dock, self.tasks_dock, QtCore.Qt.Vertical
+            )
         self.toolbar.show()
         self.browser_dock.show()
         self.history_dock.show()
@@ -338,6 +353,9 @@ QStatusBar { background: #e8ecef; color: #657583; font-size: 10px; }
             if editing != self.last_edit:
                 self.ribbon.update_context(bool(sketch))
                 self.last_edit = editing
+            self.sketch_dock.setVisible(bool(sketch))
+            if sketch:
+                self.sketch_palette.refresh(sketch)
             self.history.refresh()
             self.browser.refresh()
             self.ribbon.documents.refresh()
@@ -432,15 +450,18 @@ QStatusBar { background: #e8ecef; color: #657583; font-size: 10px; }
         self.main.removeToolBar(self.toolbar)
         self.main.removeDockWidget(self.history_dock)
         self.main.removeDockWidget(self.browser_dock)
+        self.main.removeDockWidget(self.sketch_dock)
         self.toolbar.hide()
         self.history_dock.hide()
         self.browser_dock.hide()
+        self.sketch_dock.hide()
         # Detach before deferred deletion. A user can re-enter the workbench in
         # the same event-loop turn; its next layout snapshot must not capture
         # these retired widgets or retain dangling toolbar wrappers.
         self.toolbar.setParent(None)
         self.history_dock.setParent(None)
         self.browser_dock.setParent(None)
+        self.sketch_dock.setParent(None)
         for dock, title, width in self.native_docks:
             dock.setWindowTitle(title)
             dock.setMinimumWidth(width)
@@ -468,6 +489,7 @@ QStatusBar { background: #e8ecef; color: #657583; font-size: 10px; }
         self.toolbar.deleteLater()
         self.history_dock.deleteLater()
         self.browser_dock.deleteLater()
+        self.sketch_dock.deleteLater()
         self.navigation.deleteLater()
         self.radial.deleteLater()
         self.filter.deleteLater()
