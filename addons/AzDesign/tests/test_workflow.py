@@ -123,7 +123,7 @@ class WorkflowTest(unittest.TestCase):
         body, source, base = self.base()
         before_objects = {o.Name for o in self.doc.Objects}
         # This circle is in the same Body but lies well outside the solid.
-        # Joining its extrusion to the original must fail (two solids).
+        # An Intersect with that detached tool must fail (null result).
         detached = sketch(self.doc, [], body=body, z=6)
         detached.addGeometry(
             Part.Circle(App.Vector(50, 50, 0), App.Vector(0, 0, 1), 1)
@@ -136,7 +136,7 @@ class WorkflowTest(unittest.TestCase):
             op.update({
                 "source": (detached, []),
                 "regions": [region.descriptor()],
-                "operation": "Join",
+                "operation": "Intersect",
                 "target": body,
                 "distance": "2 mm",
             })
