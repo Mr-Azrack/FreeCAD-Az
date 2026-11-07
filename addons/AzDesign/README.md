@@ -1,4 +1,52 @@
-# Az Design 0.3.7
+# Az Design 0.4.0
+
+## 0.4.0 — consolidated design-workflow preview
+
+This release brings six previously proposed UX areas together in one build.
+It is a **Fusion-inspired FreeCAD workbench**, not a claim of full Fusion
+feature parity. All model solids remain FreeCAD-native.
+
+1. **Timeline:** discrete draggable history slider rolls the active Body Tip
+   back on release, shows current position and restores latest history;
+   right-click reports actual incoming dependency links. Existing feature
+   Edit/Delete/Undo and dependency guards are retained. Sliding does **not**
+   reorder the dependency graph.
+2. **Sketch Palette:** persistent right-side Az sketch panel while editing,
+   with native Grid, Snap, Constraints, Dimensions and Profile display toggles
+   *when the installed Sketcher exposes those properties*. Unsupported
+   toggles are disabled instead of guessing; native dimension, construction,
+   projection, drawing tools and Finish Sketch remain wired to Sketcher.
+   Native Tasks still owns constraint solving and advanced sketch controls.
+3. **Feature editing:** one edit router shared by the timeline, Browser and
+   canvas. Az Extrude and Hole keep their transactional panels. Other native
+   PartDesign features open native FreeCAD task editors, visually integrated
+   into the Az right-side Tasks area.
+4. **Canvas context:** selection-aware floating actions for sketch, face,
+   edge and feature selections. Right-click on selected geometry exposes
+   relevant native commands; right-click empty canvas retains the Az radial
+   menu. A guarded Quick Dimension dialog edits native Pad/Pocket lengths,
+   Fillet radius, Chamfer size and Az Extrude lengths with recompute and Undo,
+   rejecting newly invalid downstream features. Actual Hole/threads always
+   use the dedicated editor and diagnostics, never Quick Dimension.
+5. **Browser:** Body-first nested native features and sketches in real
+   Body.Group order, separate unassigned geometry, active Body indicator,
+   suppression labels, selection/visibility/isolate and Native Properties.
+6. **Look and feel:** consistent compact ribbon hints, scrubber/selection
+   highlights, task inputs, right-side sketch/task docks, and persistent
+   in-canvas controls. FreeCAD's native solver and workbench layout are
+   restored on exit.
+
+**What is not safe to promise yet:** arbitrary feature drag-reordering,
+automatically fixing broken topological references, custom Az UI for every
+FreeCAD feature (native dialogs remain), or arbitrary face dimension dragging.
+Those require focused graph/geometry safety work and real Windows GUI tests;
+none are silently simulated.
+
+**Update without downloading:** From Az Design 0.3.7 click **Update Az**.
+When the new 0.4.0 CI run passes, the updater should show 0.4.0; confirm,
+install and fully restart FreeCAD. Prior versions are backed up. If the
+update checker reports 0.3.7, the new build may still be awaiting successful
+CI validation; do not replace it from an untested branch HEAD.
 
 ## One-click in-app updates — 0.3.7
 
@@ -107,7 +155,7 @@ Autodesk code and artwork are not included.
 
 ## Install or update
 
-1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.3.7.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
+1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.4.0.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
 3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
