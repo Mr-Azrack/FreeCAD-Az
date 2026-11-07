@@ -205,7 +205,8 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [x] Repair old link types when editing within FreeCAD transaction, retaining
       Cancel/Undo and not silently rewriting reopened FCStd files.
 - [x] Add Qt5/Qt6 mask regression and native cross-Body + legacy migration tests.
-- [ ] Exact final combined CI pass and artifact integrity verification.
+- [x] Exact final combined CI pass (42377682997: package + modeling) and
+      artifact integrity verified (13576123483; 0.4.2 CRC/SHA256 passed).
 - [ ] Owner Windows FreeCAD 1.1 acceptance on 0.4.2 via in-app Update Az;
       create new Extrude from Body-owned sketch, edit/re-save old Extrude,
       confirm both reported errors no longer reproduce.
