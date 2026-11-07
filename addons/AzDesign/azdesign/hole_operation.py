@@ -39,10 +39,21 @@ class HoleOperation:
         if editing:
             if not editing.isDerivedFrom("PartDesign::Hole") or hole_profile_sketch(editing) != sketch:
                 raise features.DesignError("Choose a native Hole associated with this sketch.")
-            if self.body.Tip != editing:
+            group = list(self.body.Group)
+            if editing not in group:
+                raise features.DesignError("This Hole is not in the owning Body history.")
+            # The current Tip can be a later feature. Temporarily show this
+            # Hole for preview, then resume the prior Tip on accept/cancel.
+            # Reject an edit to a feature beyond the currently rolled-back
+            # point; don't silently re-enable a different history branch.
+            current_tip = self.body.Tip
+            if (
+                current_tip in group
+                and group.index(editing) > group.index(current_tip)
+            ):
                 raise features.DesignError(
-                    "Editing a Hole with later features is not yet supported in Az. "
-                    "Roll back to the Hole first or edit in Native CAD."
+                    "This Hole is beyond the current rollback marker. "
+                    "Resume history before editing it."
                 )
             # Existing modeled threads are now editable through the same
             # explicitly confirmed and instrumented preview as new holes.
@@ -184,6 +195,39 @@ class HoleOperation:
         if self.closed or not self.valid or not self.hole:
             raise features.DesignError("Show a valid Hole result before accepting.")
         self.show_result()
+        if self.editing and self.original_tip != self.hole:
+            # Recompute the rest of the actual native history, then reject a
+            # newly broken downstream solid instead of silently accepting it.
+            self.body.Tip = self.original_tip
+            self._restore_visibility()
+            self.doc.recompute()
+            group = list(self.body.Group)
+            pos = group.index(self.hole)
+            end = group.index(self.original_tip) if self.original_tip in group else len(group) - 1
+            failures = []
+            for item in group[pos + 1:end + 1]:
+                if not item.isDerivedFrom("PartDesign::Feature"):
+                    continue
+                state = getattr(item, "State", ())
+                shape = getattr(item, "Shape", None)
+                if (
+                    "Invalid" in state
+                    or bool(getattr(item, "Error", ""))
+                    or not shape
+                    or shape.isNull()
+                    or not shape.isValid()
+                ):
+                    failures.append(item.Label)
+            if failures:
+                # Leave the edit task open, with Cancel able to abort the
+                # original transaction. Do not commit this invalid design.
+                self.valid = False
+                self.show_base()
+                raise features.DesignError(
+                    "Edited Hole breaks downstream features: "
+                    + ", ".join(failures)
+                    + ". Cancel to restore the original, or adjust the Hole."
+                )
         self.doc.commitTransaction()
         self.closed = True
         return self.hole
