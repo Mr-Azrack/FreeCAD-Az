@@ -508,3 +508,42 @@ from the extracted ZIP in the working container. The latest checked-in repo
 release ZIP remains 0.3.1; use the passing Actions artifact for 0.3.6.
 **Windows FreeCAD 1.1 timeline GUI validation is still pending.** PR #1
 remains draft and unmerged.
+
+## 0.3.7 — In-app update bootstrap, November 7, 2026
+
+Owner requested an end to downloading and reinstalling each Az build manually.
+This workbench is in a public GitHub repository; no personal access token is
+required to read successful Actions runs, Git metadata, or raw source files.
+The new preview updater is a manual command, not background auto-update.
+
+Implemented:
+- `azdesign/updater.py`: select a **completed, successful** `Az Design add-on`
+  pull-request workflow on the dedicated `codex/az-design-workbench` branch.
+  Resolve the tested head SHA; compare the pinned `addons/AzDesign/package.xml`
+  version against the local version and no-op if already current. Resolve the
+  isolated AzDesign directory tree instead of downloading the multi-gigabyte
+  upstream FreeCAD fork. Fetch files by SHA-pinned raw.githubusercontent.com
+  URLs, reject path traversal, symlink/unsupported Git modes and outsized files,
+  and verify individual Git blob hashes. Stage and syntax-check the entire
+  snapshot before invoking existing backup-aware `install.install`.
+- `commands.py`: Update Az command displays installed/tested versions,
+  prompts to download, shows file progress/cancellation, and reminds user to
+  save and restart FreeCAD (the already-loaded Python modules are NOT hot
+  swapped). Blocks updates during a task. Failures report errors and preserve
+  previous install unless the atomic installer itself encounters a rollback
+  failure. Install leaves backup under the FreeCAD user AzDesign-backups folder.
+- `ui.py`: visible **Update Az** top ribbon button and File menu entry.
+  `catalog.py` registers `Az_Update` for Utilities and the command palette.
+- `tests/test_updater.py`: deterministic offline mock HTTP fixtures test
+  successful CI gating, SHA-pinned source, Git blob verification, complete
+  backup/install, no-op same version, cancelled download, bad symlink mode,
+  and rejection of unsafe paths. Package CI explicitly runs these tests.
+- Version `0.3.7` source and README/install instructions updated.
+
+**Bootstrapping:** User must install 0.3.7 by extracting the ZIP + executing
+`Install_AzDesign.FCMacro` **once more**, then restart. Subsequent builds
+have an Update Az button. Updates require an internet connection to public
+GitHub endpoints and a full FreeCAD process restart. Linux CI and offline
+HTTP mocking do not prove the user's Windows FreeCAD 1.1 network path; owner
+acceptance is pending. Do not confuse a future source commit with a passing
+CI-tested commit. Keep PR #1 draft and unmerged.
