@@ -80,6 +80,96 @@ def palette():
     dialog.search.setFocus()
 
 
+_update_running = False
+
+
+def update_az_design():
+    """One-click check, explicit approval and verified local replacement."""
+    global _update_running
+    if _update_running:
+        notify("Az Design update already running.")
+        return
+    from . import updater
+    parent = Gui.getMainWindow()
+    installation = os.path.join(App.getUserAppDataDir(), "Mod", "AzDesign")
+    if Gui.Control.activeDialog():
+        notify("Finish or cancel the current task before updating Az Design.", True)
+        return
+    _update_running = True
+    progress = None
+    try:
+        old, new, sha, link = updater.available_update(installation)
+        if updater._version_number(new) <= updater._version_number(old):
+            QtWidgets.QMessageBox.information(
+                parent, "Az Design is current",
+                "You already have Az Design " + old
+                + ".\\nThe latest CI-tested build is " + new + ".",
+            )
+            return
+        answer = QtWidgets.QMessageBox.question(
+            parent, "Update Az Design",
+            "Installed: " + old + "\\n"
+            "Available, CI-tested: " + new + "\\n\\n"
+            "Download verified files directly from our public GitHub repo "
+            "and replace Az Design?\\n\\n"
+            "The current installation will be backed up. "
+            "Your documents will not be modified.\\n\\n"
+            "You MUST close and restart FreeCAD when finished. "
+            "Save open work before restarting.",
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            QtWidgets.QMessageBox.No,
+        )
+        if answer != QtWidgets.QMessageBox.Yes:
+            return
+        progress = QtWidgets.QProgressDialog(
+            "Downloading verified Az Design files…", "Cancel", 0, 100, parent
+        )
+        progress.setWindowTitle("Updating Az Design")
+        progress.setMinimumDuration(0)
+        progress.setValue(0)
+
+        def advance(done, total, file_name):
+            progress.setRange(0, total)
+            progress.setValue(done)
+            progress.setLabelText(
+                "Verified " + str(done) + " / " + str(total) + " files\\n"
+                + file_name
+            )
+            QtWidgets.QApplication.processEvents()
+            if progress.wasCanceled():
+                raise updater.UpdateError(
+                    "Update cancelled before installation. The current version is unchanged."
+                )
+
+        previous, installed, backup = updater.install_revision(
+            installation, sha, new, progress=advance
+        )
+        progress.setValue(progress.maximum())
+        message = (
+            "Installed Az Design " + installed + ".\\n\\n"
+            "Close ALL FreeCAD windows and restart the application before "
+            "using the updated workbench."
+        )
+        if backup:
+            message += "\\n\\nBackup of previous version: " + str(backup)
+        QtWidgets.QMessageBox.information(
+            parent, "Az Design update installed", message
+        )
+    except Exception as exc:
+        App.Console.PrintError(
+            "Az Design update failed:\\n" + traceback.format_exc()
+        )
+        QtWidgets.QMessageBox.warning(
+            parent, "Az Design update not installed",
+            str(exc) + "\\n\\nThe existing installation was left in place "
+            "unless the installer itself reports a rollback failure.",
+        )
+    finally:
+        if progress:
+            progress.close()
+        _update_running = False
+
+
 def help_dialog():
     text = """<h2>Az Design · Quick start</h2>
     <p><b>1.</b> Create Sketch → choose XY, XZ, YZ or a flat face.<br>
@@ -128,6 +218,7 @@ def dispatch(key):
         "help": help_dialog,
         "native": native,
         "cam": manufacture,
+        "update": update_az_design,
     }
     return adapters[key]()
 
@@ -198,6 +289,7 @@ def menu_commands():
             "home",
             "palette",
             "help",
+            "update",
             "cam",
             "native",
         )
