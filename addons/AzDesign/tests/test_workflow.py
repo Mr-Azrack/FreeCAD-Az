@@ -175,6 +175,30 @@ class WorkflowTest(unittest.TestCase):
         self.assertEqual(sum(o.isDerivedFrom("PartDesign::Body") for o in self.doc.Objects), 1)
         op.accept()
 
+    def test_new_body_extrude_can_depend_on_sketch_inside_another_body(self):
+        original_body, source, base = self.base()
+        operation = operations.Operation(self.doc)
+        result = operation.update(
+            {
+                "source": (source, []),
+                "whole": True,
+                "operation": "New body",
+                "distance": "4 mm",
+            }
+        )[0]
+        new_body = features.owner_body(result)
+        self.assertIsNot(new_body, original_body)
+        self.assertEqual(result.getTypeIdOfProperty("Source"), "App::PropertyLinkSubGlobal")
+        self.assertEqual(result.getTypeIdOfProperty("SourceFrame"), "App::PropertyLinkGlobal")
+        self.assertEqual(result.Source[0], source)
+        self.assertEqual(result.SourceFrame, original_body)
+        self.assertEqual(result.Error, "")
+        self.assertAlmostEqual(result.Shape.Volume, 400)
+        operation.accept()
+        self.doc.recompute()
+        self.assertNotIn("Invalid", result.State)
+        self.assertAlmostEqual(new_body.Shape.Volume, 400)
+
     def test_disconnected_profiles_create_separate_bodies(self):
         source = sketch(
             self.doc, RECT + [(20, 0, 30, 0), (30, 0, 30, 10), (30, 10, 20, 10), (20, 10, 20, 0)]
@@ -381,6 +405,15 @@ class WorkflowTest(unittest.TestCase):
         self.doc.recompute()
         self.assertEqual(obj.Error, "")
         self.assertAlmostEqual(obj.Shape.Volume, 300)
+        # Global-scoped links are required when Extrude is in another Body.
+        # Local-only LinkSub emitted 'go out of the allowed scope' on FreeCAD
+        # 1.1, even when the solid happened to render correctly.
+        self.assertEqual(obj.getTypeIdOfProperty("Source"), "App::PropertyLinkSubGlobal")
+        self.assertEqual(obj.getTypeIdOfProperty("UpToFace"), "App::PropertyLinkSubGlobal")
+        self.assertEqual(obj.getTypeIdOfProperty("SourceFrame"), "App::PropertyLinkGlobal")
+        self.assertEqual(obj.getTypeIdOfProperty("LimitFrame"), "App::PropertyLinkGlobal")
+        self.assertEqual(obj.Source[0], source)
+        self.assertEqual(obj.SourceFrame, body)
         before = other.Shape.CenterOfMass + other.Placement.Base
         body.Placement.Base.x += 7
         self.doc.recompute()
