@@ -591,3 +591,26 @@ observed.
 ## 2026-11-07 — Owner acceptance: 0.3.7 updater bootstrap
 
 Following installation of Az Design 0.3.7, owner reported **"OK THAT WORKED WOOT"** in response to the instruction to run **Update Az** and verify the up-to-date result. Treat this as owner confirmation that the 0.3.7 installation and in-app check flow worked on their Windows FreeCAD machine. It does **not** validate downloading/installing a newer 0.3.8+ build yet; validate the actual upgrade path when a new tested version exists. Continue incremental break/fix workflow, PR #1 stays draft and unmerged.
+
+
+## 2026-11-07 — Next Fusion-like UX priorities agreed for planning
+
+User asks for next primary changes to close Fusion 360 layout, workflow,
+look/feel gap. Inspected current `codex/az-design-workbench`, draft PR #1,
+`ROADMAP.md`, `PROJECT_STATE.md`, `SESSION_HANDOFF.md`, `AGENTS.md`
+and Az UI/Browser/session/catalog structure. No source-code edits or release
+version bump were requested this turn.
+
+Prioritize proposed sequence 0.3.8 timeline interaction/dependency-aware
+edit (first; 0.3.6 Delete/Edit Windows acceptance still pending), 0.3.9
+contextual sketch palette/constraints/dimensions, 0.4.0 consistent native
+feature editing tasks, 0.4.1 in-canvas selection/manipulators, 0.4.2
+body/component/Browser behavior, 0.4.3 cohesive visual/DPI polish.
+Added detailed definitions and acceptance gates to ROADMAP.md. Autodesk
+official documentation of Fusion timeline and Sketch Palette used only for
+interaction comparison; copy no Autodesk source or branded assets.
+
+Next change if owner says proceed: 0.3.8 first increment, verify Windows
+0.3.6 timeline operations and the 0.3.7 updater's *real future upgrade* path.
+Build small tests for Body Tip rollback marker and selection/active/rolled
+visuals before any arbitrary reorder. Keep PR draft and preserve continuity.
