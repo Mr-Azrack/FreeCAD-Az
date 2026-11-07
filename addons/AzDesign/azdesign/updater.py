@@ -144,6 +144,8 @@ def file_manifest(sha, fetch_json=_fetch_json):
         source_url(sha, name)  # Check for path traversal.
         if name.endswith(".pyc") or "__pycache__" in PurePosixPath(name).parts:
             continue
+        if node.get("mode") not in ("100644", "100755"):
+            raise UpdateError("Unsupported Git file mode in update: " + name)
         if not _SHA_RE.fullmatch(node.get("sha", "")):
             raise UpdateError("Invalid source Git blob hash.")
         size = node.get("size", -1)
