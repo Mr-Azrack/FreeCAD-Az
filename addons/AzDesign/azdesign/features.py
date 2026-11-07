@@ -261,6 +261,46 @@ def native_extrusion(
             App.closeDocument(transient.Name)
 
 
+def upgrade_extrude_links(obj):
+    """Repair 0.4.1 local link properties on an Extrude being explicitly edited.
+
+    This must be invoked inside the operation's already-open FreeCAD native
+    transaction so Cancel can restore the original feature unchanged.
+    A previously saved file is not silently rewritten when merely opened.
+    """
+    if getattr(obj, "AzType", "") != "AzExtrude":
+        return False
+    properties = (
+        ("Source", "App::PropertyLinkSub", "App::PropertyLinkSubGlobal", "Profiles"),
+        ("UpToFace", "App::PropertyLinkSub", "App::PropertyLinkSubGlobal", "Extrude"),
+        ("SourceFrame", "App::PropertyLink", "App::PropertyLinkGlobal", "Az Design"),
+        ("LimitFrame", "App::PropertyLink", "App::PropertyLinkGlobal", "Az Design"),
+    )
+    changed = False
+    for name, old_type, new_type, group in properties:
+        if name not in obj.PropertiesList:
+            continue
+        actual_type = obj.getTypeIdOfProperty(name)
+        if actual_type == new_type:
+            continue
+        if actual_type != old_type:
+            raise DesignError(
+                "Unexpected " + name + " link type on " + obj.Label
+                + ": " + actual_type + ". No automatic conversion was attempted."
+            )
+        value = getattr(obj, name)
+        obj.removeProperty(name)
+        obj.addProperty(new_type, name, group)
+        if value is not None and not (
+            isinstance(value, (tuple, list)) and value and value[0] is None
+        ):
+            setattr(obj, name, value)
+        if name in ("SourceFrame", "LimitFrame"):
+            obj.setEditorMode(name, 2)
+        changed = True
+    return changed
+
+
 class ExtrudeProxy:
     Type = "AzExtrude"
 
