@@ -1,5 +1,25 @@
 # Az Design installer packages
 
+## 0.4.3 Extrude visibility and invalid-profile preview correction
+
+A user Windows FreeCAD 1.1 screen recording revealed an Extrude task
+hiding the entire model during multi-profile selection and occasionally
+leaving an invalid temporary Body Tip after a failing Join. 0.4.3 stops
+auto-entering profile-picking mode; displays overlays on the existing
+solid; pauses preview recomputation while picking; suppresses previews
+with zero selected profiles; and discards invalid **new** Extrude previews,
+restoring the previous Body Tip, visibility and recomputed solid.
+
+A truly disconnected Join still reports a geometrically invalid result
+rather than pretending to create a valid PartDesign Body. Existing edited
+features retain full native Cancel rollback behavior. Native tests cover
+invalid new preview cleanup and successful retry in the same transaction.
+
+Upgrade with **Update Az** from 0.4.2, then completely restart FreeCAD
+and repeat the multi-profile sketch test.
+
+
+
 ## 0.4.2 FreeCAD 1.1 Extrude dialog and link-scope corrective build
 
 Addresses owner-reported PySide6 `getStandardButtons()` TypeError and native
