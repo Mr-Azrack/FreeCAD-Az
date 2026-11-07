@@ -640,3 +640,31 @@ Native FreeCAD object/geometry/kernel unchanged. We did NOT implement arbitrary 
 - `addons/AzDesign/package.xml`, `azdesign/__init__.py`, help dialog bumped to 0.4.0.
 - Documentation updated for this combined build and remaining parity limitations.
 
+
+### Verified consolidated 0.4.0 CI/artifact — 2026-11-07
+
+[Az Design CI run 42344629492](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42344629492)
+completed with successful **package** and **native modeling** jobs after
+all 0.4.0 source changes. The earlier combined-feature run 42344565681 also
+passed both jobs before the version bump. Native geometry includes history
+scrubbing/dependency graph and Quick Dimension/Undo coverage. This verifies
+FreeCAD 1.0 Linux native logic, not Windows FreeCAD 1.1 GUI behavior.
+
+[AzDesign-installer artifact 13563450513](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42344629492/artifacts/13563450513)
+contains `AzDesign-0.4.0.zip`: **207,456 bytes**, SHA256
+`92adccffeae1e1aeccc05471a5dc3fd852af9a7a15c38462fbe44695497e84fa`.
+Outer/inner ZIP CRC passed. ZIP contains the existing installer/updater,
+sketch_palette, canvas_actions, quick_dimension, feature_edit and XML package;
+7 offline tests extracted and rerun in the container all passed:
+`test_updater.py`, `test_install.py`, `test_interaction.py`,
+`test_hole_panel.py`, `test_hole_ui_policy.py`,
+`test_hole_operation.py`, `test_hole_spec.py`.
+
+**First owner test:** On installed 0.3.7 press **Update Az**. Confirm 0.4.0,
+install and fully restart FreeCAD. Check that native FreeCAD is restored when
+leaving workbench. Check (1) drag timeline scrub and restore latest;
+(2) Sketch Palette and native solver; (3) Browser Body grouping;
+(4) selected face right-click/canvas actions; (5) Quick Dimension/Undo on a
+test solid, (6) existing modeled Hole edit. Do not yet claim actual Windows
+acceptance of these integrated controls or an actual 0.3.7→0.4.0 HTTPS upgrade.
+PR #1 remains draft/unmerged.
