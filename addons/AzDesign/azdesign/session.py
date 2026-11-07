@@ -309,6 +309,23 @@ QDockWidget#AzDesignHistoryDock { background: #e8ecef; border-top: 1px solid #cd
 QDockWidget#AzSketchPaletteDock { background: #f7f9fb; border-left: 1px solid #ccd9e4; }
 QDockWidget#Tasks { color: #41515d; background: #f7f8fa; }
 QStatusBar { background: #e8ecef; color: #657583; font-size: 10px; }
+QWidget#AzHoleForm, QWidget#AzExtrudeForm {
+    background: #f8fafb; color: #374f5f; }
+QWidget#AzHoleForm QLabel, QWidget#AzExtrudeForm QLabel { color: #52697a; }
+QWidget#AzHoleForm QGroupBox, QWidget#AzExtrudeForm QGroupBox {
+    background: #f7fafc; border: 1px solid #d2dfe8;
+    border-radius: 5px; margin-top: 11px; padding: 7px; font-weight: 600; }
+QWidget#AzHoleForm QGroupBox::title, QWidget#AzExtrudeForm QGroupBox::title {
+    subcontrol-origin: margin; left: 10px; color: #376586; }
+QWidget#AzHoleForm QDoubleSpinBox, QWidget#AzHoleForm QComboBox,
+QWidget#AzExtrudeForm QComboBox, QWidget#AzExtrudeForm QLineEdit {
+    border: 1px solid #bbcbd7; border-radius: 4px; padding: 5px;
+    background: #ffffff; color: #30495a; min-height: 20px; }
+QWidget#AzHoleForm QPushButton, QWidget#AzExtrudeForm QPushButton {
+    border: 1px solid #b8cedd; border-radius: 4px; padding: 6px;
+    background: #eaf3f9; color: #31536e; }
+QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
+    background: #d8ebf8; }
 """)
         self.main.menuBar().hide()
         for dock, _title, _width in self.native_docks:
