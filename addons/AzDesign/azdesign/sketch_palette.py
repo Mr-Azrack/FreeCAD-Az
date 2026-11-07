@@ -89,7 +89,8 @@ class SketchPalette(QtWidgets.QWidget):
         layout.addWidget(header)
         self.summary = QtWidgets.QLabel("Sketch options")
         self.summary.setObjectName("AzSketchSummary")
-        self.summary.setWordWrap(False)
+        self.summary.setWordWrap(True)
+        self.summary.setMaximumHeight(34)
         layout.addWidget(self.summary)
 
         for key, label, _native in NATIVE_PROPERTIES:
