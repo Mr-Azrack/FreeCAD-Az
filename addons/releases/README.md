@@ -1,5 +1,21 @@
 # Az Design installer packages
 
+## 0.4.2 FreeCAD 1.1 Extrude dialog and link-scope corrective build
+
+Addresses owner-reported PySide6 `getStandardButtons()` TypeError and native
+`PartDesign::FeaturePython` out-of-scope sketch references during Extrude.
+Both Az Hole and Extrude task button masks now work with Qt5 and Qt6.
+New Extrudes use native globally scoped FreeCAD source/limit links when
+modeling across Bodies. Existing 0.4.1 Extrudes can have local-only links
+upgraded by explicitly reopening them in Az Edit and accepting a valid
+preview; Undo/Cancel keeps original properties.
+
+Upgrade from 0.4.1 with **Update Az**, then save work and completely restart
+FreeCAD. The native CI checks link types, cross-Body recomputation and
+the legacy transaction migration. Owner Windows 1.1 acceptance is pending.
+
+
+
 ## 0.4.1 Sketch Palette screen-fit and native control repair
 
 0.4.0's owner Windows screenshot showed a large duplicate-tools sketch panel,
