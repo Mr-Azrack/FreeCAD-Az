@@ -147,3 +147,17 @@ including after changing an originally modeled Hole or toggling modeled mode
 off. Preserve explicit consent, logs, native transactions, original geometry,
 reversible sketch selection before preview, and no-op edits. Maintain Windows
 GUI testing as separate evidence from Linux/Qt-stub test results.
+
+## 2026-11-07 — First reliable editable timeline increment
+
+The owner explicitly requires the bottom strip to be a usable modeling
+history, not only a rollback viewer. Add obvious selected-feature Edit/Delete,
+retain double-click editing and contextual operations, and use FreeCAD's real
+native feature/task/transaction semantics. Deletion is a destructive operation:
+require explicit confirmation, provide Undo, reject single deletion when live
+dependents exist, and offer separately confirmed same-Body Delete from here.
+Refuse external dependencies rather than quietly breaking another body or
+rewiring unknown topological subelements. Allow earlier native Hole editing
+only with original Body Tip restoration and downstream geometry validation;
+retain experimental modeled-thread consent and logs. This is intentionally
+smaller than unrestricted Fusion reordering and all-feature edit parity.
