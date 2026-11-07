@@ -102,3 +102,53 @@
 - [ ] Optional stable release channel and signed manifest/version pinning;
       avoid deploying private or untested development code by default for
       anyone outside this owner-focused review workflow.
+
+
+## Proposed next UX milestones — owner planning conversation, November 7, 2026
+
+These are **priorities, not completed code or committed release promises**.
+Chosen to close the gap with Fusion-style modeling workflows while preserving
+native FreeCAD documents, kernel and dependency semantics. Incremental
+break/fix with GitHub tests and owner Windows acceptance per release.
+
+1. **0.3.8 — History-first interaction and dependency clarity.** Harden 0.3.6
+   timeline selection/edit/delete and actual Windows acceptance. Add a draggable
+   Body Tip/rollback marker and clear future/active/suppressed states; expose
+   dependency-aware edits and actionable failure messages. Preserve downstream
+   topology where supported, but never arbitrarily rewire unstable references.
+   Add safe, explicit supported reorder cases only with dependency checks.
+   End-to-end acceptance: Pad → Hole → Fillet, edit Pad/Hole upstream and
+   return to latest history without unexpected lost solids.
+2. **0.3.9 — Contextual sketch workspace / palette.** Right-side Az Sketch
+   Palette with grid/snap/show profile/show constraints/show dimensions,
+   construction and projected geometry, constraint completeness cues and
+   dimension feedback. Keep Sketcher-native solver/constraints. Acceptance:
+   plane → rectangle + dimensions → circles + constraints → Finish Sketch
+   without losing view/layout; downstream edit updates the solid.
+3. **0.4.0 — Coherent feature editing tasks.** Unify on task structure for
+   Extrude, Hole, Fillet/Chamfer, Revolve, Shell, Loft/Sweep where FreeCAD native
+   capabilities permit; standard preview/OK/Cancel/original/broken-reference
+   and in-canvas manipulators. Do not wrap every possible native property
+   prematurely. Acceptance: consistent editing on a representative fabrication
+   part without workbench switching.
+4. **0.4.1 — In-canvas selection and direct manipulation.** Clear hover/
+   selection highlighting; contextual actions for face/edge/profile/sketch;
+   direct dimension editing, move/rotate controls and viewport handles with
+   stable Undo; nonselectable Az grid and native CAD fallback. Acceptance:
+   common edits require fewer trips to a property panel.
+5. **0.4.2 — Browser and component organization.** Proper tree hierarchy
+   for bodies/components/sketches/origin/construction, active body marker,
+   reliable visibility/isolate and selection synchronization with timeline
+   and viewport, context menus and renamed/suppressed status. Multi-body
+   document tests before grouping or component manipulation promises.
+6. **0.4.3 — Visual/layout consistency pass.** Unified ribbon icon sizing
+   and tooltips, coherent compact right-side task/Sketch Palette, stable
+   panel placement, shortcuts, theme/contrast/DPI, and 2D/3D navigation.
+   Target familiar interaction rather than cloning branded visual assets.
+
+**Guardrail:** The priority is working history + sketching + feature tasks,
+not visual imitation alone. Do not promise drag-reorder/dependency repair
+until the specific FreeCAD-native graph and transaction cases pass tests.
+Do not advance versions for planning-only changes. 0.3.7 remains the latest
+owner-confirmed updater bootstrap; actual network upgrade to a later release
+must be tested after the next passing build.
