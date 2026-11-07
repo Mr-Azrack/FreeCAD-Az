@@ -141,6 +141,7 @@ def delete_feature(feature, cascade=False):
     """
     body, targets, tip = deletion_plan(feature, cascade)
     doc = feature.Document
+    labels = [obj.Label for obj in targets]
     names = {obj.Name for obj in targets}
     # Existing broken unrelated objects must not prevent removing bad geometry.
     prior_errors = {
@@ -177,7 +178,7 @@ def delete_feature(feature, cascade=False):
                 + ". No changes were kept."
             )
         doc.commitTransaction()
-        return [obj.Label for obj in targets]
+        return labels
     except Exception:
         doc.abortTransaction()
         doc.recompute()
