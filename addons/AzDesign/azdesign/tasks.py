@@ -3,7 +3,7 @@
 
 import FreeCAD as App
 import FreeCADGui as Gui
-from .qt import QtCore, QtWidgets
+from .qt import QtCore, QtWidgets, standard_button_bits
 from . import features, profiles, operations, history
 from .features import DesignError
 
@@ -506,7 +506,9 @@ class ExtrudeTask:
         self.remove_overlays()
 
     def getStandardButtons(self):
-        return int(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        return standard_button_bits(
+            QtWidgets.QDialogButtonBox.Ok, QtWidgets.QDialogButtonBox.Cancel
+        )
 
     def accept(self):
         self.picking = None
