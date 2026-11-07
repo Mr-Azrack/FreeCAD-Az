@@ -328,7 +328,10 @@ class FeatureButton(QtWidgets.QToolButton):
         self.setCheckable(True)
         self.setFixedSize(31, 34)
         self.setAccessibleName(obj.Label)
-        self.setToolTip(obj.Label + "\nClick: select · Double-click: edit · Right-click: more")
+        self.setToolTip(
+            obj.Label + " · " + obj.TypeId
+            + "\nClick: select · Double-click: edit · Delete: remove safely · Right-click: actions"
+        )
         self.clicked.connect(self.select)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.context_menu)
@@ -384,6 +387,13 @@ class FeatureButton(QtWidgets.QToolButton):
         menu = QtWidgets.QMenu(self)
         menu.addAction("Edit feature", self.edit)
         menu.addAction("Select in model", self.select)
+        if obj and (
+            obj.isDerivedFrom("PartDesign::Feature")
+            or obj.isDerivedFrom("Sketcher::SketchObject")
+        ):
+            menu.addSeparator()
+            menu.addAction("Delete feature…", self.delete_feature)
+            menu.addAction("Delete from here…", lambda: self.delete_feature(cascade=True))
         obj = self.object()
         if obj and obj.isDerivedFrom("PartDesign::Feature"):
             menu.addSeparator()
@@ -395,6 +405,51 @@ class FeatureButton(QtWidgets.QToolButton):
         menu.addAction("Toggle visibility", self.toggle_visibility)
         menu.addAction("Rename", self.rename)
         menu_exec(menu, self.mapToGlobal(position))
+
+    def keyPressEvent(self, event):
+        if event.key() in (QtCore.Qt.Key_Delete, QtCore.Qt.Key_Backspace):
+            self.delete_feature()
+            event.accept()
+            return
+        super().keyPressEvent(event)
+
+    def delete_feature(self, cascade=False):
+        obj = self.object()
+        if not obj:
+            return
+        if Gui.Control.activeDialog() or modeling.in_sketch():
+            commands.notify("Finish the active task or sketch before deleting a feature.", True)
+            return
+        try:
+            body, targets, _new_tip = model_history.deletion_plan(obj, cascade)
+        except ValueError as exc:
+            commands.notify(str(exc), True)
+            return
+        what = (
+            "Delete " + str(len(targets)) + " timeline steps from " + obj.Label
+            if cascade else "Delete " + obj.Label
+        )
+        details = "\n".join("  • " + item.Label for item in targets[:10])
+        if len(targets) > 10:
+            details += "\n  … and " + str(len(targets) - 10) + " more"
+        answer = QtWidgets.QMessageBox.warning(
+            self,
+            "Confirm timeline deletion",
+            what + "?\n\n" + details
+            + "\n\nThis changes the native CAD model. You can Undo afterward.",
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            QtWidgets.QMessageBox.No,
+        )
+        if answer != QtWidgets.QMessageBox.Yes:
+            return
+        try:
+            deleted = model_history.delete_feature(obj, cascade=cascade)
+            Gui.Selection.clearSelection()
+            commands.notify("Deleted " + str(len(deleted)) + " step(s). Undo is available.")
+            self.history.signature = None
+            self.history.refresh()
+        except Exception as exc:
+            commands.notify(str(exc), True)
 
     def roll_back(self):
         if Gui.Control.activeDialog():
