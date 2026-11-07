@@ -315,6 +315,13 @@ class Browser(QtWidgets.QWidget):
             from .hole import edit_feature
 
             edit_feature(obj)
+        elif obj.isDerivedFrom("PartDesign::Feature"):
+            # Reuse FreeCAD's native editor for Pad, Pocket, Fillet and other
+            # unwrapped Part Design features instead of only opening Properties.
+            try:
+                Gui.activeDocument().setEdit(obj.Name)
+            except Exception as exc:
+                commands.notify("Cannot edit " + obj.Label + ": " + str(exc), True)
         else:
             self.properties()
 
