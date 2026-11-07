@@ -92,3 +92,13 @@
 - [ ] Fully dependency-aware removal of arbitrary middle features (rewire
       surviving steps with verified support), timeline drag reorder, broader
       native-task dialogs and broken-reference repair.
+
+- [x] 0.3.7 Update Az ribbon/File menu/Utilities command; only successful
+      branch CI builds are eligible; SHA-pinned, per-file Git integrity
+      checks, temp staging, backup-aware install, no-op current version,
+      cancellation/error behavior and offline tests.
+- [ ] First owner Windows FreeCAD 1.1 successful in-app update check/upgrade
+      over HTTPS, including restart/restore verification and UI feedback.
+- [ ] Optional stable release channel and signed manifest/version pinning;
+      avoid deploying private or untested development code by default for
+      anyone outside this owner-focused review workflow.
