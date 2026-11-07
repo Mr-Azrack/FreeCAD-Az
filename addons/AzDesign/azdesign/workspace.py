@@ -386,6 +386,15 @@ class Browser(QtWidgets.QWidget):
             return
         menu = QtWidgets.QMenu(self)
         menu.addAction("Edit / Activate", lambda: self.edit(item))
+        from .quick_dimension import dimension_property
+        if dimension_property(obj):
+            def quick_edit():
+                try:
+                    from .quick_dimension import prompt
+                    prompt(obj, self)
+                except Exception as exc:
+                    commands.notify("Quick Dimension: " + str(exc), True)
+            menu.addAction("Quick Dimension…", quick_edit)
         if obj.isDerivedFrom("PartDesign::Body"):
             menu.addAction(
                 "Set as active Body",
