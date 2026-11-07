@@ -265,9 +265,9 @@ class Session:
         self.history = History()
         self.history_dock.setWidget(self.history)
         self.history_dock.setMinimumHeight(47)
-        self.history_dock.setMaximumHeight(94)
+        self.history_dock.setMaximumHeight(72)
         self.main.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.history_dock)
-        self.main.resizeDocks([self.history_dock], [72], QtCore.Qt.Vertical)
+        self.main.resizeDocks([self.history_dock], [58], QtCore.Qt.Vertical)
         self.sketch_dock = QtWidgets.QDockWidget("Sketch Palette", self.main)
         self.sketch_dock.setObjectName("AzSketchPaletteDock")
         self.sketch_dock.setAllowedAreas(QtCore.Qt.RightDockWidgetArea)
@@ -275,7 +275,9 @@ class Session:
         self.sketch_dock.setTitleBarWidget(QtWidgets.QWidget())
         self.sketch_palette = SketchPalette(self.appearance)
         self.sketch_dock.setWidget(self.sketch_palette)
-        self.sketch_dock.setMinimumWidth(225)
+        self.sketch_dock.setMinimumWidth(215)
+        self.sketch_dock.setMinimumHeight(110)
+        self.sketch_dock.setMaximumHeight(210)
         self.main.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.sketch_dock)
         self.sketch_dock.hide()
         self.navigation = Navigation(self, self.mdi.viewport())
@@ -392,6 +394,10 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
             if editing != self.last_edit:
                 self.ribbon.update_context(bool(sketch))
                 self.last_edit = editing
+                if sketch and self.tasks_dock:
+                    # Wait until the native Tasks dock has entered sketch mode,
+                    # then reserve only a slim top strip for sketch options.
+                    QtCore.QTimer.singleShot(0, self.arrange_sketch_docks)
             self.sketch_dock.setVisible(bool(sketch))
             if sketch:
                 self.sketch_palette.refresh(sketch)
@@ -416,7 +422,7 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
                     self.navigation.set_mode(None)
                     self.last_task = wants_tasks
                 self.tasks_dock.setVisible(wants_tasks)
-                self.tasks_dock.setWindowTitle("Sketch Palette" if sketch else "Tasks")
+                self.tasks_dock.setWindowTitle("Sketch Tasks" if sketch else "Tasks")
                 if wants_tasks:
                     self.style_tasks()
             # Some native commands reveal their old toolbar while editing.
@@ -429,6 +435,19 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
             if problem != self.last_problem:
                 App.Console.PrintError("Az Design refresh:\n" + problem)
                 self.last_problem = problem
+
+    def arrange_sketch_docks(self):
+        """Keep the sketch settings compact and native solver/task view usable."""
+        if not self.active or not modeling.in_sketch() or not self.tasks_dock:
+            return
+        try:
+            self.main.resizeDocks(
+                [self.sketch_dock, self.tasks_dock],
+                [185, max(260, self.main.height() - 350)],
+                QtCore.Qt.Vertical,
+            )
+        except (RuntimeError, ValueError):
+            pass
 
     def style_tasks(self, restore=False):
         if not self.tasks_dock:
