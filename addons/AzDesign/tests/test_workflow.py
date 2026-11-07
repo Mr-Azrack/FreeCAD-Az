@@ -554,11 +554,12 @@ class WorkflowTest(unittest.TestCase):
             history.deletion_plan(hole)
         _body, plan, _tip = history.deletion_plan(hole, cascade=True)
         self.assertEqual([obj.Name for obj in plan], [hole.Name, boss_profile.Name, boss.Name])
+        hole_name, boss_name = hole.Name, boss.Name
         history.delete_feature(hole, cascade=True)
         self.assertEqual(body.Tip, base)
         self.assertAlmostEqual(body.Shape.Volume, 600)
-        self.assertIsNone(self.doc.getObject(hole.Name))
-        self.assertIsNone(self.doc.getObject(boss.Name))
+        self.assertIsNone(self.doc.getObject(hole_name))
+        self.assertIsNone(self.doc.getObject(boss_name))
 
     def test_edit_middle_hole_restores_latest_solid_and_cancel_reverts(self):
         body, source, base = self.base()
