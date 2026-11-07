@@ -373,8 +373,8 @@ class FeatureButton(QtWidgets.QToolButton):
                 edit_feature(obj)
             else:
                 Gui.activeDocument().setEdit(obj.Name)
-        except RuntimeError:
-            commands.notify("Select this feature in the Browser to edit its properties.", True)
+        except Exception as exc:
+            commands.notify("Could not edit " + obj.Label + ": " + str(exc), True)
 
     def mouseDoubleClickEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
