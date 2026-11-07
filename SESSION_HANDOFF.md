@@ -787,3 +787,47 @@ Previously saved legacy features are repaired on a user-initiated **Edit →
 valid preview → OK**, then Save; merely opening old files is nonmutating.
 Actual user Windows 1.1 GUI acceptance is **not yet observed**. Keep PR #1
 draft/unmerged.
+
+
+## 2026-11-07 — Video-driven 0.4.3 Extrude preview fix
+
+An owner-uploaded 7.97-second 1896×908 Windows FreeCAD 1.1 video
+(`20261107-2027-14.5165198.mp4`) showed solid Body
+(Extrude007 → Hole → Extrude018/019) with `Sketch001` two profiles
+flashing between visible/blank. Native Report view showed `Body:
+Tip shape is empty`, old TopoShape hasher mismatch, plus invalid connected
+solid status. No user text was present; interpreted as request to debug
+observed 0.4.2 behavior. Do not infer unseen clicks or claim that every
+geometry/hasher warning is resolved.
+
+Read AGENTS.md and state docs on PR #1 branch
+`codex/az-design-workbench` starting HEAD
+`c4fae7f343758b579c92f66e11d563ef06996e89`.
+Inspected tasks, operations, history, native tests and video frames.
+
+Changes committed to development branch:
+- `azdesign/operations.py`: `discard_preview` restores native initial
+  Body Tip/visibility and removes temporary new Extrude objects.
+- `azdesign/tasks.py`: no automatic multi-profile pick mode; overlay
+  selection does not hide all Body features; timers stop while picking;
+  zero regions cause a prompt but no preview; failed previews call
+  `discard_preview` and leave task open. Existing edit Cancel remains native.
+- `tests/test_workflow.py`: native geometry regression for disjoint
+  Intersect cleanup, previous Body Tip/volume/object inventory, retry
+  and discarded valid preview. An initial test used disconnected Join,
+  which FreeCAD allowed without throwing; corrected to Intersect.
+- `tests/test_extrude_preview_ui.py`: four stubbed UI behavior checks
+  guarding the exact visibility/timer/invalid-preview failure; added to
+  package CI.
+- Version `0.4.3` in `package.xml`, `__init__.py`, `commands.py`
+  and documentation.
+
+CI run `42411545580`: package success; native failed one TEST
+expectation (Join did not throw) not production behavior; new test corrected.
+Run `42411861600`: package succeeded including new UI regressions;
+native pending at last check. Before release check final result, artifact,
+CRC, SHA256, extracted native version, package test reruns; then update
+this handoff with exact evidence and PR #1 metadata. Do not merge.
+Owner is on 0.4.2 with working Update Az. Windows acceptance should verify
+multi-profile selection no longer blanks the block and invalid preview
+returns original Body. Hasher mismatch may be a separate issue.
