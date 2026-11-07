@@ -35,6 +35,19 @@ QWidget#AzHistory QToolButton { background: transparent; border: 1px solid trans
 QWidget#AzHistory QToolButton:hover { border-color: #a2bdcf; background: #dbe6ef; }
 QWidget#AzHistory QToolButton:checked { border: 1px solid #398ddf; background: #cde3f5; }
 QWidget#AzHistory QLabel { color: #70808b; background: transparent; }
+QWidget#AzHistory QSlider::groove:horizontal { height: 5px; border-radius: 2px;
+ background: #c3d2dd; }
+QWidget#AzHistory QSlider::handle:horizontal { background: #367ea7;
+ width: 12px; height: 15px; margin: -5px 0; border-radius: 5px; }
+QWidget#AzHistory QSlider::handle:horizontal:hover { background: #215b80; }
+QWidget#AzHistory QPushButton { border: 1px solid #ccd9e3; border-radius: 4px;
+ background: #f4f7fa; padding: 4px 8px; color: #375368; font-size: 10px; }
+QWidget#AzHistory QPushButton:hover { background: #dbeaf5; border-color: #a9c4d7; }
+QWidget#AzHistory QPushButton:disabled { color: #9faab4; }
+QWidget#AzRibbon QPushButton#AzUpdateButton { border: 1px solid #aac8d5;
+ border-radius: 4px; padding: 6px 9px; color: #235879;
+ background: #e4f0f5; font-weight: 600; }
+QWidget#AzRibbon QPushButton#AzUpdateButton:hover { background: #d2e7f1; }
 """
 
 
@@ -144,7 +157,7 @@ class Ribbon(QtWidgets.QFrame):
         workspace.setObjectName("AzWorkspaceSelector")
         workspace.addItems(["DESIGN", "Manufacture", "Native CAD"])
         workspace.setFixedWidth(118)
-        workspace.setMinimumHeight(96)
+        workspace.setMinimumHeight(90)
         workspace.activated.connect(
             lambda index: (
                 commands.invoke(TOOLS["cam" if index == 1 else "native"].command) if index else None
@@ -162,7 +175,7 @@ class Ribbon(QtWidgets.QFrame):
         content.addWidget(self.tabs)
         self.pages = QtWidgets.QStackedWidget()
         self.pages.setObjectName("AzRibbonPages")
-        self.pages.setFixedHeight(74)
+        self.pages.setFixedHeight(72)
         for groups in (SOLID, SKETCH, UTILITIES):
             self.pages.addWidget(self.make_page(groups))
         self.tabs.currentChanged.connect(self.pages.setCurrentIndex)
@@ -171,7 +184,11 @@ class Ribbon(QtWidgets.QFrame):
         layout.addLayout(tools)
         self.hint = QtWidgets.QLabel()
         self.hint.setObjectName("AzHint")
-        self.hint.hide()
+        self.hint.setText(
+            "Select a face to sketch · E Extrude · Q Press/Pull · "
+            "F Fillet · H Hole · S Find a Tool"
+        )
+        self.hint.show()
         layout.addWidget(self.hint)
 
     def make_page(self, groups):
