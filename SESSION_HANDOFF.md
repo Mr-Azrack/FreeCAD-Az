@@ -668,3 +668,59 @@ leaving workbench. Check (1) drag timeline scrub and restore latest;
 test solid, (6) existing modeled Hole edit. Do not yet claim actual Windows
 acceptance of these integrated controls or an actual 0.3.7→0.4.0 HTTPS upgrade.
 PR #1 remains draft/unmerged.
+
+
+## 2026-11-07 — 0.4.1 owner Windows screenshot: repair nonfunctional oversized Sketch Palette
+
+After installing/testing the consolidated 0.4.0 UI on Windows FreeCAD 1.1,
+owner provided a screenshot showing the custom right palette consumed almost
+the entire available screen height, pushing native Tasks and bottom history
+below the visible area. The custom duplicated Rectangle/Circle/Line/Dimension
+and Finish Sketch from the ribbon; light-on-light labels made some buttons
+unreadable. Several checkboxes tried to write nonexistent Sketcher properties
+(`SnapToGrid`, `ShowConstraints`, `ShowDimensions`, `ShowProfiles`);
+they were visually inert. Owner correctly rejected the result as not
+Fusion-like. We must not present these as completed working controls.
+
+### 0.4.1 fix made on existing draft PR #1 / branch
+
+- **Replaced**, not cosmetically tweaked, `azdesign/sketch_palette.py`.
+  Removed all duplicate ribbon drawing buttons and its duplicate Finish
+  Sketch; native Sketcher Tasks remains the geometry/constraint solver.
+- The compact option-only palette has an explicit themed background,
+  high-contrast labels/checkboxes, 215 px minimum width, 234 px inner
+  maximum height and **210 px QDockWidget maximum height**; its native task
+  dock uses the remaining right-side space. Bottom history dock limited to
+  72 px (initial 58 px). Arrange sketch/native docks on sketch edit entry.
+- Real ViewProviderSketch-backed toggles now only include **Show grid**
+  (synced through Az appearance), **Auto grid spacing** (`GridAuto`),
+  **Auto constraints** (`Autoconstraints`), and **Avoid redundant
+  constraints** (`AvoidRedundant`). In a FreeCAD build supporting an actual
+  checkable `Sketcher_Snap` QAction, **Snap while drawing** toggles that
+  native action and tracks its state. Missing capabilities are hidden, not
+  shown as fake disabled choices. User must test snap *while drawing new
+  geometry*, not against existing lines.
+- `test_sketch_palette.py` has four headless UI-wiring tests: compact
+  control set, concrete provider property mutation, native checked Snap
+  QAction, unsupported option hiding. Registered in CI alongside native
+  modeling and prior installer/updater/Hole tests.
+- Version bumped from 0.4.0 to **0.4.1**. Owner on 0.4.0 can click
+  **Update Az** and restart; no new manual installer needed.
+
+### Evidence and limitations
+
+[CI run 42375950780](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42375950780)
+passed both package and native modeling jobs. Its package job passed all
+four new SketchPalette tests. The
+[AzDesign-installer artifact 13575022990](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42375950780/artifacts/13575022990)
+contains `AzDesign-0.4.1.zip`, 212,070 bytes, SHA256
+`10bb043092f9cabb0a896a4d8e9d9ad8a076279956cdfe9f766e36e0411976e2`.
+Both outer/inner ZIP CRC checks passed, `package.xml` is 0.4.1, and five
+focused extracted tests were rerun successfully in the working container.
+
+**Still pending:** actual owner Windows FreeCAD 1.1 screen-fit/theme
+acceptance of 0.4.1. Mocked Qt wiring and Linux FreeCAD CI cannot certify
+the user's native GUI panel sizing/color behavior or the precise native
+checked Snap action. No custom Show Profiles/Dimensions controls until a
+verified supported native implementation is available. Do not claim full
+Fusion 360 Sketch Palette parity. Keep draft PR #1 unmerged.
