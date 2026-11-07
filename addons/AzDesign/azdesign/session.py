@@ -11,6 +11,7 @@ from .ui import Ribbon, History
 from .workspace import Browser, Navigation, RadialMenu
 from .appearance import Appearance
 from .sketch_palette import SketchPalette
+from .canvas_actions import CanvasActions
 
 _session = None
 
@@ -65,6 +66,7 @@ class InteractionFilter(QtCore.QObject):
         kind = event.type()
         if kind == QtCore.QEvent.Resize and watched == self.session.mdi.viewport():
             self.session.navigation.place()
+            self.session.canvas_actions.place()
         if kind == QtCore.QEvent.ContextMenu and self.is_viewport(watched):
             if not Gui.Control.activeDialog() and not modeling.in_sketch():
                 self.session.radial.popup(event.globalPos())
@@ -258,6 +260,7 @@ class Session:
         self.main.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.sketch_dock)
         self.sketch_dock.hide()
         self.navigation = Navigation(self, self.mdi.viewport())
+        self.canvas_actions = CanvasActions(self, self.mdi.viewport())
         self.radial = RadialMenu(self.main)
         for label, name in (
             ("Python console", "Python console"),
@@ -361,6 +364,7 @@ QStatusBar { background: #e8ecef; color: #657583; font-size: 10px; }
             self.ribbon.documents.refresh()
             self.appearance.update()
             self.navigation.place()
+            self.canvas_actions.refresh()
             for tab in self.mdi.findChildren(QtWidgets.QTabBar):
                 if tab.parentWidget() == self.mdi:
                     if not any(saved == tab for saved, _visible in self.native_tabs):
@@ -425,6 +429,7 @@ QStatusBar { background: #e8ecef; color: #657583; font-size: 10px; }
         self.appearance.deactivate()
         self.style_tasks(restore=True)
         self.navigation.hide()
+        self.canvas_actions.hide()
         self.radial.close()
         QtWidgets.QApplication.instance().removeEventFilter(self.filter)
         # FreeCAD activates the destination C++ toolbars before calling this
@@ -491,6 +496,7 @@ QStatusBar { background: #e8ecef; color: #657583; font-size: 10px; }
         self.browser_dock.deleteLater()
         self.sketch_dock.deleteLater()
         self.navigation.deleteLater()
+        self.canvas_actions.deleteLater()
         self.radial.deleteLater()
         self.filter.deleteLater()
         self.timer.deleteLater()
