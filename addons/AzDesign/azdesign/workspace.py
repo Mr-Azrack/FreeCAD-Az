@@ -185,9 +185,14 @@ class Browser(QtWidgets.QWidget):
     def refresh(self):
         doc = modeling.current_document()
         objects = [o for o in doc.Objects if not getattr(o, "AzPreview", False)] if doc else []
+        active = modeling.active_body() if doc else None
         signature = (
             (doc.Name, doc.Label) if doc else None,
-            tuple((o.Name, o.Label, getattr(getattr(o, "Tip", None), "Name", "")) for o in objects),
+            getattr(active, "Name", None),
+            tuple((
+                o.Name, o.Label, getattr(getattr(o, "Tip", None), "Name", ""),
+                getattr(o, "Suppressed", False),
+            ) for o in objects),
         )
         self.updating = True
         try:
@@ -210,33 +215,69 @@ class Browser(QtWidgets.QWidget):
                         item = self.add(views, label, "Std_ViewIsometric")
                         item.setData(0, QtCore.Qt.UserRole + 1, command)
                     origins = self.add(root, "Origin", "PartDesign_Plane")
-                    bodies = self.add(root, "Bodies", "folder", expanded=True)
-                    sketches = self.add(root, "Sketches", "folder", expanded=True)
+                    bodies = self.add(root, "Bodies & Components", "folder", expanded=True)
+                    loose_sketches = self.add(root, "Unassigned Sketches", "folder")
                     construction = self.add(root, "Construction", "folder")
+                    loose_solids = self.add(root, "Other Geometry", "folder")
+                    body_nodes = {}
+                    for body in objects:
+                        if not body.isDerivedFrom("PartDesign::Body"):
+                            continue
+                        is_active = body == active
+                        name = ("● " if is_active else "") + body.Label
+                        node = self.add(bodies, name, "PartDesign_Body", body, expanded=True)
+                        body_nodes[body.Name] = (
+                            self.add(node, "Features", "folder", expanded=True),
+                            self.add(node, "Sketches", "folder", expanded=True),
+                        )
+                        node.setToolTip(
+                            0, ("Active Body · " if is_active else "Body · ")
+                            + body.Label + " · " + str(len(body.Group)) + " items"
+                        )
+                        node.setExpanded(expanded.get((doc.Name, body.Name), True))
+                    # Native Body.Group order is the modeling history; don't
+                    # invent order from document creation or alphabetical labels.
+                    added = set()
+                    for body in objects:
+                        if not body.isDerivedFrom("PartDesign::Body"):
+                            continue
+                        features_folder, sketch_folder = body_nodes[body.Name]
+                        for member in body.Group:
+                            if member not in objects or member.Name in added:
+                                continue
+                            if member.isDerivedFrom("Sketcher::SketchObject"):
+                                parent, symbol = sketch_folder, "PartDesign_NewSketch"
+                            elif member.isDerivedFrom("PartDesign::Feature"):
+                                parent, symbol = features_folder, "PartDesign_Body"
+                            else:
+                                continue
+                            suffix = " (suppressed)" if getattr(member, "Suppressed", False) else ""
+                            item = self.add(parent, member.Label + suffix, symbol, member)
+                            item.setExpanded(expanded.get((doc.Name, member.Name), False))
+                            added.add(member.Name)
                     for obj in objects:
-                        symbol = None
-                        if obj.isDerivedFrom("PartDesign::Body"):
-                            parent, symbol = bodies, "PartDesign_Body"
-                        elif obj.isDerivedFrom("Sketcher::SketchObject"):
-                            parent, symbol = sketches, "PartDesign_NewSketch"
+                        if obj.Name in added or obj.isDerivedFrom("PartDesign::Body"):
+                            continue
+                        parent, symbol = None, None
+                        if obj.isDerivedFrom("Sketcher::SketchObject"):
+                            parent, symbol = loose_sketches, "PartDesign_NewSketch"
                         elif obj.isDerivedFrom("App::Origin"):
                             parent, symbol = origins, "PartDesign_Plane"
-                        elif (
-                            obj.isDerivedFrom("PartDesign::Plane")
-                            or obj.isDerivedFrom("PartDesign::Line")
-                            or obj.isDerivedFrom("PartDesign::Point")
-                        ):
+                        elif (obj.isDerivedFrom("PartDesign::Plane")
+                              or obj.isDerivedFrom("PartDesign::Line")
+                              or obj.isDerivedFrom("PartDesign::Point")):
                             parent, symbol = construction, "PartDesign_Plane"
                         elif obj.isDerivedFrom("Spreadsheet::Sheet"):
                             parent, symbol = root, "Spreadsheet_CreateSheet"
-                        elif obj.isDerivedFrom("Part::Feature") and not any(
-                            p.isDerivedFrom("PartDesign::Body") for p in obj.InList
-                        ):
-                            parent, symbol = bodies, "PartDesign_Body"
+                        elif (obj.isDerivedFrom("Part::Feature")
+                              and not history.owner_body(obj)):
+                            parent, symbol = loose_solids, "PartDesign_Body"
                         if symbol:
                             item = self.add(parent, obj.Label, symbol, obj)
                             item.setExpanded(expanded.get((doc.Name, obj.Name), False))
-                    construction.setData(0, QtCore.Qt.UserRole + 2, construction.childCount() == 0)
+                    for folder in (construction, loose_sketches, loose_solids):
+                        folder.setData(0, QtCore.Qt.UserRole + 2, folder.childCount() == 0)
+
                 self.signature = signature
                 self.filter(self.search.text())
             selected = {(obj.Document.Name, obj.Name) for obj in Gui.Selection.getSelection()}
@@ -302,27 +343,11 @@ class Browser(QtWidgets.QWidget):
         if Gui.Control.activeDialog():
             commands.notify("Finish or cancel the current operation first.", True)
             return
-        if obj.isDerivedFrom("PartDesign::Body"):
-            Gui.activeDocument().activeView().setActiveObject("pdbody", obj)
-            commands.notify(obj.Label + " is the active body.")
-        elif obj.isDerivedFrom("Sketcher::SketchObject"):
-            modeling.edit_sketch(obj)
-        elif getattr(obj, "AzType", "") == "AzExtrude":
-            from .tasks import edit_feature
-
-            edit_feature(obj)
-        elif obj.isDerivedFrom("PartDesign::Hole"):
-            from .hole import edit_feature
-
-            edit_feature(obj)
-        elif obj.isDerivedFrom("PartDesign::Feature"):
-            # Reuse FreeCAD's native editor for Pad, Pocket, Fillet and other
-            # unwrapped Part Design features instead of only opening Properties.
-            try:
-                Gui.activeDocument().setEdit(obj.Name)
-            except Exception as exc:
-                commands.notify("Cannot edit " + obj.Label + ": " + str(exc), True)
-        else:
+        try:
+            from .feature_edit import edit
+            edit(obj)
+        except Exception as exc:
+            commands.notify("Cannot edit " + obj.Label + ": " + str(exc), True)
             self.properties()
 
     def properties(self):
@@ -361,6 +386,11 @@ class Browser(QtWidgets.QWidget):
             return
         menu = QtWidgets.QMenu(self)
         menu.addAction("Edit / Activate", lambda: self.edit(item))
+        if obj.isDerivedFrom("PartDesign::Body"):
+            menu.addAction(
+                "Set as active Body",
+                lambda: Gui.activeDocument().activeView().setActiveObject("pdbody", obj),
+            )
         menu.addAction("Properties", self.properties)
         menu.addAction("Toggle visibility", lambda: self.click(item, 1))
         menu.addSeparator()
