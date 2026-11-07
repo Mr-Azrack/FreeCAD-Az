@@ -80,3 +80,15 @@
       preview, source switching and unchanged modeled threads.
 - [ ] Continue incremental Fusion-like interaction polish on other daily
       tools, preserving FreeCAD-native geometry, transactions and diagnostics.
+
+- [x] 0.3.6 selected-feature Edit/Delete timeline controls and context actions;
+      guarded native leaf/cascade deletion with Undo and cross-body dependency
+      refusal; earlier Hole edits with downstream validation and safe rollback;
+      native FreeCAD geometry regressions.
+- [ ] Owner Windows FreeCAD 1.1 timeline acceptance: double-click edit Hole
+      before later Pad, edit native Pad/Pocket from timeline/Browser, delete
+      last feature and Undo, confirm blocked single deletion, explicit Delete
+      from here and Undo; report layout/selection problems.
+- [ ] Fully dependency-aware removal of arbitrary middle features (rewire
+      surviving steps with verified support), timeline drag reorder, broader
+      native-task dialogs and broken-reference repair.
