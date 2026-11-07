@@ -587,3 +587,7 @@ acceptance, verify this no-op check, then use it to upgrade a future 0.3.8+
 CI-passing build. The official ZIP under `addons/releases` is still older.
 Keep draft PR #1 unmerged; do not claim an actual Windows network update was
 observed.
+
+## 2026-11-07 — Owner acceptance: 0.3.7 updater bootstrap
+
+Following installation of Az Design 0.3.7, owner reported **"OK THAT WORKED WOOT"** in response to the instruction to run **Update Az** and verify the up-to-date result. Treat this as owner confirmation that the 0.3.7 installation and in-app check flow worked on their Windows FreeCAD machine. It does **not** validate downloading/installing a newer 0.3.8+ build yet; validate the actual upgrade path when a new tested version exists. Continue incremental break/fix workflow, PR #1 stays draft and unmerged.
