@@ -83,6 +83,107 @@ def insert_after(body, base, created):
         body.Group = group
 
 
+
+def deletion_plan(feature, cascade=False):
+    """Return (body, reverse-removal-safe targets, resulting tip).
+
+    One-feature deletion refuses every referenced object; deleting a branch
+    means deleting only explicitly shown downstream steps within one Body.
+    External users (including other bodies) always block the operation.
+    """
+    if feature is None or not (
+        feature.isDerivedFrom("PartDesign::Feature")
+        or feature.isDerivedFrom("Sketcher::SketchObject")
+    ):
+        raise DesignError("Select a sketch or solid feature in the timeline.")
+    body = owner_body(feature)
+    if body is None or feature not in body.Group:
+        raise DesignError("Choose a feature that belongs to a Part Design Body.")
+    group = list(body.Group)
+    position = group.index(feature)
+    if cascade:
+        targets = [
+            member for member in group[position:]
+            if member.isDerivedFrom("PartDesign::Feature")
+            or member.isDerivedFrom("Sketcher::SketchObject")
+        ]
+    else:
+        targets = [feature]
+    names = {item.Name for item in targets}
+    for item in targets:
+        for user in item.InList:
+            if user == body or user.Name in names:
+                continue
+            raise DesignError(
+                "Cannot delete " + item.Label + ": " + user.Label
+                + " still depends on it. Use 'Delete from here' for later "
+                "steps in this Body, or repair external references first."
+            )
+    # All trailing objects not included in the plan must be independent of
+    # the target. If they are not, the reference check above rejects deletion.
+    tip = body.Tip
+    if tip and tip.Name in names:
+        tip = next(
+            (
+                obj for obj in reversed(group[:position])
+                if obj.isDerivedFrom("PartDesign::Feature") and obj.Name not in names
+            ),
+            None,
+        )
+    return body, targets, tip
+
+
+def delete_feature(feature, cascade=False):
+    """Transactionally delete a safe leaf or an explicitly confirmed branch.
+
+    This method does not show UI confirmation: callers must ask the user
+    before passing cascade=True. Undo remains available after commit.
+    """
+    body, targets, tip = deletion_plan(feature, cascade)
+    doc = feature.Document
+    names = {obj.Name for obj in targets}
+    # Existing broken unrelated objects must not prevent removing bad geometry.
+    prior_errors = {
+        o.Name for o in doc.Objects
+        if o.isDerivedFrom("PartDesign::Feature") and (
+            "Invalid" in getattr(o, "State", ())
+            or bool(getattr(o, "Error", ""))
+        )
+    }
+    doc.openTransaction("Az: Delete later steps" if cascade else "Az: Delete feature")
+    try:
+        if body.Tip and body.Tip.Name in names:
+            body.Tip = tip
+        if getattr(body, "AzHistoryEnd", "") in names:
+            body.AzHistoryEnd = ""
+        for obj in reversed(targets):
+            if doc.getObject(obj.Name):
+                doc.removeObject(obj.Name)
+        if tip and doc.getObject(tip.Name) and body.Tip is None:
+            body.Tip = tip
+        doc.recompute()
+        broken = [
+            o.Label for o in doc.Objects
+            if o.isDerivedFrom("PartDesign::Feature")
+            and o.Name not in prior_errors
+            and (
+                "Invalid" in getattr(o, "State", ())
+                or bool(getattr(o, "Error", ""))
+            )
+        ]
+        if broken:
+            raise DesignError(
+                "Deleting this feature would break: " + ", ".join(broken)
+                + ". No changes were kept."
+            )
+        doc.commitTransaction()
+        return [obj.Label for obj in targets]
+    except Exception:
+        doc.abortTransaction()
+        doc.recompute()
+        raise
+
+
 def ordered(doc):
     result = []
     for obj in doc.Objects:
