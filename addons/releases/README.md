@@ -1,5 +1,21 @@
 # Az Design installer packages
 
+## 0.4.1 Sketch Palette screen-fit and native control repair
+
+0.4.0's owner Windows screenshot showed a large duplicate-tools sketch panel,
+unreadable control labels, nonfunctional fake view settings and native Tasks
+pushed below screen height. **0.4.1** replaces it with a compact, maximum
+210 px high Sketch Palette containing only native-backed grid, spacing,
+auto-constraints, redundancy and capability-checked Snap controls. No duplicate
+draw buttons or Finish Sketch button, no unsupported ShowProfiles/Dimensions
+checkboxes. Native Sketcher Tasks now receives the remaining vertical space.
+
+Run the existing **Update Az** command from 0.4.0, accept 0.4.1 after CI
+passes, save documents and completely restart FreeCAD. As always, old versions
+are backed up; user Windows GUI validation follows.
+
+
+
 ## 0.4.0 consolidated design-workflow preview
 
 A single larger UX delivery across timeline navigation/dependencies, sketch
