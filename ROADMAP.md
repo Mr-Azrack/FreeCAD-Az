@@ -210,3 +210,22 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [ ] Owner Windows FreeCAD 1.1 acceptance on 0.4.2 via in-app Update Az;
       create new Extrude from Body-owned sketch, edit/re-save old Extrude,
       confirm both reported errors no longer reproduce.
+
+
+## 0.4.3 Extrude profile selection video regression — Nov 7, 2026
+
+- [x] Review owner Windows eight-second recording and identify blanking
+      Body during implicit pick mode, failed preview leaving empty Tip.
+- [x] Stop auto-entering pick mode on multi-profile sketches; require user
+      check/select region without hiding existing part.
+- [x] Block recompute timers while selecting, and skip geometry evaluation
+      for zero selected sketch regions.
+- [x] Restore original Body Tip/visibility/solid after failed new Extrude
+      and allow same task to continue with a different profile.
+- [x] Native FreeCAD and headless UI regressions added to model/CI workflow.
+- [ ] Verify final 0.4.3 native AND package jobs and release artifact checksum.
+- [ ] Owner Windows 1.1 acceptance: multiple profiles, no selection, invalid
+      Join and change direction/region; existing threaded part always visible
+      when no valid preview exists; no repeated empty-Tip message.
+- [ ] Separately inspect persistent TopoShape hasher mismatch messages if
+      present after invalid preview cleanup; not covered by this fix.
