@@ -514,6 +514,82 @@ class WorkflowTest(unittest.TestCase):
         self.assertEqual(str(restored.DepthType), original_depth_mode)
         self.assertAlmostEqual(restored.Shape.Volume, original_volume, places=5)
 
+    def test_timeline_delete_last_hole_preserves_base_and_undo(self):
+        body, source, base = self.base()
+        centers = sketch(self.doc, [], body=body, z=6)
+        centers.addGeometry(Part.Circle(App.Vector(5, 5, 0), App.Vector(0, 0, 1), 1))
+        self.doc.recompute()
+        operation = HoleOperation(self.doc, centers)
+        operation.preview(HoleSpec(diameter=2, depth=6, through_all=True))
+        hole = operation.accept()
+        name = hole.Name
+        self.assertLess(body.Shape.Volume, base.Shape.Volume)
+        self.assertEqual(history.deletion_plan(hole)[1], [hole])
+        history.delete_feature(hole)
+        self.assertIsNone(self.doc.getObject(name))
+        self.assertEqual(body.Tip, base)
+        self.assertAlmostEqual(body.Shape.Volume, 600)
+        self.doc.undo()
+        self.doc.recompute()
+        self.assertIsNotNone(self.doc.getObject(name))
+        self.assertAlmostEqual(body.Shape.Volume, 600 - 6 * math.pi, places=3)
+
+    def test_timeline_middle_feature_delete_requires_explicit_branch(self):
+        body, source, base = self.base()
+        centers = sketch(self.doc, [], body=body, z=6)
+        centers.addGeometry(Part.Circle(App.Vector(5, 5, 0), App.Vector(0, 0, 1), 1))
+        self.doc.recompute()
+        operation = HoleOperation(self.doc, centers)
+        operation.preview(HoleSpec(diameter=2, depth=6, through_all=True))
+        hole = operation.accept()
+        boss_profile = sketch(self.doc, [], body=body, z=6)
+        boss_profile.addGeometry(Part.Circle(App.Vector(2, 2, 0), App.Vector(0, 0, 1), 1))
+        boss = body.newObject("PartDesign::Pad", "Boss")
+        boss.Profile = boss_profile
+        boss.Length = 2
+        self.doc.recompute()
+        self.assertTrue(boss.Shape.isValid())
+        self.assertEqual(boss.BaseFeature, hole)
+        with self.assertRaisesRegex(features.DesignError, "still depends"):
+            history.deletion_plan(hole)
+        _body, plan, _tip = history.deletion_plan(hole, cascade=True)
+        self.assertEqual([obj.Name for obj in plan], [hole.Name, boss_profile.Name, boss.Name])
+        history.delete_feature(hole, cascade=True)
+        self.assertEqual(body.Tip, base)
+        self.assertAlmostEqual(body.Shape.Volume, 600)
+        self.assertIsNone(self.doc.getObject(hole.Name))
+        self.assertIsNone(self.doc.getObject(boss.Name))
+
+    def test_edit_middle_hole_restores_latest_solid_and_cancel_reverts(self):
+        body, source, base = self.base()
+        centers = sketch(self.doc, [], body=body, z=6)
+        centers.addGeometry(Part.Circle(App.Vector(5, 5, 0), App.Vector(0, 0, 1), 1))
+        self.doc.recompute()
+        operation = HoleOperation(self.doc, centers)
+        operation.preview(HoleSpec(diameter=2, depth=6, through_all=True))
+        hole = operation.accept()
+        boss_profile = sketch(self.doc, [], body=body, z=6)
+        boss_profile.addGeometry(Part.Circle(App.Vector(2, 2, 0), App.Vector(0, 0, 1), 1))
+        boss = body.newObject("PartDesign::Pad", "Boss")
+        boss.Profile = boss_profile
+        boss.Length = 2
+        self.doc.recompute()
+        original = boss.Shape.Volume
+        edit = HoleOperation(self.doc, centers, editing=hole)
+        self.assertEqual(body.Tip, boss)
+        edit.preview(HoleSpec(diameter=3, depth=6, through_all=True))
+        self.assertEqual(body.Tip, hole)
+        edit.accept()
+        self.assertEqual(body.Tip, boss)
+        self.assertTrue(boss.Shape.isValid())
+        self.assertLess(boss.Shape.Volume, original)
+        later_volume = boss.Shape.Volume
+        second = HoleOperation(self.doc, centers, editing=hole)
+        second.preview(HoleSpec(diameter=4, depth=6, through_all=True))
+        second.cancel()
+        self.assertEqual(body.Tip, boss)
+        self.assertAlmostEqual(boss.Shape.Volume, later_volume, places=5)
+
     def test_native_pad_can_follow_an_az_feature(self):
         body, source, base = self.base()
         circle = sketch(self.doc, [], body=body, z=6)
