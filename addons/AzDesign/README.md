@@ -1,4 +1,32 @@
-# Az Design 0.3.6
+# Az Design 0.3.7
+
+## One-click in-app updates — 0.3.7
+
+After installing 0.3.7 **one final time** from the GitHub Actions artifact,
+look for the **Update Az** button on the top ribbon, or use
+**File → Check for Az Design updates…** or **Utilities → Update Az Design**.
+
+The update dialog checks for the **latest successful Az Design pull-request
+CI run on `codex/az-design-workbench`**, not an arbitrary untested GitHub
+branch HEAD. It displays the current and tested versions and requires
+confirmation before downloading. GitHub source files are pinned to the
+successful source commit and checked against their individual Git blob hashes
+before installation. Az stages all files, then uses its existing tested
+backup-aware installer, preserving the previous version under
+`AzDesign-backups` in the FreeCAD user folder. Failed/incomplete downloads
+leave the installation unchanged. A cancelled download does not modify it.
+
+Because the GitHub repository is **public**, this updater needs neither a
+GitHub personal access token nor Git/CLI tools on the Windows computer.
+It uses HTTPS to the public GitHub REST API and raw content service. Network
+access is required. API throttling or network restrictions are reported rather
+than silently installing untested bytes.
+
+**After each in-app update, close ALL FreeCAD windows and fully restart the
+application** to activate the new Python code. Save any open CAD documents
+before restarting. This is manual one-click update, not background auto-update
+or hot-swapping an active workbench. The GitHub branch remains a **draft**
+development source and is not the main-branch official FreeCAD release.
 
 ## Timeline editing and deletion — 0.3.6
 
@@ -79,7 +107,7 @@ Autodesk code and artwork are not included.
 
 ## Install or update
 
-1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.3.6.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
+1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.3.7.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
 3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
