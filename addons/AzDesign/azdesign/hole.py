@@ -2,7 +2,7 @@
 """Az-owned Hole task with stable layout and explicit, safe native previews."""
 
 import FreeCADGui as Gui
-from .qt import QtCore, QtWidgets
+from .qt import QtCore, QtWidgets, standard_button_bits
 from . import modeling, features
 from .hole_spec import HoleSpec, THREAD_TYPES, THREAD_LABELS, thread_sizes
 from .hole_operation import HoleOperation, hole_profile_sketch
@@ -413,7 +413,9 @@ class HoleTask:
         self.message("Original solid displayed; preview not accepted.")
 
     def getStandardButtons(self):
-        return int(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        return standard_button_bits(
+            QtWidgets.QDialogButtonBox.Ok, QtWidgets.QDialogButtonBox.Cancel
+        )
 
     def accept(self):
         self.preview_timer.stop()
