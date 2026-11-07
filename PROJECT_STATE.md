@@ -736,3 +736,32 @@ Early native runs including newly added cross-Body and legacy migration
 tests passed (39 geometry tests in 1.23s on Linux FreeCAD 1.0).
 Check final CI run `42377682997` for BOTH package and native success
 and verify artifact before release. Actual Windows 1.1 acceptance pending.
+
+
+### Verified 0.4.2 corrective release — 2026-11-07
+
+**Both CI jobs passed:** [Az Design run 42377682997](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42377682997),
+package and native modeling successful after the headless Hole Qt stub was
+updated. Native Linux FreeCAD test suite passed 39 geometry cases, including
+cross-Body Global links, source Body frame/placement tracking, migration of
+legacy local Source links inside an explicit Edit, Cancel/Undo reversal, and
+accepted migrated Extrude geometry. Qt5 and Qt6 dialog-button compatibility
+regressions passed in package CI.
+
+**Verified package:** [AzDesign-installer artifact 13576123483](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42377682997/artifacts/13576123483)
+contains `AzDesign-0.4.2.zip` (**216,282 bytes**, SHA256
+`0d2feef7a6a49d8bf94b783939e56f5a16b83f98947905ff8a9037bf12450b96`).
+Outer and inner ZIP CRC passed, exact version in package.xml is 0.4.2,
+the patched `qt.py`, `tasks.py`, `hole.py`, `features.py` and
+`operations.py` and all tests are present; six extracted focused
+Python tests reran and passed in the working container:
+`test_qt_buttons.py`, `test_hole_panel.py`, `test_hole_operation.py`,
+`test_updater.py`, `test_compat.py`, `test_sketch_palette.py`.
+
+**Owner step:** installed 0.4.1 can now press **Update Az**, confirm 0.4.2,
+then fully restart FreeCAD. Test creating/editing Extrude from sketch inside
+another Body and check Report view for the exact two previous errors.
+Previously saved legacy features are repaired on a user-initiated **Edit →
+valid preview → OK**, then Save; merely opening old files is nonmutating.
+Actual user Windows 1.1 GUI acceptance is **not yet observed**. Keep PR #1
+draft/unmerged.
