@@ -116,6 +116,9 @@ class Ribbon(QtWidgets.QFrame):
             )
         self.file_menu.addSeparator()
         self.file_menu.addAction("Native CAD / Properties", lambda: commands.invoke("Az_Native"))
+        self.file_menu.addAction(
+            "Check for Az Design updates…", lambda: commands.invoke("Az_Update")
+        )
         self.advanced_menu = self.file_menu.addMenu("Advanced")
         file_button.setMenu(self.file_menu)
         top.addWidget(file_button)
@@ -126,6 +129,13 @@ class Ribbon(QtWidgets.QFrame):
         top.addWidget(self.documents, 1)
         top.addWidget(tool_button("new", True))
         top.addWidget(tool_button("palette", True))
+        update_button = QtWidgets.QPushButton("Update Az")
+        update_button.setObjectName("AzUpdateButton")
+        update_button.setToolTip(
+            "Check GitHub for the latest tested Az Design build; install with an automatic backup."
+        )
+        update_button.clicked.connect(lambda _checked=False: commands.invoke("Az_Update"))
+        top.addWidget(update_button)
         top.addWidget(tool_button("help", True))
         layout.addLayout(top)
         tools = QtWidgets.QHBoxLayout()
