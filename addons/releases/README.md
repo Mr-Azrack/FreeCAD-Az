@@ -1,5 +1,21 @@
 # Az Design installer packages
 
+## 0.4.0 consolidated design-workflow preview
+
+A single larger UX delivery across timeline navigation/dependencies, sketch
+palette, shared feature edit routing, canvas contextual actions and guarded
+quick dimensions, Body-grouped Browser, and consistent ribbon/task styling.
+Native FreeCAD workbench files/geometry remain authoritative; arbitrary
+history reorder, reference repair, and custom feature-dialog parity are not
+claimed. Review `addons/AzDesign/README.md` for exact actions and limitations.
+
+Owners on **0.3.7** use **Update Az** to fetch a CI-passing 0.4.0 source commit
+directly from the public development branch, with per-file Git integrity checks,
+an automatic dated backup, and required full application restart. A downloaded
+ZIP is still published in CI for recovery, not required for normal upgrades.
+
+
+
 ## 0.3.7 in-app updater bootstrap review build
 
 Install `AzDesign-0.3.7.zip` **one final time**, using the same
