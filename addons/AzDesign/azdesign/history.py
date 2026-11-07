@@ -185,6 +185,46 @@ def delete_feature(feature, cascade=False):
         raise
 
 
+def dependents(feature):
+    """Return downstream actual document objects, never infer from label/order."""
+    if feature is None:
+        return []
+    visited = {feature.Name}
+    pending = [feature]
+    result = []
+    while pending:
+        target = pending.pop(0)
+        for user in getattr(target, "InList", ()):
+            if user.Name in visited:
+                continue
+            visited.add(user.Name)
+            # Body is a container, not itself evidence of a feature edge.
+            if user.isDerivedFrom("PartDesign::Body"):
+                continue
+            result.append(user)
+            pending.append(user)
+    return result
+
+
+def history_position(body):
+    """(features, index, rolled_back) for a native Body Tip."""
+    entries = solids(body)
+    tip = body.Tip
+    index = entries.index(tip) if tip in entries else -1
+    return entries, index, bool(getattr(body, "AzHistoryEnd", ""))
+
+
+def move_history_marker(body, index):
+    """Drag-release timeline scrub; only moves Body Tip, never reorders links."""
+    items, current, rolled = history_position(body)
+    if not items or not 0 <= index < len(items):
+        raise DesignError("Choose a valid solid in the current Body history.")
+    if index == len(items) - 1 and rolled:
+        end(body)
+    elif index != current:
+        rollback(items[index])
+
+
 def ordered(doc):
     result = []
     for obj in doc.Objects:
