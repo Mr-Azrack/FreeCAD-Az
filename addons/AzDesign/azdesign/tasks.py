@@ -219,8 +219,8 @@ class ExtrudeTask:
             self.busy = False
         self.preview()
         self.schedule()
-        if self.region_data and not self.selected_descriptors():
-            self.pick_regions.setChecked(True)
+        # Multiple regions must not automatically enter pick mode: that
+        # previously hid the Body and made the part flash/disappear.
 
     def set_source(self, source):
         for index, link in enumerate(self.source_links):
@@ -373,8 +373,21 @@ class ExtrudeTask:
         self.timer.stop()
         if self.closed:
             return
+        spec = self.spec()
+        source = spec.get("source")
+        if (
+            source and source[0]
+            and source[0].isDerivedFrom("Sketcher::SketchObject")
+            and not spec["regions"] and not spec["whole"]
+        ):
+            self.valid = False
+            self.operation.discard_preview()
+            self.message(
+                "Check a closed profile to preview. The original solid is still visible."
+            )
+            return
         try:
-            outputs = self.operation.update(self.spec())
+            outputs = self.operation.update(spec)
             self.valid = True
             action = self.operation.last_spec["resolved_operation"]
             self.message(
@@ -391,7 +404,17 @@ class ExtrudeTask:
                 self.ensure_manipulator()
         except Exception as exc:
             self.valid = False
-            self.message(str(exc), True)
+            # A failed preview must not leave a transient invalid FeaturePython
+            # as the Body Tip; it produces empty-shape warnings and appears to
+            # erase an otherwise valid model.
+            try:
+                self.operation.discard_preview()
+            except Exception as restore_error:
+                App.Console.PrintWarning(
+                    "Az failed to restore previous Extrude preview: "
+                    + str(restore_error) + "\\n"
+                )
+            self.message(str(exc) + " · Original geometry restored.", True)
 
     def toggle_profile_pick(self, checked):
         if self.closed:
@@ -406,19 +429,23 @@ class ExtrudeTask:
             self.end_pick()
 
     def apply_pick_visibility(self):
+        # Profile selection must be an overlay on the existing part, NOT a
+        # mode that hides every Body. That 0.4.2 behavior made valid solids
+        # disappear whenever multiple profiles were available.
+        self.timer.stop()
         if self.manipulator:
             self.manipulator.hide()
-        for obj in self.doc.Objects:
-            if obj.isDerivedFrom("PartDesign::Body") or (
-                obj.isDerivedFrom("Part::Feature") and not getattr(obj, "AzPreview", False)
-            ):
-                obj.ViewObject.Visibility = False
+        self.operation.discard_preview()
+        self.valid = False
         for name in self.overlay_names:
             obj = self.doc.getObject(name)
             if obj:
                 obj.ViewObject.Visibility = True
 
     def begin_face_pick(self, mode):
+        self.timer.stop()
+        self.operation.discard_preview()
+        self.valid = False
         self.picking = mode
         self.pick_regions.blockSignals(True)
         self.pick_regions.setChecked(False)
