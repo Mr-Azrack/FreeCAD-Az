@@ -79,6 +79,11 @@ class Operation:
         self.original_operations = {o.Name: str(o.Operation) for o in self.editing}
         self.last_spec = None
         features.begin_transaction(self.doc, "Az: Edit Extrude" if self.editing else "Az: Extrude")
+        # Existing 0.4.1 Extrudes used local-only LinkSub for profiles
+        # belonging to other Bodies. Migrate while the editing transaction
+        # is open so Reject/Cancel can roll it back atomically.
+        for obj in self.editing:
+            features.upgrade_extrude_links(obj)
 
     def _restore_tips(self):
         for name, tip_name in self.original_tips.items():
