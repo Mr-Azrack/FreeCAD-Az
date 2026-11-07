@@ -223,7 +223,8 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [x] Restore original Body Tip/visibility/solid after failed new Extrude
       and allow same task to continue with a different profile.
 - [x] Native FreeCAD and headless UI regressions added to model/CI workflow.
-- [ ] Verify final 0.4.3 native AND package jobs and release artifact checksum.
+- [x] Verified native AND package CI 42411861600; artifact 13590115605
+      contains 0.4.3 ZIP (221,092 bytes), CRC and SHA256 verified.
 - [ ] Owner Windows 1.1 acceptance: multiple profiles, no selection, invalid
       Join and change direction/region; existing threaded part always visible
       when no valid preview exists; no repeated empty-Tip message.
