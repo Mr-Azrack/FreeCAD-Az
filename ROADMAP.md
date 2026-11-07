@@ -196,3 +196,16 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [ ] Audit true Fusion-like sketch task layout further based on actual
       Windows 0.4.1 screenshots; avoid duplicating native interface without
       functional benefit.
+
+
+## 0.4.2 Qt6/Extrude cross-Body fixes — November 7, 2026
+
+- [x] Fix PySide6 `StandardButton` `int()` TypeError for Az Extrude and Hole.
+- [x] Declare FreeCAD global-scoped Extrude source/end-face/frame links across Bodies.
+- [x] Repair old link types when editing within FreeCAD transaction, retaining
+      Cancel/Undo and not silently rewriting reopened FCStd files.
+- [x] Add Qt5/Qt6 mask regression and native cross-Body + legacy migration tests.
+- [ ] Exact final combined CI pass and artifact integrity verification.
+- [ ] Owner Windows FreeCAD 1.1 acceptance on 0.4.2 via in-app Update Az;
+      create new Extrude from Body-owned sketch, edit/re-save old Extrude,
+      confirm both reported errors no longer reproduce.
