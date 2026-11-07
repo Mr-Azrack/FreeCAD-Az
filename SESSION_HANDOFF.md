@@ -724,3 +724,37 @@ the user's native GUI panel sizing/color behavior or the precise native
 checked Snap action. No custom Show Profiles/Dimensions controls until a
 verified supported native implementation is available. Do not claim full
 Fusion 360 Sketch Palette parity. Keep draft PR #1 unmerged.
+
+
+## 2026-11-07 — 0.4.2 Windows report-view bugfix handoff
+
+Owner reported: `tasks.py:509 int(QDialogButtonBox.Ok |
+Cancel) TypeError: StandardButton` and FreeCAD native out-of-scope
+link `'Body Sketch' ... 'Extrude'`. Read AGENTS.md, all state docs,
+inspected branch/PR #1 and code. Existing head at start
+`357450ec10824e3edda6fe12acb4362d7add0398` on
+`codex/az-design-workbench`; draft PR remains unmerged.
+
+Committed fixes: new `qt.standard_button_bits`; both `tasks.py` and
+`hole.py` getStandardButtons; `features.py` new cross-Body global
+LinkSubGlobal/LinkGlobal properties; `upgrade_extrude_links` for old
+features under editing transaction in `operations.py`, aborting if
+unexpected type; `test_qt_buttons.py`, updated Hole-panel mock,
+`test_workflow.py` cross-Body/legacy-Undo tests; CI package job
+includes Qt button tests. Version `0.4.2`; README and release notes
+updated. The early package job failed only because `test_hole_panel.py`
+mock Qt module omitted new helper; fixed in commit
+`5c39c87b65a90402f32035c93db18258170d30d4`.
+Earlier native modeling run `42377605469` passed all 39 FreeCAD tests
+including new geometry and legacy migration tests. Final run
+`42377682997` package passed, modeling was running at last check.
+
+Continue: fetch both jobs and 0.4.2 artifact from final run, verify
+inner ZIP/package/CRC/test files, record SHA256/artifact ID here and
+update PR title/body. User has 0.4.1 and installed updater; tell them
+click Update Az only once 0.4.2 CI is confirmed, restart fully,
+then test (1) Extrude dialog opens without Qt TypeError and
+(2) fresh Extrude from sketch inside another Body no link warning.
+For previously saved 0.4.1 Extrudes, open Edit, accept valid preview,
+save the FCStd file; changing link types occurs in native transaction.
+No Windows execution evidence yet. Keep draft PR #1 unmerged.
