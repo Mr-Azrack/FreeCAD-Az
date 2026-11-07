@@ -315,6 +315,37 @@ class WorkflowTest(unittest.TestCase):
         self.doc.recompute()
         self.assertAlmostEqual(body.Shape.Volume, 900)
 
+    def test_history_scrubber_moves_native_tip_and_resumes_latest(self):
+        body, source, base = self.base()
+        second = features.create_extrude(
+            body, (base, [top_face(base)]), base=base
+        )
+        second.Length = 2
+        self.doc.recompute()
+        self.assertEqual(body.Tip, second)
+        entries, index, rolled = history.history_position(body)
+        self.assertEqual(index, len(entries) - 1)
+        self.assertFalse(rolled)
+        history.move_history_marker(body, 0)
+        self.assertEqual(body.Tip, base)
+        self.assertTrue(history.history_position(body)[2])
+        history.move_history_marker(body, len(entries) - 1)
+        self.assertEqual(body.Tip, second)
+        self.assertFalse(history.history_position(body)[2])
+        self.assertAlmostEqual(body.Shape.Volume, 800)
+
+    def test_dependency_inspector_uses_real_freecad_links(self):
+        body, source, base = self.base()
+        next_feature = features.create_extrude(
+            body, (base, [top_face(base)]), base=base
+        )
+        next_feature.Length = 2
+        self.doc.recompute()
+        deps = history.dependents(base)
+        self.assertIn(next_feature, deps)
+        self.assertNotIn(body, deps)
+        self.assertEqual(history.dependents(next_feature), [])
+
     def test_source_body_placement_recomputes_a_separate_body(self):
         body, source, base = self.base()
         body.Placement = App.Placement(
