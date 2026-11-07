@@ -385,6 +385,7 @@ class FeatureButton(QtWidgets.QToolButton):
 
     def context_menu(self, position):
         menu = QtWidgets.QMenu(self)
+        obj = self.object()
         menu.addAction("Edit feature", self.edit)
         menu.addAction("Select in model", self.select)
         if obj and (
@@ -394,7 +395,6 @@ class FeatureButton(QtWidgets.QToolButton):
             menu.addSeparator()
             menu.addAction("Delete feature…", self.delete_feature)
             menu.addAction("Delete from here…", lambda: self.delete_feature(cascade=True))
-        obj = self.object()
         if obj and obj.isDerivedFrom("PartDesign::Feature"):
             menu.addSeparator()
             menu.addAction("Roll back here", self.roll_back)
