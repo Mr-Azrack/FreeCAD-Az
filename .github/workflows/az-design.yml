@@ -57,6 +57,8 @@ jobs:
           python addons/AzDesign/tests/test_hole_panel.py
       - name: Test in-app updater and backups without live GitHub downloads
         run: python addons/AzDesign/tests/test_updater.py
+      - name: Test unified edit routes and canvas selection policy
+        run: python addons/AzDesign/tests/test_interaction.py
       - name: Validate Python and XML, then build installer ZIP
         run: python tools/package_azdesign.py
       - uses: actions/upload-artifact@v4
