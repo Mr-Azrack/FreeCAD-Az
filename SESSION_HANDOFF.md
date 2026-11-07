@@ -471,3 +471,38 @@ validation. It does not execute unsafe modeled-thread helices. Owner Windows
 acceptance is needed for the new grouped Qt task, debounced preview and
 thread-size/source switching. The earlier Windows 0.3.4 modeled-thread
 edit confirmation is still valuable, but should not be treated as a 0.3.5 test.
+
+## 2026-11-07 — 0.3.6 timeline editing/deletion handoff
+
+New user report: bottom roll-back ribbon is not Fusion-like; cannot delete a
+feature and cannot truly modify one. Continued GitHub-first on draft PR #1,
+branch `codex/az-design-workbench`, after reading AGENTS.md and four state
+docs. Starting inspected branch HEAD was
+`a4c1e7ad3baf275ec31cb8d84be4bd82667f3cd1` (0.3.5).
+
+Code updates in small commits:
+- `azdesign/history.py`: `deletion_plan` and transactional
+  `delete_feature`; single deletion dependency refusal and explicit downstream
+  same-Body cascade; snapshot FreeCAD object labels before removal; update
+  Body Tip and AzHistoryEnd; refuse newly broken survivors, Undo available.
+- `azdesign/ui.py`: visible Edit/Delete for selected bottom-strip step,
+  Delete key, context actions with explicit destructive confirmation, helpful
+  user errors and timeline refresh.
+- `azdesign/workspace.py`: native PartDesign Pad/Pocket/Fillet editing now
+  opens native tasks on Browser double-click.
+- `azdesign/hole_operation.py`: older Hole editing with downstream final Tip
+  restoration/recompute and invalid downstream refusal; modeled threads
+  remain explicitly consented and logged.
+- `tests/test_workflow.py`, `tests/test_hole_operation.py` test the new
+  states. An initial native CI run 42341922863 had 31/32 geometry tests pass
+  and one test error only because the test read `hole.Name` after native
+  `doc.removeObject()` invalidated its Python proxy. The real deletion
+  recompute succeeded; corrected test saves names before deletion. After
+  correction, latest complete CI must be verified before release.
+- Version incremented to 0.3.6 with README/install guidance.
+
+Next: inspect exact HEAD, latest successful Az add-on CI and verified artifact;
+run/install 0.3.6 Windows acceptance with leaf deletion/Undo, middle cascade
+confirmation, earlier Hole edit, and native Pad/Pocket edits. Known limits:
+arbitrary middle delete preserving later features, dependency repair and drag
+reorder remain future stages. Do not merge draft PR #1 without owner sign-off.
