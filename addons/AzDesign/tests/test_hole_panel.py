@@ -191,6 +191,9 @@ class HolePanelSmokeTest(unittest.TestCase):
             QPushButton=Widget,
         )
         qt.QtCore = types.SimpleNamespace(QTimer=Timer)
+        # The UI stub must provide the Qt6/Qt5 shared button-mask helper.
+        # Its actual behavior is independently tested in test_qt_buttons.py.
+        qt.standard_button_bits = lambda *_buttons: 0x00400400
         gui = types.ModuleType("FreeCADGui")
         gui.Selection = types.SimpleNamespace(getSelection=lambda: [])
         features = types.ModuleType("azdesign.features")
