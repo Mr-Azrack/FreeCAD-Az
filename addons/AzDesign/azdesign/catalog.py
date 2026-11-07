@@ -123,6 +123,11 @@ TOOLS = {
     "palette": Tool(
         "Find a Tool", "Az_Search", "S · Search the Az Design command palette.", "search"
     ),
+    "update": Tool(
+        "Update Az Design", "Az_Update",
+        "Check for the latest CI-tested build; install with automatic backup. Restart FreeCAD afterward.",
+        "Std_Refresh",
+    ),
     "preferences": Tool("Preferences", "Std_DlgPreferences", "Open FreeCAD preferences."),
     "help": Tool(
         "Quick Guide",
@@ -177,7 +182,7 @@ SKETCH = [
 UTILITIES = [
     ("DESIGN", ["new", "open", "save", "export"]),
     ("WORKFLOW", ["cam", "native"]),
-    ("SETTINGS", ["parameters", "resume", "preferences", "help"]),
+    ("SETTINGS", ["parameters", "resume", "update", "preferences", "help"]),
 ]
 
 SOLID_KEYS = {
