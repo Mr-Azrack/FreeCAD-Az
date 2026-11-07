@@ -533,6 +533,16 @@ class History(QtWidgets.QWidget):
             "QScrollArea, QScrollArea > QWidget > QWidget {background: transparent; border: 0;}"
         )
         layout.addWidget(self.scroll, 1)
+        self.edit_selected_button = QtWidgets.QPushButton("Edit")
+        self.edit_selected_button.setObjectName("AzTimelineEdit")
+        self.edit_selected_button.setToolTip("Edit the selected timeline feature (double-click a feature to edit it).")
+        self.edit_selected_button.clicked.connect(self.edit_selected)
+        layout.addWidget(self.edit_selected_button)
+        self.delete_selected_button = QtWidgets.QPushButton("Delete")
+        self.delete_selected_button.setObjectName("AzTimelineDelete")
+        self.delete_selected_button.setToolTip("Delete the selected feature safely, or use the right-click menu to delete later history.")
+        self.delete_selected_button.clicked.connect(self.delete_selected)
+        layout.addWidget(self.delete_selected_button)
         self.resume = QtWidgets.QPushButton("Resume Latest")
         self.resume.setObjectName("AzResumeHistory")
         self.resume.clicked.connect(lambda *_: commands.invoke("Az_ResumeHistory"))
@@ -551,6 +561,28 @@ class History(QtWidgets.QWidget):
         layout.addWidget(settings)
         self.labels_visible = False
         self.refresh()
+
+    def selected_button(self):
+        selected = {(o.Document.Name, o.Name) for o in Gui.Selection.getSelection()}
+        return next(
+            (button for button in self.buttons
+             if (button.document_name, button.feature_name) in selected),
+            None,
+        )
+
+    def edit_selected(self):
+        button = self.selected_button()
+        if button:
+            button.edit()
+        else:
+            commands.notify("Select a feature in the bottom timeline first.", True)
+
+    def delete_selected(self):
+        button = self.selected_button()
+        if button:
+            button.delete_feature()
+        else:
+            commands.notify("Select a feature in the bottom timeline first.", True)
 
     def show_labels(self, enabled):
         self.labels_visible = enabled
@@ -658,3 +690,6 @@ class History(QtWidgets.QWidget):
         selected = {(o.Document.Name, o.Name) for o in Gui.Selection.getSelection()}
         for button in self.buttons:
             button.setChecked((button.document_name, button.feature_name) in selected)
+        selection_available = self.selected_button() is not None
+        self.edit_selected_button.setEnabled(selection_available)
+        self.delete_selected_button.setEnabled(selection_available)
