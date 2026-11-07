@@ -118,6 +118,62 @@ class WorkflowTest(unittest.TestCase):
         self.doc.recompute()
         self.assertAlmostEqual(result.Shape.Volume, (100 - 4 * math.pi) * 9)
 
+    def test_failed_new_extrude_preview_restores_original_solid_and_recovers(self):
+        """Video regression: bad multi-region Join must not empty Body Tip."""
+        body, source, base = self.base()
+        before_objects = {o.Name for o in self.doc.Objects}
+        # This circle is in the same Body but lies well outside the solid.
+        # Joining its extrusion to the original must fail (two solids).
+        detached = sketch(self.doc, [], body=body, z=6)
+        detached.addGeometry(
+            Part.Circle(App.Vector(50, 50, 0), App.Vector(0, 0, 1), 1)
+        )
+        self.doc.recompute()
+        before_objects = {o.Name for o in self.doc.Objects}
+        region = profiles.regions(detached)[0]
+        op = operations.Operation(self.doc)
+        with self.assertRaises(features.DesignError):
+            op.update({
+                "source": (detached, []),
+                "regions": [region.descriptor()],
+                "operation": "Join",
+                "target": body,
+                "distance": "2 mm",
+            })
+        op.discard_preview()
+        self.assertIs(body.Tip, base)
+        self.assertAlmostEqual(body.Shape.Volume, 600)
+        self.assertEqual({o.Name for o in self.doc.Objects}, before_objects)
+        # A new valid preview can still be made in the same transaction.
+        result = op.update({
+            "source": (base, [top_face(base)]),
+            "operation": "Join",
+            "target": body,
+            "distance": "2 mm",
+        })[0]
+        self.assertAlmostEqual(result.Shape.Volume, 800)
+        op.accept()
+        self.assertIs(body.Tip, result)
+        self.assertAlmostEqual(body.Shape.Volume, 800)
+
+    def test_switching_off_valid_extrude_preview_restores_body_before_cancel(self):
+        body, source, base = self.base()
+        op = operations.Operation(self.doc)
+        obj = op.update({
+            "source": (base, [top_face(base)]),
+            "operation": "Join",
+            "target": body,
+            "distance": "2 mm",
+        })[0]
+        self.assertAlmostEqual(body.Shape.Volume, 800)
+        temporary_name = obj.Name
+        op.discard_preview()
+        self.assertIsNone(self.doc.getObject(temporary_name))
+        self.assertIs(body.Tip, base)
+        self.assertAlmostEqual(body.Shape.Volume, 600)
+        op.cancel()
+        self.assertAlmostEqual(body.Shape.Volume, 600)
+
     def test_join_cut_and_intersect_switch_in_one_preview(self):
         body, source, base = self.base()
         names = [o.Name for o in self.doc.Objects]
