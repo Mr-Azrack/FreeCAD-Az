@@ -25,7 +25,9 @@ def selection_actions(obj, subelements=()):
             return ("fillet", "edit", "isolate")
         if any(str(name).startswith("Face") for name in subelements):
             return ("sketch", "presspull", "edit", "isolate")
-        return ("edit", "isolate")
+        from .quick_dimension import dimension_property
+        return (("edit", "dimension", "isolate") if dimension_property(obj)
+                else ("edit", "isolate"))
     return ()
 
 
@@ -34,6 +36,7 @@ class CanvasActions(QtWidgets.QFrame):
 
     ACTIONS = (
         ("edit", "Edit"),
+        ("dimension", "Dimension"),
         ("activate", "Activate"),
         ("sketch", "Sketch"),
         ("extrude", "Extrude"),
@@ -85,6 +88,9 @@ class CanvasActions(QtWidgets.QFrame):
             if key == "edit" or key == "activate":
                 from .feature_edit import edit
                 edit(obj)
+            elif key == "dimension":
+                from .quick_dimension import prompt
+                prompt(obj, self)
             elif key == "isolate":
                 if obj.Document.Name in self.session.browser.isolated:
                     self.session.browser.restore_visibility()
