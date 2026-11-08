@@ -51,9 +51,20 @@ TOOLS = {
     "sweep": Tool("Sweep", "PartDesign_AdditivePipe", "Sweep a profile along a selected path."),
     "hole": Tool("Hole", "Az_Hole", "H · Native holes with safe previews and cosmetic threads.", "PartDesign_Hole"),
     "fillet": Tool(
-        "Fillet", "PartDesign_Fillet", "F · Select solid edges and set a rounding radius."
+        "Fillet", "Az_Fillet",
+        "F · Validate native Fillet geometry before changing the real Body.",
+        "PartDesign_Fillet",
     ),
-    "chamfer": Tool("Chamfer", "PartDesign_Chamfer", "Bevel selected solid edges."),
+    "chamfer": Tool(
+        "Chamfer", "Az_Chamfer",
+        "Check edge distances against the native kernel before committing a bevel.",
+        "PartDesign_Chamfer",
+    ),
+    "snaps": Tool(
+        "Snap & Centers", "Az_SnapFinder",
+        "Find exact selected-edge endpoints, midpoints and circular centers; copy XYZ or place a fixed Sketch reference.",
+        "Sketcher_CreatePoint",
+    ),
     "shell": Tool("Shell", "PartDesign_Thickness", "Hollow a solid; select the faces to remove."),
     "mirror": Tool("Mirror", "PartDesign_Mirrored", "Mirror selected features across a plane."),
     "pattern": Tool(
@@ -167,10 +178,10 @@ SOLID = [
         ],
     ),
     ("CONSTRUCT", ["plane"]),
-    ("INSPECT", ["measure", "home"]),
+    ("INSPECT", ["measure", "snaps", "home"]),
 ]
 SKETCH = [
-    ("CREATE", ["line", "rectangle", "sizedrect", "circle", ("More", ["centerrect", "arc", "slot"])]),
+    ("CREATE", ["line", "rectangle", "sizedrect", "circle", ("More", ["centerrect", "arc", "slot", "snaps"])]),
     ("MODIFY", ["trim", "offset", "project", "construction"]),
     (
         "CONSTRAIN",
