@@ -211,6 +211,9 @@ def dispatch(key):
         "parameters": parameters.show,
         "resume": history.resume_all,
         "dimension": smart_dimension,
+        "sizedrect": lambda: __import__(
+            "azdesign.sketch_rectangle", fromlist=["prompt_sized_rectangle"]
+        ).prompt_sized_rectangle(),
         "finish": modeling.finish_sketch,
         "body": modeling.new_body,
         "home": home,
@@ -285,6 +288,7 @@ def menu_commands():
             "parameters",
             "resume",
             "dimension",
+            "sizedrect",
             "body",
             "home",
             "palette",
