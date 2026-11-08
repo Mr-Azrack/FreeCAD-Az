@@ -1,0 +1,81 @@
+diff --git a/src/Mod/Sketcher/Gui/SnapManager.h b/src/Mod/Sketcher/Gui/SnapManager.h
+--- a/src/Mod/Sketcher/Gui/SnapManager.h
++++ b/src/Mod/Sketcher/Gui/SnapManager.h
+@@ -97,7 +97,8 @@
+         void updateSnapParameter(const std::string& parametername);
+         void updateSnapToObjectParameter(const std::string& parametername);
+         void updateSnapToGridParameter(const std::string& parametername);
+-        void updateSnapAngleParameter(const std::string& parametername);
++        void updateSnapAngleParameter(const std::string& parametername);
++        void updateAzSnapCircleCenterParameter(const std::string& parametername);
+ 
+         static ParameterGrp::handle getParameterGrpHandle();
+ 
+@@ -140,7 +141,10 @@
+     bool angleSnapRequested;
+     bool snapRequested;
+     bool snapToObjectsRequested;
+-    bool snapToGridRequested;
++    bool snapToGridRequested;
++    // Opt-in in an Az native build: clicking a preselected circle during
++    // a sketch drawing command uses the true geometric center.
++    bool azSnapCircleCenterRequested = false;
+ 
+     Base::Vector2d referencePoint;
+     double lastMouseAngle;
+diff --git a/src/Mod/Sketcher/Gui/SnapManager.cpp b/src/Mod/Sketcher/Gui/SnapManager.cpp
+--- a/src/Mod/Sketcher/Gui/SnapManager.cpp
++++ b/src/Mod/Sketcher/Gui/SnapManager.cpp
+@@ -72,7 +72,10 @@
+         {"Snap", [this](const std::string& param) { updateSnapParameter(param); }},
+         {"SnapToObjects", [this](const std::string& param) { updateSnapToObjectParameter(param); }},
+         {"SnapToGrid", [this](const std::string& param) { updateSnapToGridParameter(param); }},
+-        {"SnapAngle", [this](const std::string& param) { updateSnapAngleParameter(param); }},
++        {"SnapAngle", [this](const std::string& param) { updateSnapAngleParameter(param); }},
++        {"AzSnapCircleCenter", [this](const std::string& param) {
++             updateAzSnapCircleCenterParameter(param);
++         }},
+     };
+ 
+     for (auto& val : str2updatefunction) {
+@@ -112,7 +115,14 @@
+         = fmod(Base::toRadians(hGrp->GetFloat(parametername.c_str(), 5.)), 2 * std::numbers::pi);
+ }
+ 
+-void SnapManager::ParameterObserver::subscribeToParameters()
++void SnapManager::ParameterObserver::updateAzSnapCircleCenterParameter(
++    const std::string& parametername)
++{
++    client.azSnapCircleCenterRequested
++        = getParameterGrpHandle()->GetBool(parametername.c_str(), false);
++}
++
++void SnapManager::ParameterObserver::subscribeToParameters()
+ {
+     try {
+         ParameterGrp::handle hGrp = getParameterGrpHandle();
+@@ -276,8 +286,22 @@
+ 
+             Base::Vector3d pointToOverride(inputPos.x, inputPos.y, 0.);
+ 
+-            double pointParam = 0.0;
+-            auto curve = dynamic_cast<const Part::GeomCurve*>(geo);
++            // Az Design option: while a native Sketcher drawing command is
++            // snapping to a circular curve, use its actual center. Hold Alt
++            // to retain FreeCAD's ordinary closest-point-on-rim behavior.
++            // No Geometry/Document/constraint is modified by the snap.
++            if (azSnapCircleCenterRequested
++                && geo->is<Part::GeomCircle>() && !geo->is<Part::GeomArcOfCircle>()
++                && !(QApplication::keyboardModifiers() & Qt::AltModifier)) {
++                const auto* circle = static_cast<const Part::GeomCircle*>(geo);
++                const Base::Vector3d center = circle->getCenter();
++                snapPos.x = center.x;
++                snapPos.y = center.y;
++                return true;
++            }
++
++            double pointParam = 0.0;
++            auto curve = dynamic_cast<const Part::GeomCurve*>(geo);
+             if (curve) {
+                 try {
+                     curve->closestParameter(pointToOverride, pointParam);
