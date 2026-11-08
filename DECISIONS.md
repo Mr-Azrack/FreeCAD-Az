@@ -312,3 +312,25 @@ downstream shapes and native/Az errors before committing; preserve
 native transaction rollback. Avoid pretending unimplemented arbitrary
 timeline reorder/topological repair and actual Qt6 Windows screen-fit
 are validated by Linux CI.
+
+
+## 2026-11-08 — Native snapping and micro-geometry must be truthful
+
+User confirmed micro-scale CAD model is correct; never silently rescale.
+Fillet/Chamfer errors must be diagnosed by actual OCCT geometry on the
+selected edge, preserving native PartDesign parametric object and Undo,
+not by a size-ratio heuristic. Use native OCC check before modifying Body.
+
+User clarified Fusion workflow: midpoint glyph naturally appears as cursor
+slides over a line and circle center is discoverable from rim, without a
+manual finder. Provide passive automatic markers in the current Az Sketcher
+interface, leave native mouse clicks/AutoConstraints alone, and keep any
+manual XYZ finder as an optional inspection tool only.
+
+True **click anywhere on a circular rim to make the current native drawing
+tool use its center** is not solved by a Qt marker overlay. An opt-in
+FreeCAD **1.1.0 C++ SnapManager** patch is staged; default disabled, Alt
+bypasses to original rim snap. Do not overwrite the user's installed
+`C:\Program Files\FreeCAD 1.1`, declare it complete, or ship it through
+Update Az until a separate Windows native fork is compiled, tested and
+packaged. No Autodesk code/assets are copied.
