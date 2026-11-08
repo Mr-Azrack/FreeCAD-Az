@@ -849,3 +849,62 @@ choosing Pick profiles in view and attempting a nonconnecting Join: the
 original block should remain visible when no valid preview exists.
 `TopoShapeExpansion` hasher mismatch may require a separate follow-up if
 still reported. Keep PR #1 draft and unmerged.
+
+
+## 2026-11-08 — Az Design 0.5.0 substantive fixture workflow milestone
+
+User explicitly approved building **0.5.0** instead of further piecemeal
+cosmetic revisions. Source remains on public `Mr-Azrack/FreeCAD-Az`,
+`codex/az-design-workbench`, draft PR #1; main not changed. The state
+at startup was 0.4.3, source HEAD
+`706fb3117ca846eccef02a285fd27db7755b202d` and both 0.4.3 CI jobs
+already passing. User's Windows 1.1 acceptance of 0.4.3 disappearing-solid
+preview behavior is not confirmed by further user feedback.
+
+Substantive 0.5.0 code changes:
+- `azdesign/sketch_rectangle.py`: new **Sized Rectangle** command for a
+  sketch that is empty and being edited, with width/height input dialog.
+  Creates native Sketcher 4 lines, 11 Coincident/Horiz/Vertical/origin and
+  driving length constraints inside one undoable transaction. Real dimensions
+  change sketch geometry and downstream modeling, not an overlay.
+  Exposed under SKETCH CREATE and command palette via
+  `catalog.py` / `commands.py`.
+- `operations.Operation._preflight_existing_body`: **new**
+  Join/Cut/Intersect runs its prospective profile geometry against the
+  real Body's base shape in FreeCAD's isolated native calculator BEFORE
+  `clear_created` or creating any new FeaturePython object / Body Tip.
+  Invalid/multi-solid cases or no material change refuse with actionable
+  instructions; original document remains intact. Auto/New Body and
+  existing-feature editing retain their separate paths.
+- `Operation.accept`: validates downstream actual solid shapes, native
+  invalid states and explicit feature error strings in the affected Body
+  after an upstream Extrude edit, instead of relying solely on
+  `State == Invalid`; rejects before transaction commit. Native Cancel
+  remains the full rollback for earlier edits.
+- `tests/test_workflow.py`: tests constrained native sized-rectangle
+  geometry and width/height parameter edits, invalid input; tests complete
+  fixture: 60x40x8 plate, 20x16x3 pocket, two through Holes, native Fillet,
+  upstream width change, Hole edit Cancel/Accept/Undo/Redo, native FCStd
+  save/reopen and parameter/body Tip validation. Separate tests assert
+  disconnected Join/Cut preflight leaves document inventory, Tip and volume
+  unchanged, and editing upstream Extrude under native Fillet restores
+  final Tip and supports Cancel. No native modeled-helix auto-test is run.
+- Version/package/readme/release guide now **0.5.0**. Working 0.3.7+
+  `Update Az` command supports the one-step update after successful CI.
+
+Verification: [CI run 42450272583](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42450272583)
+passed BOTH package and native modeling jobs for core 0.5.0 fixtures,
+new sketch dimensions, preflight, and downstream validation. A final
+additional upstream-Extrude-under-Fillet edit/Cancel native regression
+was added after that run; its latest CI run is 42450344286 (package
+passed, native pending at handoff composition). Verify that exact run's
+native result, get installer artifact and SHA256 before telling user to
+update. No real Windows FreeCAD 1.1 GUI test has been performed.
+
+Scope: 0.5.0 is usable fixture workflow progress, not complete
+Fusion 360 parity. Arbitrary feature reorder, universal topological
+reference repair, all-feature custom panels and fully draggable
+in-canvas dimensions remain unsolved. Sized Rectangle is origin-anchored
+and only in empty sketches; normal FreeCAD Rectangle/Dimension commands
+remain for other cases. The owner still needs to install via Update Az,
+restart and verify visual/UI behavior on Windows.
