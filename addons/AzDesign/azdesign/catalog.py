@@ -82,6 +82,11 @@ TOOLS = {
     ),
     "line": Tool("Line", "Sketcher_CreatePolyline", "L · Draw connected sketch lines."),
     "rectangle": Tool("Rectangle", "Sketcher_CreateRectangle", "R · Draw a corner rectangle."),
+    "sizedrect": Tool(
+        "Sized Rectangle", "Az_SizedRectangle",
+        "Enter width and height for a fully constrained, editable rectangle in an empty sketch.",
+        "Sketcher_CreateRectangle",
+    ),
     "centerrect": Tool(
         "Center Rectangle", "Sketcher_CreateRectangle_Center", "Draw a rectangle about its center."
     ),
@@ -165,7 +170,7 @@ SOLID = [
     ("INSPECT", ["measure", "home"]),
 ]
 SKETCH = [
-    ("CREATE", ["line", "rectangle", "circle", ("More", ["centerrect", "arc", "slot"])]),
+    ("CREATE", ["line", "rectangle", "sizedrect", "circle", ("More", ["centerrect", "arc", "slot"])]),
     ("MODIFY", ["trim", "offset", "project", "construction"]),
     (
         "CONSTRAIN",
