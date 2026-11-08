@@ -290,3 +290,25 @@ editing transactions and Cancel as the full rollback mechanism for edits
 of existing features; avoid deleting an edited object. Do not confuse
 geometrically disconnected Join failures or FreeCAD hasher warnings with
 the visibility bug, and do not claim those are all fixed without evidence.
+
+
+## 2026-11-08 — Az 0.5.0 prioritizes safe end-to-end parametric fixture work
+
+User requested 0.5.0 as one substantial upgrade. Define success using a
+native parametric fixture acceptance test rather than feature-count or
+look-and-feel claims: constrained plate sketch, Extrude, pocket, two Hole
+centers, native Fillet, upstream dimension edit, editing Hole/Extrude with
+downstream features present, Cancel/Undo/Redo and FCStd save/reopen.
+Implement a practical Sized Rectangle via the native Sketcher solver
+and two driving dimensions, not a new geometry system; reject insertion
+into nonempty sketches to avoid creating overlapping profile loops.
+
+For new Join/Cut/Intersect, calculate feasibility on FreeCAD's existing
+independent geometry calculator BEFORE adding objects/setting Body Tip
+in the real document. Require non-no-op material change and valid one
+solid; offer context-specific alternatives when a profile is detached
+or doesn't cut. For accepted upstream Az Extrude edits, validate real
+downstream shapes and native/Az errors before committing; preserve
+native transaction rollback. Avoid pretending unimplemented arbitrary
+timeline reorder/topological repair and actual Qt6 Windows screen-fit
+are validated by Linux CI.
