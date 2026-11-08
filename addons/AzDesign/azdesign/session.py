@@ -12,6 +12,7 @@ from .workspace import Browser, Navigation, RadialMenu
 from .appearance import Appearance
 from .sketch_palette import SketchPalette
 from .canvas_actions import CanvasActions, selection_actions
+from .snap_overlay import HoverGuides
 
 _session = None
 
@@ -64,6 +65,10 @@ class InteractionFilter(QtCore.QObject):
         if not self.session.active or self.forwarding:
             return False
         kind = event.type()
+        if kind == QtCore.QEvent.MouseMove and self.is_viewport(watched):
+            self.session.snap_guides.move(watched, event)
+        if kind == QtCore.QEvent.Leave and self.is_viewport(watched):
+            self.session.snap_guides.hide()
         if kind == QtCore.QEvent.Resize and watched == self.session.mdi.viewport():
             self.session.navigation.place()
             self.session.canvas_actions.place()
@@ -282,6 +287,7 @@ class Session:
         self.sketch_dock.hide()
         self.navigation = Navigation(self, self.mdi.viewport())
         self.canvas_actions = CanvasActions(self, self.mdi.viewport())
+        self.snap_guides = HoverGuides()
         self.radial = RadialMenu(self.main)
         for label, name in (
             ("Python console", "Python console"),
@@ -401,6 +407,8 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
             self.sketch_dock.setVisible(bool(sketch))
             if sketch:
                 self.sketch_palette.refresh(sketch)
+            else:
+                self.snap_guides.hide()
             self.history.refresh()
             self.browser.refresh()
             self.ribbon.documents.refresh()
@@ -485,6 +493,7 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
         self.style_tasks(restore=True)
         self.navigation.hide()
         self.canvas_actions.hide()
+        self.snap_guides.release()
         self.radial.close()
         QtWidgets.QApplication.instance().removeEventFilter(self.filter)
         # FreeCAD activates the destination C++ toolbars before calling this
