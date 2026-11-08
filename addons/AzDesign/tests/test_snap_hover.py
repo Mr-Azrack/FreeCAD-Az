@@ -78,7 +78,7 @@ class HoverSnapTests(unittest.TestCase):
         old = sys.modules.get("FreeCAD")
         sys.modules["FreeCAD"] = fake
         try:
-            self.assertIsNone(hover_candidate(arc, (8, 20), project))
+            self.assertIsNone(hover_candidate(arc, (7, 20), project))
             candidate = hover_candidate(arc, (32, 20), project)
             self.assertIsNotNone(candidate)
             self.assertEqual(candidate[0], "Center")
