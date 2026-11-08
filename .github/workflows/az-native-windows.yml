@@ -62,7 +62,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native patch does not apply to FreeCAD 1.1.0' }
           git -C freecad-core apply "$patch"
           if ($LASTEXITCODE -ne 0) { throw 'Native patch application failed' }
-          git -C freecad-core diff --check
+          git -C freecad-core -c core.whitespace=cr-at-eol diff --check
           if ($LASTEXITCODE -ne 0) { throw 'Invalid patch formatting' }
       - name: Install upstream-recommended Pixi tooling
         uses: prefix-dev/setup-pixi@v0.11.3
