@@ -1012,3 +1012,39 @@ has NOT been compiled, Windows tested or installed. It is not in the
 0.5.1 installer. It would provide true circle-rim-click to center when
 an independent native Az application is compiled and preference enabled.
 No stock FreeCAD binaries were modified. Keep PR #1 draft/unmerged.
+
+
+## 2026-11-08 — Standalone native Windows app build underway
+
+Owner said "make it happen" after distinction between the Python workbench
+updater and a separately compiled FreeCAD C++ application. Actual branch:
+`codex/az-design-workbench`, draft PR #1; last confirmed code HEAD
+`20a29e69d073d233de23ac7bca0183cba00cd53a` before continuity
+docs. Read AGENTS.md and four project files at session start.
+
+Created and committed:
+- `.github/workflows/az-native-windows.yml`: GitHub Actions source
+  validator + Windows 2022 FreeCAD 1.1 Pixi Release build and unsigned
+  portable bundle; uploads archive only after real compile success.
+- `native-core/windows/package_portable.py`: package real FreeCAD.exe
+  from pinned Pixi env, native Sketcher and AzDesign Mod, full runtime,
+  independent launcher/profile, manifest/checksum, no overwrite.
+- `native-core/windows/test_package_portable.py`: 4 offline tests
+  passing in local Python and GitHub Linux source validator.
+- Existing C++ `native-core/patches/001-...patch` adjusted for upstream
+  CRLF source; Linux `git apply --check` now succeeded. Windows
+  `git apply --check` and apply succeeded in run 42487882179, then
+  `git diff --check` erroneously failed because Git treats CR at end
+  of original source line as trailing space; changed to
+  `git -c core.whitespace=cr-at-eol diff --check` at commit 20a29e69.
+
+Latest GitHub Actions native run `42488030121` should be inspected.
+Windows C++ build has **not yet been confirmed**. If it fails, inspect
+job steps + logs, apply minimal fix, rerun and update these docs.
+Do not promise unsigned archive until actual successful native build and
+verified artifact ID/SHA. If build takes too long, state honest
+in-progress status and share CI run URL, not fake Windows installer.
+Do not change `native-core/**` or new workflow unnecessarily while
+native job runs; GitHub Actions concurrency cancels in-progress
+previous runs on new native-code workflow runs.
+No changes to installed Windows FreeCAD 1.1 or its user's files.
