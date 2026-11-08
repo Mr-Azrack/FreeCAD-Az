@@ -9,7 +9,7 @@ import FreeCAD as App
 import Part
 import PartDesign
 import Sketcher
-from azdesign import features, profiles, operations, history, presspull, parameters, quick_dimension
+from azdesign import features, profiles, operations, history, presspull, parameters, quick_dimension, sketch_rectangle
 from azdesign.hole_operation import HoleOperation
 from azdesign.hole_spec import HoleSpec, thread_sizes
 
@@ -53,6 +53,146 @@ class WorkflowTest(unittest.TestCase):
         obj.Length = height
         self.doc.recompute()
         return body, source, obj
+
+    def test_sized_rectangle_is_native_parametric_sketch_and_undoable(self):
+        body = self.doc.addObject("PartDesign::Body", "Body")
+        source = sketch(self.doc, [], body=body)
+        indices, width_constraint, height_constraint = (
+            sketch_rectangle.dimensioned_rectangle(source, 60, 40)
+        )
+        self.assertEqual(len(indices), 4)
+        self.assertEqual(source.GeometryCount, 4)
+        self.assertEqual(source.ConstraintCount, 11)
+        self.assertAlmostEqual(profiles.regions(source)[0].face.Area, 2400)
+        source.setDatum(width_constraint, App.Units.Quantity("70 mm"))
+        self.doc.recompute()
+        self.assertAlmostEqual(profiles.regions(source)[0].face.Area, 2800)
+        source.setDatum(height_constraint, App.Units.Quantity("45 mm"))
+        self.doc.recompute()
+        self.assertAlmostEqual(profiles.regions(source)[0].face.Area, 3150)
+
+    def test_sized_rectangle_rejects_overlapping_or_invalid_sizes(self):
+        body = self.doc.addObject("PartDesign::Body", "Body")
+        source = sketch(self.doc, [], body=body)
+        for width, height in ((0, 20), (20, float("nan")), (-1, 10)):
+            with self.assertRaisesRegex(features.DesignError, "between"):
+                sketch_rectangle.dimensioned_rectangle(source, width, height)
+        self.assertEqual(source.GeometryCount, 0)
+        sketch_rectangle.dimensioned_rectangle(source, 20, 12)
+        with self.assertRaisesRegex(features.DesignError, "empty sketch"):
+            sketch_rectangle.dimensioned_rectangle(source, 10, 8)
+
+    def test_fixture_full_history_dimension_edit_hole_fillet_undo_and_save(self):
+        """Release gate: one real machining fixture survives normal CAD edits."""
+        body = self.doc.addObject("PartDesign::Body", "FixtureBody")
+        plate_sketch = sketch(self.doc, [], body=body, name="PlateSketch")
+        _, width_id, height_id = sketch_rectangle.dimensioned_rectangle(
+            plate_sketch, 60, 40
+        )
+        plate = features.create_extrude(
+            body, (plate_sketch, []), whole=True, operation="New body"
+        )
+        plate.Length = 8
+        self.doc.recompute()
+        self.assertAlmostEqual(body.Shape.Volume, 60 * 40 * 8)
+        self.assertTrue(plate.Shape.isValid())
+
+        pocket_sketch = sketch(
+            self.doc, [
+                (20, 12, 40, 12), (40, 12, 40, 28),
+                (40, 28, 20, 28), (20, 28, 20, 12),
+            ],
+            body=body, name="PocketSketch", z=8
+        )
+        pocket_operation = operations.Operation(self.doc)
+        pocket = pocket_operation.update({
+            "source": (pocket_sketch, []),
+            "whole": True,
+            "operation": "Cut",
+            "target": body,
+            "distance": "3 mm",
+        })[0]
+        pocket_operation.accept()
+        self.assertAlmostEqual(pocket.Shape.Volume, 19200 - 20 * 16 * 3)
+        self.assertTrue(pocket.Shape.isValid())
+
+        centers = sketch(self.doc, [], body=body, name="BoltCenters", z=8)
+        for x, y in ((8, 8), (52, 32)):
+            centers.addGeometry(
+                Part.Circle(App.Vector(x, y, 0), App.Vector(0, 0, 1), 1)
+            )
+        self.doc.recompute()
+        create_holes = HoleOperation(self.doc, centers)
+        hole_volume = create_holes.preview(
+            HoleSpec(diameter=3, depth=8, through_all=True)
+        )
+        self.assertLess(hole_volume, pocket.Shape.Volume)
+        holes = create_holes.accept()
+        self.assertTrue(holes.Shape.isValid())
+
+        # Choose a real outer vertical edge at the origin. This preserves the
+        # fillet through plate width edits and avoids hard-coded edge numbers.
+        edge_name = next(
+            "Edge" + str(i + 1)
+            for i, edge in enumerate(holes.Shape.Edges)
+            if abs(edge.BoundBox.XMin) < 1e-6
+            and abs(edge.BoundBox.XMax) < 1e-6
+            and abs(edge.BoundBox.YMin) < 1e-6
+            and abs(edge.BoundBox.YMax) < 1e-6
+            and edge.BoundBox.ZLength > 7.9
+        )
+        fillet = body.newObject("PartDesign::Fillet", "CornerFillet")
+        fillet.Base = (holes, [edge_name])
+        fillet.Radius = 0.65
+        self.doc.recompute()
+        self.assertEqual(body.Tip, fillet)
+        self.assertTrue(fillet.Shape.isValid())
+        original_volume = fillet.Shape.Volume
+
+        plate_sketch.setDatum(width_id, App.Units.Quantity("70 mm"))
+        self.doc.recompute()
+        self.assertAlmostEqual(plate.Shape.Volume, 70 * 40 * 8)
+        self.assertTrue(holes.Shape.isValid())
+        self.assertTrue(fillet.Shape.isValid())
+        self.assertGreater(fillet.Shape.Volume, original_volume + 3000)
+        self.assertEqual(body.Tip, fillet)
+
+        edit = HoleOperation(self.doc, centers, editing=holes)
+        edit.preview(HoleSpec(diameter=4, depth=8, through_all=True))
+        edit.cancel()
+        self.assertEqual(body.Tip, fillet)
+        cancelled_volume = fillet.Shape.Volume
+        edit = HoleOperation(self.doc, centers, editing=holes)
+        edit.preview(HoleSpec(diameter=4, depth=8, through_all=True))
+        edit.accept()
+        self.assertEqual(body.Tip, fillet)
+        self.assertTrue(fillet.Shape.isValid())
+        self.assertLess(fillet.Shape.Volume, cancelled_volume)
+        after_edit = fillet.Shape.Volume
+        self.doc.undo()
+        self.doc.recompute()
+        self.assertAlmostEqual(fillet.Shape.Volume, cancelled_volume, places=4)
+        self.doc.redo()
+        self.doc.recompute()
+        self.assertAlmostEqual(fillet.Shape.Volume, after_edit, places=4)
+
+        with tempfile.TemporaryDirectory() as directory:
+            filename = str(Path(directory) / "AzFixture.FCStd")
+            sketch_name, plate_name = plate_sketch.Name, plate.Name
+            hole_name, fillet_name = holes.Name, fillet.Name
+            self.doc.saveAs(filename)
+            App.closeDocument(self.doc.Name)
+            self.doc = App.openDocument(filename, hidden=True)
+            self.doc.recompute()
+            loaded = self.doc.getObject(fillet_name)
+            self.assertTrue(loaded.Shape.isValid())
+            self.assertAlmostEqual(loaded.Shape.Volume, after_edit, places=4)
+            self.assertEqual(
+                self.doc.getObject(plate_name).Source[0],
+                self.doc.getObject(sketch_name),
+            )
+            self.assertIsNotNone(self.doc.getObject(hole_name))
+            self.assertEqual(self.doc.getObject("FixtureBody").Tip, loaded)
 
     def test_diagonal_and_grid_form_exact_regions(self):
         for lines, expected in (
