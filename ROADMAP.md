@@ -277,3 +277,28 @@ Fusion feature-parity promise; keep explicit scope distinction.
       1.1.0 SnapManager patch; test automatic rim-click redirection with
       Alt bypass and ordinary point-on-rim commands; never replace the
       installed stock FreeCAD version.
+
+
+## Az Native Windows standalone application — 2026-11-08
+
+- [x] Identify official FreeCAD 1.1.0 source/Pixi Windows build workflow
+      and pinned dependencies, use Windows 2022 + VS2022 in CI.
+- [x] Implement independent, opt-in source patch against C++ Sketcher
+      SnapManager, preserving Alt bypass and native geometry.
+- [x] Verify patch applies to upstream FreeCAD 1.1.0 on Linux; correct
+      upstream CRLF handling for Windows source/diff checks.
+- [x] Implement guarded portable packager: compiled GUI, Sketcher, Az
+      workbench, Qt/Python dependencies, license files, integrity
+      manifest and isolated Windows user profile.
+- [x] Add four locally passing packaging safety tests and CI gate.
+- [ ] Windows native C++ compilation and installation must finish
+      successfully; inspect CI `42488030121` and fix any new dependency,
+      compiler or packaging failures.
+- [ ] Verify compiled binary actually launches with Sketcher + AzDesign
+      on Windows; test circle-rim -> center with Alt bypass and existing
+      line/arc snapping on real GUI.
+- [ ] Upload checksum-verified native portable preview, provide download
+      only after verifiable artifact, not merely CI workflow success.
+- [ ] Later: branded executable/UI, Windows application updater and
+      signed installer when tested; do not ship production machine CAM
+      until dedicated safety checks exist.
