@@ -181,7 +181,7 @@ SOLID = [
     ("INSPECT", ["measure", "snaps", "home"]),
 ]
 SKETCH = [
-    ("CREATE", ["line", "rectangle", "sizedrect", "circle", ("More", ["centerrect", "arc", "slot", "snaps"])]),
+    ("CREATE", ["line", "rectangle", "sizedrect", "circle", ("More", ["centerrect", "arc", "slot"])]),
     ("MODIFY", ["trim", "offset", "project", "construction"]),
     (
         "CONSTRAIN",
