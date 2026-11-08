@@ -9,7 +9,7 @@ import FreeCAD as App
 import Part
 import PartDesign
 import Sketcher
-from azdesign import features, profiles, operations, history, presspull, parameters, quick_dimension, sketch_rectangle
+from azdesign import features, profiles, operations, history, presspull, parameters, quick_dimension, sketch_rectangle, edge_treatments, snap_targets
 from azdesign.hole_operation import HoleOperation
 from azdesign.hole_spec import HoleSpec, thread_sizes
 
@@ -53,6 +53,102 @@ class WorkflowTest(unittest.TestCase):
         obj.Length = height
         self.doc.recompute()
         return body, source, obj
+
+    def test_small_scale_fillet_chamfer_validation_and_native_history(self):
+        """Sub-millimetre design: never scale source to make a bevel work."""
+        body = self.doc.addObject("PartDesign::Body", "MicroBody")
+        original = body.newObject("PartDesign::Feature", "MicroBlock")
+        original.Shape = Part.makeBox(1.005, 0.702, 2.0)
+        self.doc.recompute()
+        initial = original.Shape.Volume
+        vertical = next(
+            "Edge" + str(i + 1) for i, edge in enumerate(original.Shape.Edges)
+            if edge.BoundBox.ZLength > 1.999
+        )
+        names, checked = edge_treatments.preflight(
+            original, [vertical], 0.10, "Fillet"
+        )
+        self.assertEqual(names, (vertical,))
+        self.assertTrue(checked.isValid())
+        self.assertAlmostEqual(original.Shape.Volume, initial)
+        self.assertEqual(body.Tip, original)
+        new_feature = edge_treatments.create(
+            original, [vertical], 0.10, "Fillet"
+        )
+        self.assertEqual(new_feature.TypeId, "PartDesign::Fillet")
+        self.assertTrue(new_feature.Shape.isValid())
+        self.assertEqual(body.Tip, new_feature)
+        self.doc.undo()
+        self.doc.recompute()
+        self.assertEqual(body.Tip.Name, original.Name)
+        self.assertAlmostEqual(body.Shape.Volume, initial)
+
+        # Test chamfer separately on original feature (after Undo).
+        original = self.doc.getObject("MicroBlock")
+        name = next(
+            "Edge" + str(i + 1) for i, edge in enumerate(original.Shape.Edges)
+            if edge.BoundBox.ZLength > 1.999
+        )
+        chamfer = edge_treatments.create(
+            original, [name], 0.10, "Chamfer"
+        )
+        self.assertEqual(chamfer.TypeId, "PartDesign::Chamfer")
+        self.assertTrue(chamfer.Shape.isValid())
+        self.assertEqual(body.Tip, chamfer)
+
+    def test_edge_treatment_invalid_is_non_destructive(self):
+        body = self.doc.addObject("PartDesign::Body", "ThinBody")
+        source = body.newObject("PartDesign::Feature", "ThinBlock")
+        source.Shape = Part.makeBox(0.007, 0.702, 2)
+        self.doc.recompute()
+        before = {obj.Name for obj in self.doc.Objects}
+        tip = body.Tip
+        edge = next(
+            "Edge" + str(i + 1) for i, item in enumerate(source.Shape.Edges)
+            if item.BoundBox.ZLength > 1.999
+        )
+        with self.assertRaises(features.DesignError):
+            edge_treatments.preflight(source, [edge], 0.5, "Fillet")
+        with self.assertRaises(features.DesignError):
+            edge_treatments.create(source, [edge], 0.5, "Fillet")
+        self.assertEqual({obj.Name for obj in self.doc.Objects}, before)
+        self.assertEqual(body.Tip, tip)
+        self.assertAlmostEqual(body.Shape.Volume, 0.007 * 0.702 * 2)
+
+    def test_exact_snap_endpoints_midpoint_and_circle_center(self):
+        line = Part.makeLine(App.Vector(1, 2, 0), App.Vector(5, 2, 0))
+        snaps = snap_targets.targets(line, "Edge2")
+        self.assertEqual([snap.name for snap in snaps], [
+            "Start", "End", "Midpoint"
+        ])
+        self.assertAlmostEqual(snaps[2].point.x, 3)
+        self.assertAlmostEqual(snaps[2].point.y, 2)
+        circle = Part.makeCircle(0.5, App.Vector(2, 3, 4))
+        circle_targets = snap_targets.targets(circle, "Edge7")
+        centers = [target for target in circle_targets if target.name == "Center"]
+        self.assertEqual(len(centers), 1)
+        self.assertEqual(centers[0].edge_name, "Edge7")
+        self.assertAlmostEqual(centers[0].point.x, 2)
+        self.assertAlmostEqual(centers[0].point.y, 3)
+        self.assertAlmostEqual(centers[0].point.z, 4)
+
+    def test_center_snap_inserts_fixed_construction_point_and_undoes(self):
+        body = self.doc.addObject("PartDesign::Body", "SnapBody")
+        target = sketch(self.doc, [], body=body)
+        center = snap_targets.SnapTarget(
+            "Center", App.Vector(2.5, 3.25, 5), "Edge4"
+        )
+        initial = target.GeometryCount
+        index = snap_targets.create_sketch_reference(target, center)
+        self.assertEqual(target.GeometryCount, initial + 1)
+        self.assertTrue(target.getConstruction(index))
+        self.assertEqual(target.ConstraintCount, 1)
+        self.assertAlmostEqual(target.Geometry[index].Point.x, 2.5)
+        self.assertAlmostEqual(target.Geometry[index].Point.y, 3.25)
+        self.doc.undo()
+        self.doc.recompute()
+        updated = self.doc.getObject(target.Name)
+        self.assertEqual(updated.GeometryCount, initial)
 
     def test_sized_rectangle_is_native_parametric_sketch_and_undoable(self):
         body = self.doc.addObject("PartDesign::Body", "Body")
