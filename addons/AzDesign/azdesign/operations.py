@@ -434,13 +434,33 @@ class Operation:
                 if previous and previous not in self.editing:
                     history.reveal(body, previous)
         self.doc.recompute()
-        broken = [
-            o.Label
-            for o in self.doc.Objects
-            if o.isDerivedFrom("PartDesign::Feature") and "Invalid" in o.State
-        ]
+        # A feature can have an empty/invalid Shape or an explicit Az Error
+        # before FreeCAD marks its State "Invalid". Validate the actual
+        # affected Body chain (including the final Tip), not unrelated Bodies.
+        broken = []
+        inspected = set()
+        for obj in self.outputs:
+            body = features.owner_body(obj)
+            members = list(body.Group) if body else [obj]
+            start = members.index(obj) if obj in members else 0
+            for item in members[start:]:
+                if item.Name in inspected or not item.isDerivedFrom("PartDesign::Feature"):
+                    continue
+                inspected.add(item.Name)
+                shape = getattr(item, "Shape", None)
+                if (
+                    "Invalid" in getattr(item, "State", ())
+                    or bool(getattr(item, "Error", ""))
+                    or shape is None or shape.isNull() or not shape.isValid()
+                    or len(shape.Solids) != 1
+                ):
+                    broken.append(item.Label)
         if broken:
-            raise DesignError("The edit breaks downstream features: " + ", ".join(broken))
+            raise DesignError(
+                "This Extrude would break downstream solids: "
+                + ", ".join(broken)
+                + ". Cancel to restore the original design or adjust the Extrude."
+            )
         self.doc.commitTransaction()
         self.closed = True
 
