@@ -908,3 +908,34 @@ in-canvas dimensions remain unsolved. Sized Rectangle is origin-anchored
 and only in empty sketches; normal FreeCAD Rectangle/Dimension commands
 remain for other cases. The owner still needs to install via Update Az,
 restart and verify visual/UI behavior on Windows.
+
+
+### Verified Az Design 0.5.0 installer and tests — November 8, 2026
+
+[Az Design CI run 42450344286](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42450344286)
+finished with successful **package** and **native modeling** jobs, including
+the new upstream Az Extrude edit under a native Fillet with final Body Tip
+restoration and Cancel rollback. The earlier core 0.5.0 run 42450272583
+also passed both jobs (complete fixture, sketch dimensions, disconnected
+Join/Cut preflight).
+
+[Installer artifact 13604909908](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42450344286/artifacts/13604909908)
+contains `AzDesign-0.5.0.zip` (**228,250 bytes**, SHA256
+`e1aeaf4966a952fd69a98cfd417111d5d967f26295d4656c91f3d3398b700688`).
+Outer and inner ZIP CRC tests passed; expected files are present:
+`Install_AzDesign.FCMacro`, `package.xml` version 0.5.0,
+`azdesign/sketch_rectangle.py`, `azdesign/operations.py`,
+`azdesign/updater.py`, and `tests/test_workflow.py`.
+Seven dedicated scripts from the extracted distribution passed in local
+Python: `test_install.py`, `test_qt_buttons.py`, `test_updater.py`,
+`test_extrude_preview_ui.py`, `test_hole_operation.py`,
+`test_sketch_palette.py` and `test_interaction.py`.
+
+**Owner action:** on their installed 0.4.x Az Design, choose **Update Az**,
+confirm 0.5.0 after the latest passing CI run, save open documents and FULLY
+restart FreeCAD. Create a *disposable* native fixture with Sized Rectangle,
+Extrude, sketch pocket/cut, Hole, Fillet, edit initial rectangle dimensions,
+Hole editing and Undo. Native Linux FreeCAD 1.0 CI does NOT constitute
+Windows FreeCAD 1.1 GUI acceptance. Keep PR #1 draft/unmerged and inspect
+any new first traceback rather than claiming this fixes every TopoShape
+or historical topology naming issue.
