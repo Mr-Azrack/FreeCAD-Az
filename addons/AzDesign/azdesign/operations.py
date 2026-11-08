@@ -148,6 +148,70 @@ class Operation:
     def _base(self, body):
         return self.original_bases.get(body.Name)
 
+    def _preflight_existing_body(
+        self, source, region_group, spec, operation, target, distance,
+        distance2, reverse, taper, taper2, offset, limit
+    ):
+        """Validate a prospective change BEFORE creating a temporary Body Tip.
+
+        The calculator operates in an independent unsaved document. The
+        existing document/history and its visibility are untouched if the
+        operation is disconnected or produces no material change.
+        """
+        base = self._base(target)
+        if not base:
+            raise DesignError("Select an existing target Body with a solid.")
+        source_signature = (
+            self.editing[0].SourceFaceSignature
+            if self.editing and self.editing[0].Source[0] == source[0]
+            else ""
+        )
+        descriptions = (
+            [region.descriptor() for region in region_group]
+            if region_group is not None else spec.get("regions", ())
+        )
+        shape = features.source_shape(
+            source, target, descriptions, bool(spec.get("whole", False)),
+            source_signature,
+        )
+        base_shape = features.shape_in_body(base, target)
+        face = (
+            features.face_in_body(limit, target)
+            if spec.get("extent", "Distance") == "To face"
+            else None
+        )
+        result = features.native_extrusion(
+            shape,
+            base=base_shape,
+            operation=operation,
+            distance=distance,
+            distance2=distance2,
+            direction=spec.get("direction", "One side"),
+            reversed=reverse,
+            extent=spec.get("extent", "Distance"),
+            to_face=face,
+            taper=taper,
+            taper2=taper2,
+            start=offset,
+        )
+        tolerance = max(profiles.TOL, base_shape.Volume * 1e-9)
+        change = result.Volume - base_shape.Volume
+        if operation == "Join" and change <= tolerance:
+            raise DesignError(
+                "Join adds no material to this Body. Select a profile that "
+                "touches the solid, reverse direction, or choose New body."
+            )
+        if operation == "Cut" and change >= -tolerance:
+            raise DesignError(
+                "Cut removes no material from this Body. Check the profile "
+                "plane and direction or choose a different region."
+            )
+        if operation == "Intersect" and change >= -tolerance:
+            raise DesignError(
+                "Intersect does not change this Body. Check the selected "
+                "profile or use Join/New body."
+            )
+
     def update(self, spec):
         if self.closed:
             raise DesignError("This operation has closed.")
@@ -236,6 +300,15 @@ class Operation:
             raise DesignError(
                 "This edit changes the number of bodies. Create separate Extrude features for the changed regions."
             )
+        if not self.editing and operation in ("Join", "Cut", "Intersect"):
+            # Preflight may be costly, but it prevents invalid temporary
+            # FeaturePython objects from taking over the real Body Tip.
+            for region_group in groups:
+                self._preflight_existing_body(
+                    source, region_group, spec, operation, target,
+                    abs(raw_distance), distance2, reverse, taper, taper2,
+                    offset, limit,
+                )
         self.clear_created()
         for index, region_group in enumerate(groups):
             if self.editing:
