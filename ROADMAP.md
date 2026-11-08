@@ -245,8 +245,8 @@ Fusion feature-parity promise; keep explicit scope distinction.
       FCStd save/reopen and Body Tip/volume verification.
 - [x] Native tests for no-op/disconnected operations with unchanged document.
 - [x] Native upstream Extrude edit with later Fillet plus Cancel regression.
-- [ ] Final CI run 42450344286 full modeling+package result and artifact
-      ZIP/hash verification (core 0.5.0 run 42450272583 already passed both).
+- [x] Final CI run 42450344286 passed both native modeling and package;
+      artifact 13604909908 ZIP/CRC/0.5.0 version and SHA256 verified.
 - [ ] Windows FreeCAD 1.1 0.4.3 → 0.5.0 update using Update Az, full restart
       and owner's GUI modeling acceptance.
 - [ ] Production-level topology change/face-reference repair for arbitrary
