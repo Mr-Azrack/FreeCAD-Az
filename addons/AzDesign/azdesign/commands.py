@@ -208,6 +208,15 @@ def dispatch(key):
         "cut": lambda: tasks.show_extrude(cut=True),
         "presspull": presspull.start,
         "hole": hole.show_hole,
+        "fillet": lambda: __import__(
+            "azdesign.edge_treatments_ui", fromlist=["show"]
+        ).show("Fillet"),
+        "chamfer": lambda: __import__(
+            "azdesign.edge_treatments_ui", fromlist=["show"]
+        ).show("Chamfer"),
+        "snaps": lambda: __import__(
+            "azdesign.snap_finder_ui", fromlist=["show"]
+        ).show(),
         "parameters": parameters.show,
         "resume": history.resume_all,
         "dimension": smart_dimension,
@@ -285,6 +294,9 @@ def menu_commands():
             "cut",
             "presspull",
             "hole",
+            "fillet",
+            "chamfer",
+            "snaps",
             "parameters",
             "resume",
             "dimension",
