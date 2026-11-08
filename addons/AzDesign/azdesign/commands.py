@@ -173,7 +173,7 @@ def update_az_design():
 def help_dialog():
     text = """<h2>Az Design · Quick start</h2>
     <p><b>1.</b> Create Sketch → choose XY, XZ, YZ or a flat face.<br>
-    <b>2.</b> Draw and dimension a closed profile.<br>
+    <b>2.</b> Draw or choose Sized Rectangle (exact native width/height), then finish the sketch.<br>
     <b>3.</b> Finish Sketch → Extrude → distance → OK.</p>
     <p>Select a solid face and create another sketch to make a Cut.</p>
     <p><b>Solid shortcuts:</b> E Extrude · Q Press/Pull · F Fillet · H Hole · M Move · S Find a Tool.<br>
@@ -194,7 +194,7 @@ def help_dialog():
     FreeCAD's task dialogs. The Tasks panel is on the right.</p>
     <p><b>Return:</b> Utilities → Native CAD restores your previous layout.
     This is an independent interface, not an Autodesk product.</p>"""
-    QtWidgets.QMessageBox.information(Gui.getMainWindow(), "Az Design 0.4.3", text)
+    QtWidgets.QMessageBox.information(Gui.getMainWindow(), "Az Design 0.5.0", text)
 
 
 def dispatch(key):
