@@ -296,8 +296,8 @@ def start():
             return tasks.show_extrude((obj, []))
         for name in selection.SubElementNames:
             if name.startswith("Edge"):
-                Gui.runCommand("PartDesign_Fillet", 0)
-                return None
+                from .edge_treatments_ui import show
+                return show("Fillet")
             if name.startswith("Face"):
                 if obj.isDerivedFrom("PartDesign::Body"):
                     obj = features.body_tip(obj)
