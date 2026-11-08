@@ -68,7 +68,7 @@ class InteractionPoliciesTest(unittest.TestCase):
         )
         self.assertEqual(
             self.context.selection_actions(solid, ["Edge2"]),
-            ("fillet", "edit", "isolate"),
+            ("fillet", "chamfer", "snaps", "edit", "isolate"),
         )
         self.assertEqual(
             self.context.selection_actions(obj("PartDesign::Body")),
