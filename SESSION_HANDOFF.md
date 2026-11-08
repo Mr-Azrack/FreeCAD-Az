@@ -937,3 +937,49 @@ Hole editing and Undo. Native Linux FreeCAD 1.0 CI does NOT constitute
 Windows FreeCAD 1.1 GUI acceptance. Keep PR #1 draft/unmerged and inspect
 any new first traceback rather than claiming this fixes every TopoShape
 or historical topology naming issue.
+
+
+## 2026-11-08 — Automatic Fusion-style snapping correction + core path
+
+During 0.5.1 work owner clarified intended snap/center interaction is
+**automatic on cursor** (midpoint triangle when sliding on an edge;
+clicking a circular rim should directly target its center), rather than
+a pop-up lookup tool.
+
+Read repo AGENTS.md plus continuity docs and inspected actual
+`codex/az-design-workbench` branch, existing PR #1. Implemented:
+`edge_treatments.py`, `edge_treatments_ui.py`,
+`snap_targets.py`, `snap_finder_ui.py`,
+`snap_hover.py`, `snap_overlay.py`; integrated in
+`catalog.py`, `commands.py`, `canvas_actions.py`,
+`presspull.py`, `session.py`. New native
+`tests/test_workflow.py` cases for tiny valid/invalid Fillet/Chamfer
+and exact targets; `tests/test_snap_hover.py` pure inference;
+`tests/test_snap_overlay.py` fake-GUI marker placement; registered in CI.
+Updated test_interaction expected actions. Version files and README 0.5.1.
+
+Initial CI `42453411665` failed only in new test assertions:
+a headless edge-actions tuple and a Part.Point.X/Y attribute mismatch;
+corrected. Source CI `42453824245` passed package and 51 native
+modeling tests; `42454020125` both package and modeling passed after
+version bump. Latest `42454414615` package passed, native still
+running when this handoff was written.
+
+Core assessment: inspected official FreeCAD/FreeCAD 1.1.0
+`src/Mod/Sketcher/Gui/SnapManager.cpp/.h`. The native Sketcher
+SnapManager receives the actual snapped XY before `DrawSketchHandler`;
+core intervention is necessary for **rim-click to center** without
+synthetic Qt events. Created opt-in source diff under
+`native-core/patches/001-freecad-1.1.0-sketcher-circle-center.patch`
+and `native-core/README.md`. Five hunks were reconstructed and
+checked against exact FreeCAD 1.1.0 upstream file contents, matching
+all old lines, hunk counts and patch output. This is source-level
+review only, **NOT a compiled Windows FreeCAD build**. The stock
+FreeCAD 1.1 addon Update Az cannot activate the core feature.
+
+Next: verify final 0.5.1 CI both jobs, artifact ID, ZIP integrity,
+SHA256 and extracted Python tests; update state, handoff, PR #1 as DRAFT
+and send user Update Az instructions. Explain 0.5.1 auto hover cues
+vs future native compiled full rim-click, no false parity claims.
+Native core patch needs separate branch/build/test/installer track
+and should not disrupt the current installed FreeCAD 1.1.
