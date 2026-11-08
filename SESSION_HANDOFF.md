@@ -983,3 +983,32 @@ and send user Update Az instructions. Explain 0.5.1 auto hover cues
 vs future native compiled full rim-click, no false parity claims.
 Native core patch needs separate branch/build/test/installer track
 and should not disrupt the current installed FreeCAD 1.1.
+
+
+### Verified 0.5.1 packaged workbench and native-modeling CI — November 8, 2026
+
+[Az Design CI run 42454414615](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42454414615)
+passed BOTH **package** and **native FreeCAD modeling** jobs after adding
+automatic Sketcher hover overlay regression tests.
+[Artifact 13606378238](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42454414615/artifacts/13606378238)
+contains `AzDesign-0.5.1.zip`, **246,212 bytes**, SHA256
+`ba8c95c115750c0671fc732aeea0f0e76372f84c7f3f73188b6939ff95b3c7bd`.
+Both outer/inner ZIP CRC passed, `package.xml` version is 0.5.1,
+149 package items, and seven scripts rerun directly from the extracted
+package all passed: `test_snap_hover.py`, `test_snap_overlay.py`,
+`test_interaction.py`, `test_sketch_palette.py`,
+`test_updater.py`, `test_qt_buttons.py`, `test_hole_panel.py`.
+
+**Owner install:** click **Update Az**, choose CI-tested 0.5.1, then fully
+restart FreeCAD. Observe while editing a sketch: hover a line midpoint
+for triangle, circle/arc edge for center marker, no separate tool needed.
+Fillet/Chamfer through Az now use isolated native kernel preflight and
+transactional PartDesign features. **Windows UI rendering and actual
+native click semantics remain unverified on user's machine.**
+
+**Native-core scope:** the additional 1.1.0 `SnapManager` patch has
+verified source hunk location/counts against upstream FreeCAD 1.1.0, but
+has NOT been compiled, Windows tested or installed. It is not in the
+0.5.1 installer. It would provide true circle-rim-click to center when
+an independent native Az application is compiled and preference enabled.
+No stock FreeCAD binaries were modified. Keep PR #1 draft/unmerged.
