@@ -1020,3 +1020,44 @@ has NOT been compiled, Windows tested or installed. It is not in the
 0.5.1 installer. It would provide true circle-rim-click to center when
 an independent native Az application is compiled and preference enabled.
 No stock FreeCAD binaries were modified. Keep PR #1 draft/unmerged.
+
+
+## 2026-11-08 — First independent native Windows application pipeline
+
+Owner explicitly approved transitioning from the Python-only workbench into
+a separately compiled Windows FreeCAD-derived Az Design application.
+Existing `codex/az-design-workbench` branch and draft PR #1 remain open
+and unmerged; current installed FreeCAD 1.1 is untouched.
+
+Added `.github/workflows/az-native-windows.yml`: on native-core changes,
+first checks the C++ Sketcher source patch against the exact upstream
+`FreeCAD/FreeCAD` **tag 1.1.0**, then checks out a separate full copy
+on `windows-2022`, applies native patch, uses upstream pinned Pixi
+`configure-release` / `build-release` / `install-release`, packages a
+side-by-side independent portable preview, tests 7z integrity and uploads
+the actual compiled application only if the entire build succeeds.
+Package is explicitly UNSIGNED EXPERIMENTAL and not a production machine
+postprocessor. The native workbench updater is separate and unchanged.
+
+Added `native-core/windows/package_portable.py`: FreeCAD/Sketcher
+compiled binaries plus upstream bundled runtime dependencies, user AzDesign
+workbench under `Mod/AzDesign`, portable `Az Design.cmd` launcher with
+separate profile under `%LOCALAPPDATA%\AzDesign\Native-1.1`, manifest
+with actual compiled exe and source patch SHA256, FreeCAD license files,
+version/purpose notices. It rejects nonexistent compiled binary or Sketcher,
+missing Az workbench, or existing output destination before modifying it.
+Added `native-core/windows/test_package_portable.py` with four passing
+offline safety tests (no dependencies on FreeCAD or Windows).
+
+First native CI `42487740195`: packaging safety tests passed; strict
+`git apply --check` failed because upstream SnapManager.cpp is CRLF.
+Adjusted C++ diff to match upstream CRLF, native CI `42487882179`:
+Linux source patch verified; on Windows native patch applied but generic
+`git diff --check` flagged upstream CRLF as trailing whitespace.
+Commit `20a29e69d073d233de23ac7bca0183cba00cd53a` changes the
+Windows diff validation to `git -c core.whitespace=cr-at-eol diff --check`,
+as appropriate for existing Windows-style upstream C++ source.
+Latest native CI run `42488030121` was queued/in-progress when this
+handoff was recorded. **There is no confirmed compiled binary or
+downloadable native archive yet.** Examine final CI jobs/artifact
+before announcing any complete native application.
