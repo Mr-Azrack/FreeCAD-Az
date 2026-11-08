@@ -267,8 +267,9 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [x] Pin and stage FreeCAD 1.1.0 C++ `SnapManager` patch allowing
       rim-to-center click in native Sketcher when opted in; Alt bypass.
       Patch hunks matched 1.1.0 source but **not compiled**.
-- [ ] Both jobs from final 0.5.1 CI `42454414615`, verified installer
-      archive SHA256 and complete delivery through Update Az.
+- [x] Both jobs in CI 42454414615 passed; artifact 13606378238
+      contains AzDesign-0.5.1.zip (246,212 bytes), CRC and SHA256
+      verified. Owner installation and Windows acceptance remain pending.
 - [ ] Owner Windows FreeCAD 1.1 GUI confirmation that hover markers render
       at the correct coordinates, native snap/constraints are usable, and
       the small-geometry Fillet/Chamfer dialog behaves.
