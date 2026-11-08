@@ -861,3 +861,48 @@ choosing Pick profiles in view and attempting a nonconnecting Join: the
 original block should remain visible when no valid preview exists.
 `TopoShapeExpansion` hasher mismatch may require a separate follow-up if
 still reported. Keep PR #1 draft and unmerged.
+
+
+## 2026-11-08 — Az Design 0.5.0 fixture acceptance handoff
+
+Owner authorized building 0.5.0 and requested execution rather than small
+steps. Recovered actual development branch
+`codex/az-design-workbench` at `706fb3117ca846eccef02a285fd27db7755b202d`
+(0.4.3); draft PR #1; read AGENTS.md, all four continuity docs and actual
+features, commands, tasks, Hole and history modules. Changes committed in
+multiple small commits; no main merge.
+
+Implementation:
+1. `azdesign/operations.py` `_preflight_existing_body` and call before
+   creating new Join/Cut/Intersect; refuse disconnected/non-cutting
+   operations without inserting temporary real features.
+2. `azdesign/sketch_rectangle.py` native constrained origin rectangle
+   with editable dimensional width/height and Qt dialog.
+3. `catalog.py` SKETCH CREATE button/command and `commands.py` dispatch.
+4. `operations.accept` checks actual shapes and errors of affected
+   downstream features after upstream edits.
+5. `test_workflow.py`: native solver/editable constraints and complete
+   fixture plate/pocket/holes/fillet/width change/Hole edits/Undo/Redo/
+   FCStd save-reopen test; disjoint Join/Cut refusal before any doc
+   mutation; upstream Az Extrude edit with later Fillet+Cancel regression.
+6. `package.xml` and `__init__.py` 0.5.0; README and release notes.
+
+CI run 42450272583 passed BOTH package and native modeling with
+full fixture and no-op preflight tests. Subsequently added upstream
+Extrude/Fillet edit regression, source commit
+`8738fe99a17c9a16b4fd55dd880ac30fc2b2abcc`. Latest run
+42450344286 had passed package, native still in-progress at writing;
+CHECK IT BEFORE PUBLICATION.
+
+Once both jobs pass:
+- get AzDesign-installer artifact from 42450344286; download, extract
+  AzDesign-0.5.0.zip, check outer/inner CRC, version, presence of new
+  `azdesign/sketch_rectangle.py`, installer/updater and tests, run selected
+  offline tests from packaged ZIP, compute inner ZIP SHA256/size.
+- record evidence in state/handoff and update PR #1 metadata. PR must remain
+  DRAFT, unmerged.
+- user currently has Update Az from prior 0.4.x installs; instruct
+  Update Az → 0.5.0 → fully restart FreeCAD. Owner Windows 1.1 screen
+  acceptance and real first part remain necessary.
+- don't claim complete Fusion parity or that the patch has fixed all
+  previous TopoShape hasher warnings; those may be separate.
