@@ -1,5 +1,27 @@
 # Az Design installer packages
 
+## 0.5.0 parametric machining fixture and native workflow reliability
+
+This release closes a large functional gap between Az's visual shell
+and daily modeling: **Sized Rectangle** creates native dimension-driven
+Sketcher geometry; new Join/Cut/Intersect options are preflighted against
+existing Body geometry before changing the real feature history; and
+accepting an edited upstream Extrude validates actual downstream solids
+rather than only checking FreeCAD's Invalid flag.
+
+The native release-gate test creates a full 60×40×8 mm fixture, subtracts
+a pocket, makes two holes and a Fillet, changes source sketch width,
+edits a Hole and verifies Cancel/Undo/Redo plus native FCStd save/reopen.
+This does not prove actual Windows FreeCAD 1.1 UI behavior, modeled-helix
+safety, or complete Fusion 360 feature parity.
+
+Owners with 0.4.3 installed use **Update Az**, confirm the CI-tested
+0.5.0 version and fully restart FreeCAD. The updater backs up the old
+workbench automatically, and an installer ZIP is available via CI only
+for recovery.
+
+
+
 ## 0.4.3 Extrude visibility and invalid-profile preview correction
 
 A user Windows FreeCAD 1.1 screen recording revealed an Extrude task
