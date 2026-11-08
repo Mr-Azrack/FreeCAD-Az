@@ -258,6 +258,54 @@ class WorkflowTest(unittest.TestCase):
         self.doc.recompute()
         self.assertAlmostEqual(result.Shape.Volume, (100 - 4 * math.pi) * 9)
 
+    def test_disconnected_join_is_refused_before_creating_a_temporary_tip(self):
+        body, source, base = self.base()
+        detached = sketch(self.doc, [], body=body, name="Disconnected", z=6)
+        detached.addGeometry(
+            Part.Circle(App.Vector(50, 50, 0), App.Vector(0, 0, 1), 1)
+        )
+        self.doc.recompute()
+        region = profiles.regions(detached)[0]
+        names_before = {o.Name for o in self.doc.Objects}
+        tip_before = body.Tip
+        op = operations.Operation(self.doc)
+        with self.assertRaisesRegex(features.DesignError, "Join adds no material"):
+            op.update({
+                "source": (detached, []),
+                "regions": [region.descriptor()],
+                "operation": "Join",
+                "target": body,
+                "distance": "3 mm",
+            })
+        # The preflight calculator may run, but the real FreeCAD document
+        # must never receive a temporary FeaturePython result.
+        self.assertEqual(names_before, {o.Name for o in self.doc.Objects})
+        self.assertEqual(body.Tip, tip_before)
+        self.assertAlmostEqual(body.Shape.Volume, 600)
+        op.cancel()
+
+    def test_disconnected_cut_does_not_mutate_existing_body(self):
+        body, source, base = self.base()
+        detached = sketch(self.doc, [], body=body, name="NoIntersection", z=6)
+        detached.addGeometry(
+            Part.Circle(App.Vector(40, 40, 0), App.Vector(0, 0, 1), 1)
+        )
+        self.doc.recompute()
+        before = {o.Name for o in self.doc.Objects}
+        op = operations.Operation(self.doc)
+        with self.assertRaises(features.DesignError):
+            op.update({
+                "source": (detached, []),
+                "regions": [profiles.regions(detached)[0].descriptor()],
+                "operation": "Cut",
+                "target": body,
+                "distance": "2 mm",
+            })
+        self.assertEqual(before, {o.Name for o in self.doc.Objects})
+        self.assertIs(body.Tip, base)
+        self.assertAlmostEqual(body.Shape.Volume, 600)
+        op.cancel()
+
     def test_failed_new_extrude_preview_restores_original_solid_and_recovers(self):
         """Video regression: bad multi-region Join must not empty Body Tip."""
         body, source, base = self.base()
