@@ -334,3 +334,23 @@ bypasses to original rim snap. Do not overwrite the user's installed
 `C:\Program Files\FreeCAD 1.1`, declare it complete, or ship it through
 Update Az until a separate Windows native fork is compiled, tested and
 packaged. No Autodesk code/assets are copied.
+
+
+## 2026-11-08 — Isolated native Windows application build
+
+Use FreeCAD **1.1.0** source and its pinned **Pixi** toolchain on a separate
+`windows-2022` GitHub Actions runner with Visual Studio 2022, rather than
+overwriting `C:\Program Files\FreeCAD 1.1` or inventing a new geometry kernel.
+Compile C++ `SketcherGui` with reviewed `SnapManager` center-click patch
+and retain the existing Python Az workbench. Prefer an unsigned isolated
+PORTABLE developer preview before attempting signed MSI/auto-updating app.
+Follow upstream FreeCAD/FreeCAD-Bundle's conda Windows runtime directory
+layout to package dependent Qt/Python/OCCT DLLs and modules. Native launcher
+uses independent `%LOCALAPPDATA%\AzDesign\Native-1.1` profile and
+`--user-cfg/--system-cfg`, never changes existing user FreeCAD data.
+Do not distribute if compiled FreeCAD.exe, Sketcher or AzDesign is absent;
+manifest includes SHA256 and exact source/patch provenance.
+Native C++ snap remains preference-gated in first experimental preview;
+do not claim a Python workbench update installs C++ binaries.
+GitHub Actions source diff requires special `core.whitespace=cr-at-eol`
+validation because FreeCAD 1.1 SnapManager.cpp is upstream CRLF.
