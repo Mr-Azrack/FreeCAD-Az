@@ -939,3 +939,55 @@ Hole editing and Undo. Native Linux FreeCAD 1.0 CI does NOT constitute
 Windows FreeCAD 1.1 GUI acceptance. Keep PR #1 draft/unmerged and inspect
 any new first traceback rather than claiming this fixes every TopoShape
 or historical topology naming issue.
+
+
+## 2026-11-08 — 0.5.1 exact edge treatments + sketch snap inference
+
+User's `Design.FCStd` had intentionally micro-scale solid geometry; user
+explicitly confirmed dimensions must not be rescaled. Report view showed
+native Chamfer/Fillet failures, but the saved Fillet may be valid; do not
+generalize to all native operations. During work user specified Fusion-like
+**automatic** cursor inference: midpoint triangle upon hovering along an
+edge and circle center shown immediately upon hovering/clicking its rim,
+NOT a standalone manual lookup tool.
+
+Changes on existing `codex/az-design-workbench`, draft PR #1:
+- `edge_treatments.py` + `edge_treatments_ui.py`: exact selected native
+  edges, radius/size validation via isolated OpenCascade operation on
+  a shape (not a document feature); optional kernel-tested smaller
+  size suggestion; native `PartDesign::Fillet`/`PartDesign::Chamfer`
+  created only in a FreeCAD transaction, abort on invalid recompute.
+  Routed from ribbon, canvas and Press/Pull. Never changes dimensions,
+  heals geometry or pretends invalid radius is valid.
+- `snap_targets.py` + `snap_finder_ui.py`: optional Utilities precision
+  tool for exact edge endpoints/midpoints and full circle/arc center XYZ,
+  copy and explicitly **fixed/non-associative** construction reference.
+  Kept as optional inspection, not a step before sketching.
+- `snap_hover.py` + `snap_overlay.py` + `session.py`: passive automatic
+  on-hover endpoint square, line-midpoint triangle, circle/arc-center
+  marker while native Sketcher is active. Uses real Sketcher geometry and
+  activeView world-to-screen projection; Qt overlay does not intercept
+  native mouse clicks/constraints. Native Sketcher remains responsible
+  for actual snap position on stock FreeCAD.
+- Source-level C++ patch
+  `native-core/patches/001-freecad-1.1.0-sketcher-circle-center.patch`,
+  pinned **FreeCAD/FreeCAD 1.1.0**, changes only
+  `src/Mod/Sketcher/Gui/SnapManager.h/.cpp`. Adds optional
+  `AzSnapCircleCenter` native parameter (default false), redirects
+  snapped curve coordinate to circle center in Sketcher draw operation
+  when circle rim is selected, Alt bypass to original rim snap.
+  This is **not compiled, installed or used by the workbench updater**.
+  5 diff hunks were checked against exact upstream 1.1.0 source lines,
+  counts/context and output, but no FreeCAD C++ build yet. Separate
+  native app/Windows build is needed; see `native-core/README.md`.
+
+CI source checks: `42453824245` and `42454020125` passed both
+package and native modeling jobs after correcting early test assertions.
+Native FreeCAD tests cover sub-mm valid Fillet and Chamfer with Undo,
+invalid too-thin edge preserving Body, exact line/circle snaps and
+Sketcher fixed reference/Undo. Package tests cover midpoint/circle/arc
+inference, and a new `test_snap_overlay.py` adds UI stub tests for mouse
+transparent placement. Latest run `42454414615` package passed; native
+in-progress while documenting. Exact 0.5.1 final artifact SHA and owner
+Windows acceptance not yet confirmed. Do not merge draft PR or imply
+core patch is live.
