@@ -230,3 +230,25 @@ Fusion feature-parity promise; keep explicit scope distinction.
       when no valid preview exists; no repeated empty-Tip message.
 - [ ] Separately inspect persistent TopoShape hasher mismatch messages if
       present after invalid preview cleanup; not covered by this fix.
+
+
+## Az 0.5.0 single functional fixture milestone — 2026-11-08
+
+- [x] Native Sized Rectangle command in SKETCH CREATE with width/height
+      driving constraints, repeatable parametric edits and Undo grouping.
+- [x] Preflight new Join/Cut/Intersect against actual Body geometry before
+      creation; disconnected or no-material options cannot take the Body Tip.
+- [x] Validate downstream actual solid Shapes and errors before committing
+      edited earlier Extrude.
+- [x] Native FreeCAD full fixture test: parametric plate, pocket, two Holes,
+      Fillet, upstream sketch dimensions, Hole edits/Cancel, Undo/Redo,
+      FCStd save/reopen and Body Tip/volume verification.
+- [x] Native tests for no-op/disconnected operations with unchanged document.
+- [x] Native upstream Extrude edit with later Fillet plus Cancel regression.
+- [ ] Final CI run 42450344286 full modeling+package result and artifact
+      ZIP/hash verification (core 0.5.0 run 42450272583 already passed both).
+- [ ] Windows FreeCAD 1.1 0.4.3 → 0.5.0 update using Update Az, full restart
+      and owner's GUI modeling acceptance.
+- [ ] Production-level topology change/face-reference repair for arbitrary
+      middle-history reorder; universal drag dimensions and advanced native
+      feature task parity still not implemented.
