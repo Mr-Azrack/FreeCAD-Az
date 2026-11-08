@@ -22,7 +22,7 @@ def selection_actions(obj, subelements=()):
         return ("activate", "isolate")
     if obj.isDerivedFrom("PartDesign::Feature") or obj.isDerivedFrom("Part::Feature"):
         if any(str(name).startswith("Edge") for name in subelements):
-            return ("fillet", "edit", "isolate")
+            return ("fillet", "chamfer", "snaps", "edit", "isolate")
         if any(str(name).startswith("Face") for name in subelements):
             return ("sketch", "presspull", "edit", "isolate")
         from .quick_dimension import dimension_property
@@ -42,6 +42,8 @@ class CanvasActions(QtWidgets.QFrame):
         ("extrude", "Extrude"),
         ("presspull", "Press/Pull"),
         ("fillet", "Fillet"),
+        ("chamfer", "Chamfer"),
+        ("snaps", "Snap/Centers"),
         ("isolate", "Isolate"),
     )
 
@@ -101,7 +103,9 @@ class CanvasActions(QtWidgets.QFrame):
                     "sketch": "Az_Sketch",
                     "extrude": "Az_Extrude",
                     "presspull": "Az_PressPull",
-                    "fillet": "PartDesign_Fillet",
+                    "fillet": "Az_Fillet",
+                    "chamfer": "Az_Chamfer",
+                    "snaps": "Az_SnapFinder",
                 }.get(key)
                 if cmd:
                     commands.invoke(cmd)
