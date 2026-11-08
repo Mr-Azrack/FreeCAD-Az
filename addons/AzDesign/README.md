@@ -1,4 +1,52 @@
-# Az Design 0.5.0
+# Az Design 0.5.1
+
+## 0.5.1 — native edge-treatment validation and automatic sketch inference
+
+**Exact small-geometry Fillet/Chamfer:** Az no longer sends its ribbon
+Fillet and Chamfer directly into an unvalidated native task dialog. Choose
+one or more real edges of the current solid and use **Fillet** or **Chamfer**:
+the Az compact task checks the requested dimension against a **copy** of
+the real shape via FreeCAD's native OCCT `makeFillet/makeChamfer`. Invalid
+radii/bevels are reported without changing the source solid or Body Tip.
+**Find smaller valid size** tries a small, explicit set of reduced values
+against the actual kernel; it never promises a theoretical maximum. Explicit
+**Create** commits the same operation as a native, editable
+`PartDesign::Fillet` or `PartDesign::Chamfer` within a FreeCAD Undo
+transaction, validates the recomputed solid, and aborts on failure.
+No automatic scaling/healing/edge replacement. The imported test model's
+intentionally very small scale is preserved; no example data is uploaded.
+
+**Automatic Sketcher inference:** while editing a sketch, moving the mouse
+near a native line's midpoint now automatically shows a small **triangle**;
+endpoints are marked with a square. Hovering a circle/arc rim or its center
+reveals the exact **center marker**. These cues are based on the actual
+Sketcher geometry and viewport projection; they do not require opening a
+finder, and the marker widgets cannot capture mouse input. Real snapping
+and constraints stay with FreeCAD Sketcher's own snap/AutoConstraints
+engine. This is **not yet full Fusion click redirection**: clicking anywhere
+on a circular rim is not secretly sent to its center, because that could
+interfere with native selection/drawing tools. The center target becomes
+visible for choosing with native sketch snapping, and deeper core integration
+will be needed to support click-on-rim-to-center without breaking existing
+Sketcher input semantics.
+
+An optional **Utilities → Snap & Centers** precision-inspection tool
+still exposes exact endpoints/midpoints/circular center XYZ, copy XYZ and
+explicitly **fixed, non-associative** projected sketch reference points.
+It's not a prerequisite to automatic visual inference.
+
+**Validation:** native FreeCAD tests cover a millimetre-scale block with
+native Fillet/Chamfer/Undo, a deliberately too-thin Fillet that must not
+mutate geometry, exact 3D midpoint/circle centers and an Undoable fixed
+sketch reference. Python CI tests cover mouse-hover inference, full circles
+and only the visible span of arcs. The actual Windows FreeCAD 1.1 GUI
+and native snap-click behavior must be verified after installing this build.
+
+**Future native-core work:** a FreeCAD source fork and Windows build/test
+pipeline may be appropriate for true Sketcher center-on-rim click injection,
+custom sketch inference constraint semantics and deep 3D interaction.
+The existing plugin does **not** modify system-installed FreeCAD C++ files
+and no source-level FreeCAD patch is claimed to be installed by Update Az.
 
 ## 0.5.0 — dimension-driven fixture modeling and validated feature history
 
@@ -334,7 +382,7 @@ Autodesk code and artwork are not included.
 
 ## Install or update
 
-1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.5.0.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
+1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.5.1.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
 3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
