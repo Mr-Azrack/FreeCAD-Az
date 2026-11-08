@@ -252,3 +252,27 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [ ] Production-level topology change/face-reference repair for arbitrary
       middle-history reorder; universal drag dimensions and advanced native
       feature task parity still not implemented.
+
+
+## Az 0.5.1 / native Sketcher inference stage — 2026-11-08
+
+- [x] Micro-scale exact OCCT Fillet/Chamfer preflight, selected-edge
+      diagnostics and native PartDesign commit/rollback.
+- [x] Actual native tests of small valid/invalid edge treatments, Undo.
+- [x] Automatic in-sketch marker for line midpoint triangle, endpoint
+      square and circular/arc center under hover, no manual tool required.
+- [x] Tests for line/circle/arc inference and passive Qt viewport marker;
+      no native drawing event is swallowed.
+- [x] Optional exact XYZ center finder demoted to Utilities inspection.
+- [x] Pin and stage FreeCAD 1.1.0 C++ `SnapManager` patch allowing
+      rim-to-center click in native Sketcher when opted in; Alt bypass.
+      Patch hunks matched 1.1.0 source but **not compiled**.
+- [ ] Both jobs from final 0.5.1 CI `42454414615`, verified installer
+      archive SHA256 and complete delivery through Update Az.
+- [ ] Owner Windows FreeCAD 1.1 GUI confirmation that hover markers render
+      at the correct coordinates, native snap/constraints are usable, and
+      the small-geometry Fillet/Chamfer dialog behaves.
+- [ ] Build a separate signed Windows FreeCAD-based application with native
+      1.1.0 SnapManager patch; test automatic rim-click redirection with
+      Alt bypass and ordinary point-on-rim commands; never replace the
+      installed stock FreeCAD version.
