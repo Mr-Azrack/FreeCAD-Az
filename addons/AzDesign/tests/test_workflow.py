@@ -798,6 +798,32 @@ class WorkflowTest(unittest.TestCase):
         self.doc.recompute()
         self.assertAlmostEqual(obj.Shape.Volume, 800)
 
+    def test_upstream_extrude_edit_under_native_fillet_preserves_final_tip(self):
+        body, source, plate = self.base(height=6)
+        rounding = body.newObject("PartDesign::Fillet", "Rounding")
+        rounding.Base = (plate, ["Edge1"])
+        rounding.Radius = 0.5
+        self.doc.recompute()
+        self.assertTrue(rounding.Shape.isValid())
+        initial = rounding.Shape.Volume
+        edit = operations.Operation(self.doc, editing=plate)
+        spec = operations.spec_for(plate)
+        spec["distance"] = "8 mm"
+        edit.update(spec)
+        self.assertIs(body.Tip, plate)
+        edit.accept()
+        self.assertIs(body.Tip, rounding)
+        self.assertTrue(rounding.Shape.isValid())
+        grown = rounding.Shape.Volume
+        self.assertGreater(grown, initial + 180)
+        again = operations.Operation(self.doc, editing=plate)
+        reset = operations.spec_for(plate)
+        reset["distance"] = "5 mm"
+        again.update(reset)
+        again.cancel()
+        self.assertIs(body.Tip, rounding)
+        self.assertAlmostEqual(rounding.Shape.Volume, grown, places=4)
+
     def test_native_fillet_recomputes_after_custom_extrude_edits(self):
         body, source, base = self.base()
         fillet = body.newObject("PartDesign::Fillet", "Fillet")
