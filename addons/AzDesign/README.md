@@ -1,4 +1,63 @@
-# Az Design 0.4.3
+# Az Design 0.5.0
+
+## 0.5.0 — dimension-driven fixture modeling and validated feature history
+
+This is a substantial reliability/workflow milestone. The acceptance gate
+builds a **complete native machining fixture**, not only isolated dialogs.
+The model starts from a 60×40×8 mm plate, subtracts a rectangular pocket,
+adds two through-holes, rounds an outer edge, changes the original plate
+width to 70 mm, edits the Hole feature beneath the Fillet, verifies
+Cancel/Undo/Redo, saves a native FCStd file, reopens it and checks that its
+solid volume, Body Tip and parametric links persist. This check runs in
+Linux FreeCAD 1.0 native CI; Windows 1.1 GUI behavior requires owner testing.
+
+### Sized Rectangle (new sketch ribbon command)
+
+While editing an **empty** sketch, click **Sized Rectangle** in Sketch
+CREATE or Find a Tool, enter width and height in millimetres, and Az creates
+a four-edge rectangle at the origin. These are real native Sketcher
+Coincident/Horizontal/Vertical and dimensional constraints. Modify width
+or height later in Sketcher and connected features recompute through their
+original native parametric links. All geometry and constraints are grouped
+in a single undoable transaction. To add a rectangle to an existing sketch
+or position it freely, continue using **Rectangle** plus Smart Dimension.
+This deliberately does not impersonate Fusion's complete on-cursor sketch
+dimensioning system; it provides one reliable typed-size workflow.
+
+### Safer extrusion before creating anything
+
+For newly created **Join**, **Cut** and **Intersect**, Az preflights the
+profile, offset, direction, taper, extent and existing Body in a separate
+unsaved native geometry calculation document. Only if the result is
+one valid solid that actually adds/removes material does Az add a
+FeaturePython object to the real history. A disconnected Join, non-cutting
+Pocket or disjoint Intersect reports a useful reason and keeps the real
+document's Body Tip and object inventory unchanged. Invalid user input
+does not create a broken temporary model. Auto/New body behavior and
+editing existing Extrudes continue using their own validated paths.
+
+On acceptance of an upstream Extrude edit, Az recomputes the affected
+Body and checks **actual shapes**, explicit Az errors and native invalid
+states of downstream features before committing, including empty solids
+that FreeCAD does not always mark Invalid. If downstream features break,
+the task refuses to commit and the user can Cancel to restore the
+previous document through FreeCAD's native Undo transaction.
+
+### Existing 0.4.x work retained
+
+The working updater/backup mechanism, body-aware Browser, history scrub,
+Edit/Delete and safeguarded delete-from-here, native Hole editing and
+modeled-thread consent, compact Sketch Palette and in-canvas tools remain.
+This version does **not** claim arbitrary dependency-repair/reorder, generic
+drag-to-edit all surface dimensions, or reimplementation of all native
+FreeCAD feature dialogs. Those need specialized work and actual Windows
+acceptance; avoid presenting them as complete Fusion parity.
+
+Upgrade from 0.4.3 with **Update Az**, accept the passing CI-tested
+0.5.0 build, and fully restart FreeCAD. Your previous version is backed up.
+Use a disposable fixture to exercise the sketch/plate/pocket/hole/fillet
+history and report the first new traceback if Windows 1.1 behaves
+differently.
 
 ## 0.4.3 — Prevent disappearing solids during Extrude profile selection
 
@@ -275,7 +334,7 @@ Autodesk code and artwork are not included.
 
 ## Install or update
 
-1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.4.3.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
+1. From the latest passing **[Az Design add-on CI run](https://github.com/Mr-Azrack/FreeCAD-Az/actions/workflows/az-design.yml)** on PR #1, download the **AzDesign-installer** artifact, open it and extract **AzDesign-0.5.0.zip**. This is a review build; the latest checked-in release ZIP remains [0.3.1](../releases/AzDesign-0.3.1.zip).
 2. In FreeCAD, choose **Macro → Macros…**. Set the macro location to the extracted
    folder, select **Install_AzDesign**, and choose **Execute**.
 3. Confirm the local installation, restart FreeCAD, and choose **Az Design** from
