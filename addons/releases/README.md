@@ -1,5 +1,25 @@
 # Az Design installer packages
 
+## 0.5.1 — precise Fillet/Chamfer and automatic Sketcher midpoint/center cues
+
+On very small parts, invalid radii or chamfers now fail an isolated OCCT
+geometry preflight before touching the original FreeCAD Body. Successful
+operations commit a real native PartDesign feature; Undo and invalid
+preview handling remain native and transactional.
+
+Sketcher shows automatic on-hover triangle midpoint, square endpoint, and
+circle/arc-center markers derived from the real sketch geometry. Native
+Sketcher still handles actual mouse placement and AutoConstraints, so this
+is **not yet automatic click-anywhere-on-ring to center**; deeper core
+integration requires a separately built FreeCAD fork. The old manual finder
+remains an optional inspection command, not a sketching prerequisite.
+
+The Windows GUI validation gate covers small edge cases, visible markers
+and actual native snap behavior. Owners on 0.5.0 can upgrade via **Update
+Az**, then fully restart FreeCAD. Previous installation is backed up.
+
+
+
 ## 0.5.0 parametric machining fixture and native workflow reliability
 
 This release closes a large functional gap between Az's visual shell
