@@ -302,3 +302,22 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [ ] Later: branded executable/UI, Windows application updater and
       signed installer when tested; do not ship production machine CAM
       until dedicated safety checks exist.
+
+
+## 2026-11-09 — Standalone Qt plugin launch repair
+
+- [x] Reproduce failure cause from first native archive layout:
+      qwindows.dll in lib/qt6/plugins/platforms, launcher targeted
+      nonexistent bin/platforms.
+- [x] Windows CI repair run 42560734235 extracted previous compiled
+      artifact and passed real bundled QApplication('windows') smoke.
+- [x] Verified QuickFix 411,824-byte ZIP, CRC, SHA256
+      bf85e6284b5e74b32d482645ccdc991c9d815585917981d61a4f6c5284c85095.
+      Artifact 13648924049, user given drop-in download.
+- [x] Future full native packages require matching qwindows.dll, qt.conf
+      and actual QApplication launch test (no more false-green package).
+- [ ] User tests patched `Az Design.cmd` on Windows and verifies Az Design
+      workbench loading, Sketcher Circle snap and Alt override.
+- [ ] Verify new full Windows native CI run (separate from quick-fix CI)
+      produces startup-smoked portable archive, then publish new full
+      preview only after artifact and SHA are confirmed.
