@@ -1110,3 +1110,63 @@ Extract ZIP directly into the existing extracted
 `AzDesign-Native-1.1-Windows-x64` root, replacing `Az Design.cmd`.
 DO NOT modify stock FreeCAD. User Windows acceptance of full
 Az Native GUI and snap behavior remains outstanding.
+
+
+## 2026-11-09 — Windows installed-app delivery, file-delta updater and UI clipping fix
+
+Owner confirmed original compiled native Az preview successfully **launches**
+after the Qt QuickFix and **native circle-rim-to-center C++ snapping works**
+on their Windows machine. Owner shared a screenshot showing clipped
+`P...h` and `S...s` text in bottom floating navigation/history and
+Browser property buttons; asked for Windows-style install/Start Menu/desktop
+and **patches** instead of repeat full 1.3 GB downloads.
+
+In `codex/az-design-workbench`, draft PR #1, implemented:
+- `native-core/windows/AzDesignLauncher.cs`: compiled GUI
+  `AzDesign.exe`, no batch-window navigation; starts our FreeCAD.exe
+  with correct Qt plugins and independent app profile.
+- `native-core/windows/AzUpdater.cs`: native graphical patch selector
+  with rollback action. Independent PowerShell apply process starts after
+  updater exits, so app files can be replaced. This first version
+  **installs a downloaded small patch ZIP**; automatic online release
+  discovery is **not yet wired**.
+- `native-core/windows/AzDesignNative.iss`: real per-user Inno Setup
+  Windows app in `%LOCALAPPDATA%\Programs\Az Design Native`,
+  Start Menu application + updater shortcuts, optional desktop shortcut,
+  Windows Installed Apps/uninstall registration. Never touches stock
+  FreeCAD or claims .FCStd file associations.
+- `native-core/windows/create_patch.py`: creates changed/new files only
+  using old and new file SHA256 + deletes, version pins, zip-slip guards.
+- `native-core/windows/ApplyAzPatch.ps1`: validates downloaded patch,
+  installed baseline, safe paths/hashes; saves full pre-change backup
+  under LocalAppData, changes only listed files, rolls back on error,
+  provides explicit restore-last-update operation, and refuses if the
+  native FreeCAD process is running.
+- `native-core/windows/test_create_patch.py` and
+  `test_apply_patch.ps1`: Windows CI tested new/changed/deleted
+  file patching, version bump, successful rollback and edited-local-file
+  mismatch refusal.
+- `addons/AzDesign/azdesign/workspace.py`: fixed-size Browser,
+  history and viewport buttons explicitly IconOnly (short fallback text)
+  with full tooltips; avoids Qt's native Windows style showing clipped
+  long names in 32 px buttons.
+- `.github/workflows/az-native-installer.yml`: downloads the already
+  verified C++ and Qt-compiled preview from run 42561086751, overlays
+  latest Az Python workspace, compiles launcher/updater C# GUI EXEs, uses
+  Inno Setup 6 to create `AzDesign-Native-Setup-0.5.2-x64.exe`,
+  installs it silently on disposable Windows runner, verifies actual
+  installed files/Start Menu/updater/uninstaller/Qt QApplication,
+  uninstalls test copy and uploads checksum installer only if all steps pass.
+
+Verification: first CI run `42613250797` **patch-tests passed**,
+but installer GUI launcher compilation failed because .NET Framework
+`csc.exe` treats Unix-style relative slash source paths as incorrect;
+modified workflow to pass resolved absolute Windows paths. CI rerun
+[42613707498](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42613707498):
+both Windows patch tests passed; compiled AzDesign.exe and AzUpdater.exe
+successfully; Inno Setup 6 installed, actual setup compression **still
+running** at handoff time. Do not announce installer as available until
+silent Windows installation/uninstallation and archive artifact have passed.
+The new first installer is still a large ONE-TIME download. Subsequent
+updates use changed-file ZIPs, but no automatic remote delta index
+is published yet.
