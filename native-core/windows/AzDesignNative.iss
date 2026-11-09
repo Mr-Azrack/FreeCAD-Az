@@ -20,8 +20,10 @@ DefaultDirName={localappdata}\Programs\Az Design Native
 DefaultGroupName=Az Design Native
 OutputDir={#OutputDir}
 OutputBaseFilename=AzDesign-Native-Setup-{#AppVer}-x64
-Compression=lzma2
-SolidCompression=yes
+; Fast, independent blocks avoid multi-hour solid compression of the 1+ GB Qt/CAD runtime.
+; Slightly larger initial installer; subsequent updates are small file-delta patches.
+Compression=lzma2/fast
+SolidCompression=no
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
