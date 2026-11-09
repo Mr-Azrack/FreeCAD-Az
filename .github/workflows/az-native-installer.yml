@@ -117,9 +117,17 @@ jobs:
           foreach ($file in @('AzDesign.exe','AzUpdater.exe','ApplyAzPatch.ps1','AZ Native Version.json','bin\FreeCAD.exe','bin\platforms\qwindows.dll','Mod\Sketcher','Mod\AzDesign','unins000.exe')) {
             if (!(Test-Path (Join-Path $target $file))) { throw "Installed file missing: $file" }
           }
-          $menu = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Az Design Native'
-          if (!(Test-Path (Join-Path $menu 'Az Design Native.lnk'))) { throw 'Start Menu app entry missing' }
-          if (!(Test-Path (Join-Path $menu 'Az Design Native - Update.lnk'))) { throw 'Start Menu updater entry missing' }
+          # Inno [Icons] targets {autoprograms}, i.e. the Programs root.
+          # It does not create a subfolder unless the Name includes one.
+          $programs = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'
+          foreach ($name in @('Az Design Native.lnk','Az Design Native - Update.lnk')) {
+            $shortcut = Join-Path $programs $name
+            if (!(Test-Path $shortcut)) {
+              throw "Start Menu shortcut missing: $shortcut"
+            }
+            $lnk = (New-Object -ComObject WScript.Shell).CreateShortcut($shortcut)
+            if (!(Test-Path $lnk.TargetPath)) { throw "Broken Start Menu shortcut target: $name" }
+          }
           $env:PYTHONNOUSERSITE = '1'
           & (Join-Path $target 'bin\python.exe') native-core/windows/smoke_qt.py --bundle "$target"
           if ($LASTEXITCODE -ne 0) { throw 'Installed Windows Qt startup failed' }
