@@ -321,3 +321,30 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [ ] Verify new full Windows native CI run (separate from quick-fix CI)
       produces startup-smoked portable archive, then publish new full
       preview only after artifact and SHA are confirmed.
+
+
+## Native 0.5.2 installed-app and delta-patch milestone — November 9
+
+- [x] User confirmed original repaired native Windows app launches and
+      native C++ circle-edge-to-center snapping works.
+- [x] Native `AzDesign.exe` launcher with independent Qt/user profile.
+- [x] Native `AzUpdater.exe` GUI with patch selection/rollback.
+- [x] Inno Setup per-user Windows installer, Start Menu app+updater,
+      optional desktop shortcut and Windows Installed Apps/uninstall.
+- [x] Versioned changed-file ZIP generator, SHA256 verification, safe
+      paths, transactional PowerShell apply, previous-version rollback.
+- [x] Windows tests for changed/add/delete, mismatch rejection and
+      rollback passed in CI runs 42613250797 and 42613707498.
+- [x] Fix clipped 32px navigation/history/Browser buttons by icon-only
+      layout and short fallback glyphs; Windows owner acceptance pending.
+- [ ] Inno Setup 0.5.2 real installer run 42613707498: confirm final
+      setup compilation, silent install, Start Menu, full Qt GUI smoke,
+      silent uninstall and uploaded verified `.exe` artifact.
+- [ ] Owner installs setup on Windows, confirms Start Menu, optional
+      desktop shortcut, Installed Apps/uninstall and correct layout.
+- [ ] Publish versioned delta patches and remote update feed so
+      `AzUpdater.exe` can **check/download** automatically; currently
+      it opens a patch ZIP explicitly and can roll back.
+- [ ] Later signed binaries/installer, branding/icon improvements,
+      patch channel/certificate policy and Windows DPI tests at
+      100/125/150 percent.
