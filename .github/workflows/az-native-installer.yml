@@ -14,7 +14,7 @@ permissions:
 
 concurrency:
   group: az-native-installer-dev
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   patch-tests:
@@ -33,7 +33,7 @@ jobs:
   installer:
     runs-on: windows-2022
     needs: patch-tests
-    timeout-minutes: 160
+    timeout-minutes: 300
     defaults:
       run:
         shell: pwsh
