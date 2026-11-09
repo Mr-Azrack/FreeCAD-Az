@@ -1,0 +1,139 @@
+name: Az Native Windows Installer
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/az-native-installer.yml'
+      - 'native-core/windows/**'
+      - 'addons/AzDesign/azdesign/workspace.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: az-native-installer-dev
+  cancel-in-progress: true
+
+jobs:
+  patch-tests:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify file-delta generation
+        run: python native-core/windows/test_create_patch.py
+      - name: Verify real Windows update and rollback
+        shell: pwsh
+        run: |
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File native-core/windows/test_apply_patch.ps1
+          if ($LASTEXITCODE -ne 0) { throw "Native patch integration test failed" }
+
+  installer:
+    runs-on: windows-2022
+    needs: patch-tests
+    timeout-minutes: 160
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download previously compiled and Qt-tested native FreeCAD
+        uses: actions/download-artifact@v4
+        with:
+          name: AzDesign-Native-1.1-Windows-x64-PREVIEW
+          repository: Mr-Azrack/FreeCAD-Az
+          run-id: 42561086751
+          github-token: ${{ github.token }}
+          path: compiled-core
+      - name: Extract native program without recompiling its C++ core
+        run: |
+          $ErrorActionPreference = "Stop"
+          $archive = Get-ChildItem 'compiled-core' -Recurse -File -Filter '*.7z' | Select-Object -First 1
+          if (!$archive) { throw "Native core archive missing" }
+          $sevenZip = Join-Path $env:ProgramFiles '7-Zip/7z.exe'
+          & $sevenZip x '-y' "-o$env:RUNNER_TEMP\AzUnpacked" "$($archive.FullName)"
+          if ($LASTEXITCODE -ne 0) { throw "Core extraction failed" }
+          $found = Get-ChildItem "$env:RUNNER_TEMP\AzUnpacked" -Recurse -File -Filter 'Az Design.cmd' | Select-Object -First 1
+          if (!$found) { throw "Compiled native launcher missing" }
+          $root = $found.DirectoryName
+          $root | Set-Content 'payload-path.txt'
+          foreach ($required in @('bin\FreeCAD.exe','bin\platforms\qwindows.dll','Mod\Sketcher')) {
+            if (!(Test-Path (Join-Path $root $required))) { throw "Compiled core missing $required" }
+          }
+      - name: Add latest Az workspace, version, GUI launcher and update engine
+        run: |
+          $ErrorActionPreference = "Stop"
+          $root = (Get-Content 'payload-path.txt' -Raw).Trim()
+          Remove-Item (Join-Path $root 'Mod\AzDesign') -Recurse -Force
+          Copy-Item 'addons\AzDesign' (Join-Path $root 'Mod\AzDesign') -Recurse
+          Copy-Item 'native-core\windows\ApplyAzPatch.ps1' (Join-Path $root 'ApplyAzPatch.ps1')
+          '{"product":"AzDesignNative","version":"0.5.2"}' | Set-Content -LiteralPath (Join-Path $root 'AZ Native Version.json') -Encoding utf8
+          $csc = Join-Path $env:windir 'Microsoft.NET\Framework\v4.0.30319\csc.exe'
+          if (!(Test-Path $csc)) { throw "Windows C# compiler missing" }
+          $icon = Join-Path $env:RUNNER_TEMP 'Az.ico'
+          Add-Type -AssemblyName System.Drawing
+          $ico = [Drawing.Icon]::ExtractAssociatedIcon((Join-Path $root 'bin\FreeCAD.exe'))
+          if ($ico) {
+            $stream = [IO.File]::Create($icon)
+            try { $ico.Save($stream) } finally { $stream.Dispose(); $ico.Dispose() }
+          }
+          $iconArgs = @()
+          if (Test-Path $icon) { $iconArgs = @("/win32icon:$icon") }
+          & $csc /nologo /codepage:65001 /target:winexe "/out:$(Join-Path $root 'AzDesign.exe')" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll @iconArgs native-core/windows/AzDesignLauncher.cs
+          if ($LASTEXITCODE -ne 0) { throw "AzDesign GUI launcher did not compile" }
+          & $csc /nologo /codepage:65001 /target:winexe "/out:$(Join-Path $root 'AzUpdater.exe')" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll @iconArgs native-core/windows/AzUpdater.cs
+          if ($LASTEXITCODE -ne 0) { throw "AzUpdater GUI did not compile" }
+      - name: Install Inno Setup 6
+        run: |
+          $iscc = Join-Path ([Environment]::GetFolderPath('ProgramFilesX86')) 'Inno Setup 6\ISCC.exe'
+          if (!(Test-Path $iscc)) {
+            choco install innosetup --yes --no-progress --limit-output
+            if ($LASTEXITCODE -ne 0) { throw 'Inno Setup installation failed' }
+          }
+          if (!(Test-Path $iscc)) { throw 'Inno Setup 6 not available' }
+          $iscc | Set-Content 'iscc-path.txt'
+      - name: Compile actual native setup wizard
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = (Get-Content 'payload-path.txt' -Raw).Trim()
+          $iscc = (Get-Content 'iscc-path.txt' -Raw).Trim()
+          New-Item -ItemType Directory 'dist' -Force | Out-Null
+          $out = (Resolve-Path 'dist').Path
+          & $iscc "/DSourceDir=$root" "/DOutputDir=$out" '/DAppVer=0.5.2' 'native-core/windows/AzDesignNative.iss'
+          if ($LASTEXITCODE -ne 0) { throw 'Inno installer compilation failed' }
+          $setup = Get-Item 'dist/AzDesign-Native-Setup-0.5.2-x64.exe'
+          if ($setup.Length -lt 1000000) { throw 'Suspiciously small Windows installer' }
+      - name: Verify actual Windows install, Start Menu, Qt and uninstall
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $setup = (Resolve-Path 'dist/AzDesign-Native-Setup-0.5.2-x64.exe').Path
+          $target = Join-Path $env:RUNNER_TEMP 'AzInstalled'
+          $proc = Start-Process $setup -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/DIR=$target") -PassThru -Wait
+          if ($proc.ExitCode -ne 0) { throw "Installer exit code $($proc.ExitCode)" }
+          foreach ($file in @('AzDesign.exe','AzUpdater.exe','ApplyAzPatch.ps1','AZ Native Version.json','bin\FreeCAD.exe','bin\platforms\qwindows.dll','Mod\Sketcher','Mod\AzDesign','unins000.exe')) {
+            if (!(Test-Path (Join-Path $target $file))) { throw "Installed file missing: $file" }
+          }
+          $menu = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Az Design Native'
+          if (!(Test-Path (Join-Path $menu 'Az Design Native.lnk'))) { throw 'Start Menu app entry missing' }
+          if (!(Test-Path (Join-Path $menu 'Az Design Native - Update.lnk'))) { throw 'Start Menu updater entry missing' }
+          $env:PYTHONNOUSERSITE = '1'
+          & (Join-Path $target 'bin\python.exe') native-core/windows/smoke_qt.py --bundle "$target"
+          if ($LASTEXITCODE -ne 0) { throw 'Installed Windows Qt startup failed' }
+          $p = Start-Process (Join-Path $target 'unins000.exe') -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART') -PassThru -Wait
+          if ($p.ExitCode -ne 0) { throw 'Uninstaller failed' }
+      - name: Hash Windows installer
+        run: |
+          $exe = 'dist/AzDesign-Native-Setup-0.5.2-x64.exe'
+          $sha = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$sha  AzDesign-Native-Setup-0.5.2-x64.exe" | Set-Content 'dist/AzDesign-Native-Setup-0.5.2-x64.sha256'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AzDesign-Native-Windows-Installer-0.5.2
+          path: |
+            dist/AzDesign-Native-Setup-0.5.2-x64.exe
+            dist/AzDesign-Native-Setup-0.5.2-x64.sha256
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: error
