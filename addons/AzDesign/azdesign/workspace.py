@@ -55,9 +55,25 @@ def action_button(text, name, callback, parent=None):
     button.setText(text)
     button.setToolTip(text)
     button.setAccessibleName(text)
-    button.setIcon(icon(name))
+    actual_icon = icon(name)
+    button.setIcon(actual_icon)
     button.setIconSize(QtCore.QSize(20, 20))
-    button.setFixedSize(32, 30)
+    # FreeCAD/Qt may globally configure QToolButton text beside the icon.
+    # A 32-px button then shows fragments like "P...h" or "S...s".
+    # Always specify icon-only; fall back to a short legible label when
+    # the native command has no valid icon on a given Qt/FreeCAD build.
+    button.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
+    if actual_icon.isNull():
+        abbreviation = {
+            "Home view": "H", "Fit": "Fit",
+            "Zoom in": "+", "Zoom out": "−",
+            "Display settings": "D", "Standard views": "V",
+            "Show native properties": "P",
+        }.get(text, "".join(part[:1] for part in text.split()[:2]).upper())
+        button.setText(abbreviation[:3])
+        button.setToolButtonStyle(QtCore.Qt.ToolButtonTextOnly)
+    button.setFixedSize(36, 34)
+    button.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
     button.clicked.connect(lambda _checked=False: callback())
     return button
 
