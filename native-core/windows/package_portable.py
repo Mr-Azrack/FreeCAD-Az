@@ -13,6 +13,8 @@ import shutil
 import sys
 from pathlib import Path
 
+from qt_runtime import QtRuntimeError, install_qt_platform
+
 
 class PackageError(RuntimeError):
     pass
@@ -49,6 +51,7 @@ if not exist "%AZ_PROFILE%\Data" mkdir "%AZ_PROFILE%\Data"
 set "FREECAD_USER_HOME=%AZ_PROFILE%"
 set "FREECAD_USER_DATA=%AZ_PROFILE%\Data"
 set "PATH=%~dp0bin;%PATH%"
+set "QT_PLUGIN_PATH=%~dp0bin"
 set "QT_QPA_PLATFORM_PLUGIN_PATH=%~dp0bin\platforms"
 "%~dp0bin\FreeCAD.exe" --user-cfg "%AZ_PROFILE%\user.cfg" --system-cfg "%AZ_PROFILE%\system.cfg" %*
 endlocal
@@ -102,6 +105,13 @@ def package(env: Path, addon: Path, source: Path, out: Path, patch: Path, commit
             if (source / name).is_file():
                 (out / "licenses").mkdir(exist_ok=True)
                 shutil.copy2(source / name, out / "licenses" / name)
+        # Verify the actual Windows Qt plugin before publishing any bundle.
+        # Earlier previews copied an incomplete platform-plugin directory
+        # and passed CI despite failing to create a Qt window on Windows.
+        try:
+            qt_plugin = install_qt_platform(out, env, check_load=True)
+        except QtRuntimeError as exc:
+            raise PackageError(str(exc)) from exc
         (out / "Az Design.cmd").write_text(launcher(), encoding="utf-8", newline="\r\n")
         (out / "README-FIRST.txt").write_text(
             "AZ DESIGN NATIVE - EXPERIMENTAL WINDOWS PREVIEW\n\n"
@@ -128,6 +138,8 @@ def package(env: Path, addon: Path, source: Path, out: Path, patch: Path, commit
             "included_workbench": "Mod/AzDesign",
             "native_snap_preference": "User parameter:BaseApp/Preferences/Mod/Sketcher/Snap/AzSnapCircleCenter",
             "compiled_native_snap": "patch applied at source checkout; Windows GUI acceptance required",
+            "qt_windows_plugin": str(qt_plugin.relative_to(out)).replace("\\", "/"),
+            "qt_windows_plugin_sha256": sha256(qt_plugin),
         }
         (out / "AZ_NATIVE_BUILD.json").write_text(
             json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
