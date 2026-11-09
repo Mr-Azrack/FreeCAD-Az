@@ -371,3 +371,28 @@ To avoid making owner download 1.3 GB again, ship small checked,
 standalone Qt QuickFix ZIP which overlays only launcher,
 `bin/qt.conf` and `bin/platforms/qwindows.dll` on existing native
 extract. Never touch Program Files / system FreeCAD 1.1.
+
+
+## 2026-11-09 — Ship actual Windows installer and version-pinned delta updates
+
+A portable ZIP with `Az Design.cmd` is insufficient; owner wants
+Start Menu/desktop access, Windows Installed Apps entry and normal
+uninstall. Build real Inno Setup 6 per-user installer from already
+compiled FreeCAD 1.1 + tested native Sketcher DLLs, avoiding unnecessary
+C++ recompilation, and use Windows Forms C# GUI launchers named
+`AzDesign.exe` / `AzUpdater.exe`. Do not hijack .FCStd associations
+or overwrite normal FreeCAD. Keep user files/config in LocalAppData.
+
+Subsequent deliveries should be file-delta patch ZIPs with explicit
+installed from/to version and SHA256 of both old and new bytes, strict
+relative path validation, staging before mutation, full backup, rollback
+and native process closure before modifying running DLLs. Prefer
+independent PowerShell updater process outside installed app for updates.
+The initial native updater is manual/offline patch selection; auto
+download/signature/release feed remain separate work before claiming
+one-click internet updates. Source-root stock FreeCAD and LGPL notices
+remain untouched.
+
+For GUI clipping on Windows DPI, 32px custom QToolButtons must explicitly
+set `ToolButtonIconOnly`, full tooltips and short fallback labels rather
+than rendering truncated words under inherited global FreeCAD styles.
