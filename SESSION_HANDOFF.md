@@ -1048,3 +1048,39 @@ Do not change `native-core/**` or new workflow unnecessarily while
 native job runs; GitHub Actions concurrency cancels in-progress
 previous runs on new native-code workflow runs.
 No changes to installed Windows FreeCAD 1.1 or its user's files.
+
+
+## 2026-11-09 — Windows native Qt startup QuickFix delivered
+
+User screenshot: Windows dialog "This application failed to start
+because no Qt platform plugin could be initialized." Repo recovery:
+`Mr-Azrack/FreeCAD-Az`, development branch
+`codex/az-design-workbench`, draft PR #1, FreeCAD 1.1.0 C++ core.
+
+New files: `native-core/windows/qt_runtime.py`,
+`smoke_qt.py`, `make_qt_fixkit.py`,
+`.github/workflows/az-native-qt-repair.yml`. Modified
+`package_portable.py`, `test_package_portable.py`,
+`.github/workflows/az-native-windows.yml`.
+Qt runtime stage now copies exact Pixi Windows platform plugin from
+`lib/qt6/plugins/platforms` to `bin/platforms`, writes `bin/qt.conf`
+and validates Qt, refusing a broken published build.
+Repair workflow actually downloaded prior native build (artifact
+13627854754), found `qwindows.dll` only at `lib/qt6/plugins/platforms`,
+repaired plugin placement and launcher. Test output:
+`Az Qt portable platform: windows`. CI
+`42560734235` completed SUCCESS; artifact 13648924049.
+Extracted user-facing ZIP:
+`/mnt/data/AzDesign-Native-Qt-QuickFix.zip` verified active turn,
+**411824 bytes**, SHA256
+`bf85e6284b5e74b32d482645ccdc991c9d815585917981d61a4f6c5284c85095`;
+inner/outer CRC verified and includes matching qwindows.dll, qt.conf,
+updated launcher, README.
+
+Owner instruction: extract directly into existing
+`AzDesign-Native-1.1-Windows-x64` directory, replace Az Design.cmd,
+then run the launcher. Do not put files directly under bin or overwrite
+stock FreeCAD. User GUI acceptance pending. New full native Windows
+workflow automatically rerun after packaging source changes; check
+latest run/jobs if next user asks for full corrected preview, and only
+claim success if compile+smoke+artifact passed.
