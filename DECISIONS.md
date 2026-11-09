@@ -354,3 +354,20 @@ Native C++ snap remains preference-gated in first experimental preview;
 do not claim a Python workbench update installs C++ binaries.
 GitHub Actions source diff requires special `core.whitespace=cr-at-eol`
 validation because FreeCAD 1.1 SnapManager.cpp is upstream CRLF.
+
+
+## 2026-11-09 — Release Windows portable app only with real Qt GUI platform smoke test
+
+Owner's first Windows native preview produced
+`no Qt platform plugin could be initialized`. Source artifact had
+`qwindows.dll` under `lib/qt6/plugins/platforms`, but launcher
+pointed to `bin/platforms`. Release validation must locate/copy the
+correct plugin from the SAME compiled Pixi runtime, write
+`bin/qt.conf`, set Qt plugin paths, validate actual WinDLL dependencies
+and instantiate a real Windows PySide6 QApplication using bundled
+Python before uploading a native preview. No silent swapping with
+stock FreeCAD DLLs, no speculative C++ core changes or rescaling.
+To avoid making owner download 1.3 GB again, ship small checked,
+standalone Qt QuickFix ZIP which overlays only launcher,
+`bin/qt.conf` and `bin/platforms/qwindows.dll` on existing native
+extract. Never touch Program Files / system FreeCAD 1.1.
