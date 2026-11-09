@@ -6,9 +6,11 @@ import importlib.util
 import json
 import tempfile
 import unittest
+import sys
 from pathlib import Path
 
 MODULE = Path(__file__).with_name("package_portable.py")
+sys.path.insert(0, str(MODULE.parent))
 spec = importlib.util.spec_from_file_location("az_package_portable", MODULE)
 m = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
@@ -27,6 +29,9 @@ class PortablePackagingTests(unittest.TestCase):
         for p in (self.env / "Library/bin", self.env / "Library/Mod/Sketcher", self.addon, self.upstream):
             p.mkdir(parents=True)
         (self.env / "Library/bin/FreeCAD.exe").write_bytes(b"dummy compiled FreeCAD")
+        plugins = self.env / "Library" / "lib" / "qt6" / "plugins" / "platforms"
+        plugins.mkdir(parents=True)
+        (plugins / "qwindows.dll").write_bytes(b"matching Qt 6 platform plugin mock")
         (self.env / "Library/Mod/Sketcher/SketcherGui.pyd").write_bytes(b"dummy")
         (self.addon / "InitGui.py").write_text("# InitGui")
         (self.addon / "package.xml").write_text("<package/>")
@@ -42,6 +47,11 @@ class PortablePackagingTests(unittest.TestCase):
         self.assertTrue((self.out / "bin/FreeCAD.exe").is_file())
         self.assertTrue((self.out / "Mod/Sketcher/SketcherGui.pyd").is_file())
         self.assertTrue((self.out / "Mod/AzDesign/InitGui.py").is_file())
+        self.assertTrue((self.out / "bin/platforms/qwindows.dll").is_file())
+        self.assertIn("Plugins = .", (self.out / "bin/qt.conf").read_text())
+        self.assertEqual(result["qt_windows_plugin"], "bin/platforms/qwindows.dll")
+        self.assertEqual(len(result["qt_windows_plugin_sha256"]), 64)
+        self.assertIn("QT_PLUGIN_PATH", (self.out / "Az Design.cmd").read_text())
         self.assertTrue((self.out / "licenses/COPYING.LIB").is_file())
         cmd = (self.out / "Az Design.cmd").read_text()
         self.assertIn("FREECAD_USER_HOME", cmd)
@@ -64,6 +74,23 @@ class PortablePackagingTests(unittest.TestCase):
         with self.assertRaisesRegex(m.PackageError, "overwrite"):
             self.call()
         self.assertEqual(marker.read_bytes(), b"real work")
+
+    def test_missing_windows_qt_platform_dll_refuses_to_publish(self):
+        (self.env / "Library/lib/qt6/plugins/platforms/qwindows.dll").unlink()
+        with self.assertRaisesRegex(m.PackageError, "qwindows.dll"):
+            self.call()
+        self.assertFalse(self.out.exists())
+
+    def test_windows_plugin_can_come_from_standard_conda_plugin_directory(self):
+        source = self.env / "Library/lib/qt6/plugins/platforms/qwindows.dll"
+        target = self.env / "Library/plugins/platforms/qwindows.dll"
+        target.parent.mkdir(parents=True)
+        source.replace(target)
+        self.call()
+        self.assertEqual(
+            (self.out / "bin/platforms/qwindows.dll").read_bytes(),
+            b"matching Qt 6 platform plugin mock",
+        )
 
     def test_never_packages_without_az_workbench(self):
         (self.addon / "InitGui.py").unlink()
