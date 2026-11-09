@@ -100,6 +100,15 @@ jobs:
             --output 'dist/AzDesign-Native-1.1-Windows-x64' `
             --commit $env:GITHUB_SHA
           if ($LASTEXITCODE -ne 0) { throw 'Portable package validation failed' }
+      - name: Smoke-test actual Qt Windows GUI platform in portable bundle
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = (Resolve-Path 'dist/AzDesign-Native-1.1-Windows-x64').Path
+          $python = Join-Path $root 'bin/python.exe'
+          if (!(Test-Path $python)) { throw 'Portable bundle is missing Python for Qt platform smoke test' }
+          $env:PYTHONNOUSERSITE = '1'
+          & $python native-core/windows/smoke_qt.py --bundle "$root"
+          if ($LASTEXITCODE -ne 0) { throw 'Bundled qwindows Qt GUI failed real initialization test' }
       - name: Make and integrity-check unsigned experimental Windows archive
         run: |
           $ErrorActionPreference = 'Stop'
