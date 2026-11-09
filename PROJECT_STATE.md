@@ -1061,3 +1061,52 @@ Latest native CI run `42488030121` was queued/in-progress when this
 handoff was recorded. **There is no confirmed compiled binary or
 downloadable native archive yet.** Examine final CI jobs/artifact
 before announcing any complete native application.
+
+
+## 2026-11-09 — Qt platform startup failure on first Windows portable build; verified drop-in fix
+
+Owner screenshot showed FreeCAD-native preview start failure:
+`This application failed to start because no Qt platform plugin could be initialized`.
+The user's existing system FreeCAD 1.1 and documents were not changed.
+
+**Verified root cause:** artifact from successful Windows native CI
+[42488156221](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42488156221)
+included `qwindows.dll` **only** at
+`lib/qt6/plugins/platforms/qwindows.dll`, while the bundled launcher set
+`QT_QPA_PLATFORM_PLUGIN_PATH=bin/platforms`. The prior package check
+only asserted compiled FreeCAD.exe and Sketcher existed, not actual Qt
+Windows display plugin initialization. Successful C++ compilation
+was never sufficient proof of Windows GUI startup.
+
+**Repair committed:** `native-core/windows/qt_runtime.py` detects the
+plugin in matching FreeCAD 1.1 Pixi Qt layouts, copies the complete
+platform plugin directory to `bin/platforms`, writes actual
+`bin/qt.conf`, and optionally checks Windows DLL dependency load;
+`package_portable.py` invokes it and refuses to distribute a broken
+Qt bundle. Launcher includes `QT_PLUGIN_PATH=bin`.
+`native-core/windows/smoke_qt.py` instantiates a *real* PySide6
+`QApplication` from the bundled Python and requires
+`platformName() == windows`; native CI now requires passing that
+before packaging. Safety tests extended for missing plugin and two
+Pixi plugin layouts. The new full native Windows CI rerun was in
+progress when the repair kit was delivered.
+
+**Small drop-in repair for original 1.3 GB build, no recompilation:**
+`native-core/windows/make_qt_fixkit.py` plus dedicated
+`.github/workflows/az-native-qt-repair.yml` downloaded the previous
+compiled preview, inspected its exact Qt plugin path, relocated the
+matching DLL, added qt.conf/launcher, and **PASSED real Windows Qt
+startup** with message `Az Qt portable platform: windows`.
+[Repair CI run 42560734235](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42560734235)
+passed all steps; artifact ID **13648924049**, ~411 KB.
+Inner `AzDesign-Native-Qt-QuickFix.zip` **411,824 bytes**,
+SHA256 `bf85e6284b5e74b32d482645ccdc991c9d815585917981d61a4f6c5284c85095`,
+both inner and outer ZIP CRC passed. Files: `Az Design.cmd`,
+`bin/qt.conf`, `bin/platforms/qwindows.dll` (918,528 bytes), README.
+Link user to verified container file
+`/mnt/data/AzDesign-Native-Qt-QuickFix.zip` (only after verifying
+current runtime as done in the repair session), or GitHub repair artifact.
+Extract ZIP directly into the existing extracted
+`AzDesign-Native-1.1-Windows-x64` root, replacing `Az Design.cmd`.
+DO NOT modify stock FreeCAD. User Windows acceptance of full
+Az Native GUI and snap behavior remains outstanding.
