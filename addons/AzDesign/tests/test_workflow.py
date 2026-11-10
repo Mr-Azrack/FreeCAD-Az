@@ -12,6 +12,7 @@ import Sketcher
 from azdesign import features, profiles, operations, history, presspull, parameters, quick_dimension, sketch_rectangle, sketch_pattern, edge_treatments, snap_targets
 from azdesign.hole_operation import HoleOperation
 from azdesign.hole_spec import HoleSpec, thread_sizes
+from azdesign.solid_pattern_engine import PatternDraft
 
 RECT = [(0, 0, 10, 0), (10, 0, 10, 10), (10, 10, 0, 10), (0, 10, 0, 0)]
 
@@ -248,6 +249,61 @@ class WorkflowTest(unittest.TestCase):
                 centers, src, columns=2, rows=2, pitch_x=0, pitch_y=45
             )
         self.assertEqual(centers.GeometryCount, before)
+
+    def test_design_solid_linear_pattern_previews_and_edits_real_holes(self):
+        """Real FreeCAD kernel: pattern one hole in a plate, cancel and edit."""
+        body = self.doc.addObject("PartDesign::Body", "PatternPlateBody")
+        plate_profile = sketch(self.doc, [], body=body, name="PatternPlateProfile")
+        sketch_rectangle.dimensioned_rectangle(plate_profile, 85, 65)
+        plate = features.create_extrude(
+            body, (plate_profile, []), whole=True, operation="New body"
+        )
+        plate.Length = 8
+        self.doc.recompute()
+        initial_volume = plate.Shape.Volume
+
+        source = sketch(self.doc, [], body=body, name="PatternSourceHole", z=8)
+        source.addGeometry(
+            Part.Circle(App.Vector(13, 13, 0), App.Vector(0, 0, 1), 2.5)
+        )
+        self.doc.recompute()
+        op = HoleOperation(self.doc, source)
+        op.preview(HoleSpec(diameter=5, depth=8, through_all=True))
+        hole = op.accept()
+        self.doc.recompute()
+        one_hole_volume = hole.Shape.Volume
+        self.assertLess(one_hole_volume, initial_volume)
+
+        # A draft must show a real native patterned solid before Apply.
+        draft = PatternDraft(hole)
+        patterned = draft.preview(2, 32, "X_Axis")
+        self.assertEqual(patterned.TypeId, "PartDesign::LinearPattern")
+        self.assertTrue(patterned.Shape.isValid())
+        self.assertEqual(patterned.Occurrences, 2)
+        self.assertLess(patterned.Shape.Volume, one_hole_volume)
+        self.assertEqual(body.Tip, patterned)
+        self.assertGreater(patterned.Shape.Volume, 0)
+        draft.cancel()
+        self.doc.recompute()
+        self.assertEqual(body.Tip.Name, hole.Name)
+        self.assertAlmostEqual(body.Shape.Volume, one_hole_volume, places=4)
+
+        draft = PatternDraft(hole)
+        saved = draft.preview(2, 32, "X_Axis")
+        draft.accept()
+        self.doc.recompute()
+        self.assertTrue(saved.Shape.isValid())
+        self.assertEqual(body.Tip, saved)
+        # Design-owned editing operates on the same native pattern, not
+        # a duplicate or a baked copy of the feature.
+        editor = PatternDraft(hole, existing=saved)
+        editor.preview(3, 24, "X_Axis")
+        self.assertEqual(saved.Occurrences, 3)
+        editor.cancel()
+        self.doc.recompute()
+        restored = self.doc.getObject(saved.Name)
+        self.assertEqual(restored.Occurrences, 2)
+        self.assertEqual(body.Tip, restored)
 
     def test_fixture_full_history_dimension_edit_hole_fillet_undo_and_save(self):
         """Release gate: one real machining fixture survives normal CAD edits."""
