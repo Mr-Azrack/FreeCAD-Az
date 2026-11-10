@@ -79,7 +79,7 @@ TOOLS = {
     "plane": Tool(
         "Offset Plane", "Az_OffsetPlane", "Select a flat face or origin plane, then enter a signed normal offset."
     ),
-    "move": Tool("Move", "Std_TransformManip", "M · Transform the selected object."),
+    "move": Tool("Move", "Az_Move", "M · Move an entire Body or component by X/Y/Z with undo."),
     "measure": Tool("Measure", "Std_Measure", "Measure selected edges, faces or objects."),
     "home": Tool(
         "Home View", "Az_Home", "Isometric view and fit the whole model.", "Std_ViewIsometric"
@@ -165,7 +165,7 @@ TOOLS = {
 SOLID = [
     (
         "CREATE",
-        ["sketch", "extrude", "cut", ("More", ["hole", "body"])],
+        ["sketch", "extrude", "cut", "hole", ("More", ["body"])],
     ),
     (
         "MODIFY",
@@ -173,6 +173,7 @@ SOLID = [
             "presspull",
             "fillet",
             "chamfer",
+            "move",
             ("More", ["parameters"]),
         ],
     ),
@@ -227,7 +228,7 @@ SKETCH_KEYS = {
 # arbitrary PartDesign task panels: our workbench keeps the surrounding UI.
 RAW_FEATURE_COMMANDS = frozenset(
     tool.command for key, tool in TOOLS.items()
-    if key in {"revolve", "loft", "sweep", "shell", "mirror", "pattern", "polar", "move", "measure"}
+    if key in {"revolve", "loft", "sweep", "shell", "mirror", "pattern", "polar", "measure"}
 )
 
 ALLOWED_NATIVE_COMMANDS = frozenset(
