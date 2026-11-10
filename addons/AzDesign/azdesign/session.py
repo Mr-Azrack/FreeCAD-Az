@@ -441,6 +441,11 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
             self.configure_view()
             self.home.refresh()
             sketch = modeling.in_sketch()
+            if sketch is None and not Gui.Control.activeDialog():
+                # The native Sketch Tasks Close button bypasses our Design
+                # Finish handler; still advance face-first Hole placement.
+                from .hole import complete_pending_face_hole
+                complete_pending_face_hole()
             editing = sketch.Name if sketch else None
             if editing != self.last_edit:
                 self.ribbon.update_context(bool(sketch))
