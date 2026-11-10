@@ -32,7 +32,9 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $csc = Join-Path $env:windir 'Microsoft.NET\Framework\v4.0.30319\csc.exe'
           $exe = Join-Path $env:RUNNER_TEMP 'AzOnlineUpdateTests.exe'
-          & $csc /nologo /target:exe "/out:$exe" /reference:System.Web.Extensions.dll 'native-core/windows/AzOnlineUpdates.cs' 'native-core/windows/test_online_updates.cs'
+          $onlineSource = (Resolve-Path 'native-core/windows/AzOnlineUpdates.cs').Path
+          $testsSource = (Resolve-Path 'native-core/windows/test_online_updates.cs').Path
+          & $csc /nologo /target:exe "/out:$exe" /reference:System.Web.Extensions.dll "$onlineSource" "$testsSource"
           if ($LASTEXITCODE -ne 0) { throw 'C# updater metadata compilation failed' }
           & $exe
           if ($LASTEXITCODE -ne 0) { throw 'Updater metadata policy failed' }
@@ -93,7 +95,9 @@ jobs:
             try { $ico.Save($stream) } finally { $stream.Dispose(); $ico.Dispose() }
             $iconArgs = @("/win32icon:$icon")
           }
-          & $csc /nologo /codepage:65001 /target:winexe "/out:$(Join-Path $new 'AzUpdater.exe')" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll @iconArgs 'native-core/windows/AzUpdater.cs' 'native-core/windows/AzOnlineUpdates.cs'
+          $updaterSource = (Resolve-Path 'native-core/windows/AzUpdater.cs').Path
+          $onlineSource = (Resolve-Path 'native-core/windows/AzOnlineUpdates.cs').Path
+          & $csc /nologo /codepage:65001 /target:winexe "/out:$(Join-Path $new 'AzUpdater.exe')" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll @iconArgs "$updaterSource" "$onlineSource"
           if ($LASTEXITCODE -ne 0) { throw 'Native updater compile failed' }
           New-Item -ItemType Directory 'dist' -Force | Out-Null
           $patch = Join-Path (Resolve-Path 'dist').Path 'AzDesignNative-0.5.3-to-0.5.4.azpatch'
