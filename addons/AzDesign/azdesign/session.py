@@ -65,6 +65,20 @@ class InteractionFilter(QtCore.QObject):
         if not self.session.active or self.forwarding:
             return False
         kind = event.type()
+        # FreeCAD 1.1's native Preferences radio indicators sometimes render
+        # as two empty rings under its bundled Windows Qt style. Scope the
+        # checked-state dot to that dialog; never restyle the whole CAD app.
+        if (kind == QtCore.QEvent.Show and
+                isinstance(watched, QtWidgets.QRadioButton)):
+            window = watched.window()
+            if window and "Preferences" in window.windowTitle():
+                watched.setStyleSheet("""
+                    QRadioButton::indicator { width: 15px; height: 15px;
+                        border: 1px solid #8898a2; border-radius: 8px;
+                        background: #ffffff; }
+                    QRadioButton::indicator:checked { background: #247bad;
+                        border: 4px solid #d9eef8; border-radius: 8px; }
+                """)
         if kind == QtCore.QEvent.MouseMove and self.is_viewport(watched):
             self.session.snap_guides.move(watched, event)
         if kind == QtCore.QEvent.Leave and self.is_viewport(watched):
