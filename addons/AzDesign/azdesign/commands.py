@@ -273,6 +273,12 @@ def dispatch(key):
         "move": lambda: __import__(
             "azdesign.move_body", fromlist=["show"]
         ).show(),
+        "mirror": lambda: __import__(
+            "azdesign.feature_transform", fromlist=["show"]
+        ).show("mirror"),
+        "pattern": lambda: __import__(
+            "azdesign.feature_transform", fromlist=["show"]
+        ).show("linear"),
         "home": home,
         "palette": palette,
         "help": help_dialog,
@@ -352,6 +358,8 @@ def menu_commands():
             "body",
             "plane",
             "move",
+            "mirror",
+            "pattern",
             "home",
             "palette",
             "help",
