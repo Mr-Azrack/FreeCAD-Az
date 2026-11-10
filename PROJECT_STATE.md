@@ -1170,3 +1170,12 @@ silent Windows installation/uninstallation and archive artifact have passed.
 The new first installer is still a large ONE-TIME download. Subsequent
 updates use changed-file ZIPs, but no automatic remote delta index
 is published yet.
+
+
+## 2026-11-09 — Design-first UX and document-routing work (under review)
+
+Owner requested no surprise raw FreeCAD feature panels and simplified visible product naming. Development branch now presents the workbench as **Design**, while retaining AzDesignWorkbench internal identity and Az feature IDs for document compatibility. The main modeling ribbon excludes raw PartDesign Revolve/Loft/Sweep/Shell/Mirror/Pattern/Move/Measure task commands, and the palette hides them. An explicit Native CAD option remains for advanced unfinished features. Native Sketcher drawing tools and FreeCAD's parametric kernel remain intentionally reused; this does **not** mean the application's entire geometry/UI stack is independent of FreeCAD.
+
+`workspace_route.py` installs a FreeCAD document observer without changing the Home screen. A new unsaved ordinary modeling document routes to Design; opened files with a saved filename are left to FreeCAD's native per-document workbench persistence; new CAM/Mesh/TechDraw documents are not hijacked; active editing tasks and inactive documents are excluded. Six new headless workspace-route tests passed in add-on CI 42733420327. First command-boundary CI test detected leftover raw Revolve entry; removed in `e4eb11e`. A subsequent CI run was queued when this record was written, so full package/native Windows validation is NOT yet confirmed.
+
+Pending: Windows interactive acceptance for last-used workbench semantics, file format routing, native plane creation, remaining clipped timeline controls; full Design-owned task panels for advanced features. Preserve draft PR and do not override stock FreeCAD.
