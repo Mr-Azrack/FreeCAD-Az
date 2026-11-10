@@ -433,3 +433,14 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [ ] Windows GUI integration tests: hole-face picker/center sketch continuity, Mirror/Pattern with real native FCStd (two pads/one pocket), Move Undo/Redo, projected edge selection, visibility toggle and existing features after edit
 - [ ] Improve sketch dimension label positioning, duplicate/ref-vs-driving clarity, over/underconstrained guidance; screenshot still shows overlap and remaining 2 DoF
 - [ ] Confirm fresh 0.5.5→0.5.6 Windows patch CI success and artifact, then controlled official release; currently no verified fresh run surfaced
+
+
+## 2026-11-10 — Build process streamlined for integrated 3–6 issue batches
+
+- [x] Keep fast add-on/modeling tests on trusted branch pushes for rapid feedback
+- [x] Stop automatically running expensive Windows native patch CI on every small edit/PR update
+- [x] Add explicit release-candidate marker trigger for version 0.5.6 and retain manual workflow entrypoint
+- [x] Add headless add-on regression checks as an early Windows patch gate before downloading the pinned baseline
+- [x] Document batch scope, severity exceptions, same-SHA release verification, and GitHub-first continuity in `BATCH_VALIDATION.md`
+- [ ] Finish current sketch/Hole/Move/Mirror/Pattern integration batch, resolve all currently failing add-on test contracts and obtain fast green CI
+- [ ] Commit candidate marker with reviewed exact SHA and scope; verify Windows patch and Qt/rollback tests, then perform owner GUI acceptance before manual publication
