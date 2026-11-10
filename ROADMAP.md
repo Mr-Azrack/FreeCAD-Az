@@ -371,3 +371,14 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [ ] Approve publishing exact verified patch as GitHub Release. Workflow must be available on default branch.
 - [ ] Owner bootstrap using existing Native - Update manual patch selector, restart, then test Design Update → Check for Updates and rollback.
 - [ ] Longer term: support chains/multiple installed baselines, no-release behavior, signing/trust beyond GitHub digest, and stable release channel.
+
+
+## 0.5.4 UI readability patch
+
+- [x] Update Windows installer workflow to 0.5.4 with original 0.5.3 run 42752856389 as baseline.
+- [x] Versioned 0.5.3→0.5.4 archive names and remote release metadata tests.
+- [x] Add baseline setup SHA256 verification before patch creation.
+- [x] Update manual public release promotion workflow to expected 0.5.4 patch.
+- [ ] Confirm full Windows patch-tests, actual patch/Qt/rollback, installer/uninstaller, uploaded artifact and hashes pass in current CI.
+- [ ] After approval, publish 0.5.4 release and verify Design's Check for Updates discovers/downloads it.
+- [ ] User Windows visual acceptance for larger ribbon, history/browser text and Quick Start version.
