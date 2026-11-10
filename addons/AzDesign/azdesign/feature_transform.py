@@ -102,7 +102,14 @@ def show(mode):
             "Mirror" if mode == "mirror" else "LinearPattern",
         )
         if "TransformMode" in transform.PropertiesList:
-            transform.TransformMode = "Features"
+            # FreeCAD versions label this native enum differently:
+            # 1.0: 'Transform tools'; 1.1: 'Features'. The first enum
+            # is the documented source-feature mode in both versions.
+            choices = getattr(transform, "getEnumerationsOfProperty", lambda _name: ())(
+                "TransformMode"
+            )
+            if choices:
+                transform.TransformMode = choices[0]
         if "Originals" not in transform.PropertiesList:
             raise DesignError("The native pattern feature lacks an Originals property.")
         transform.Originals = [feature]
