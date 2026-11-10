@@ -64,7 +64,8 @@ def validate(sketch, source, columns, rows, pitch_x, pitch_y):
     return source, columns, rows, pitch_x, pitch_y
 
 
-def pattern_circles(sketch, source, columns=2, rows=2, pitch_x=40, pitch_y=30):
+def pattern_circles(sketch, source, columns=2, rows=2, pitch_x=40, pitch_y=30,
+                    manage_transaction=True):
     """Create a native 2D circle pattern with dimensional and equal constraints.
 
     Each new center is constrained relative to the original, so editing the
@@ -76,7 +77,8 @@ def pattern_circles(sketch, source, columns=2, rows=2, pitch_x=40, pitch_y=30):
     )
     first = sketch.Geometry[source]
     doc = sketch.Document
-    doc.openTransaction("Design: Rectangular sketch pattern")
+    if manage_transaction:
+        doc.openTransaction("Design: Rectangular sketch pattern")
     created = []
     try:
         for y in range(rows):
@@ -117,11 +119,13 @@ def pattern_circles(sketch, source, columns=2, rows=2, pitch_x=40, pitch_y=30):
                 "The Sketcher solver rejected this circle pattern. "
                 "Adjust spacing or constraints before retrying."
             )
-        doc.commitTransaction()
+        if manage_transaction:
+            doc.commitTransaction()
         return tuple(created)
     except Exception:
-        doc.abortTransaction()
-        doc.recompute()
+        if manage_transaction:
+            doc.abortTransaction()
+            doc.recompute()
         raise
 
 
