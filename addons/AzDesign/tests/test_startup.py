@@ -63,7 +63,7 @@ class StartupTest(unittest.TestCase):
     def assert_workbench(self):
         self.assertEqual(len(self.registered), 1)
         workbench = self.registered[0]
-        self.assertEqual(workbench.MenuText, "Az Design")
+        self.assertEqual(workbench.MenuText, "Design")
         self.assertEqual(Path(workbench.Icon).resolve(), (self.root / "Resources/az.svg").resolve())
         self.assertTrue(Path(workbench.Icon).is_file())
         self.assertEqual(workbench.GetClassName(), "Gui::PythonWorkbench")
@@ -112,7 +112,7 @@ class StartupTest(unittest.TestCase):
         commands.register.assert_called_once_with()
         session.start.assert_called_once_with()
         session.stop.assert_called_once_with()
-        self.assertEqual(workbench.menu, ("Az Design", ["Az_Sketch", "Az_Extrude"]))
+        self.assertEqual(workbench.menu, ("Design", ["Az_Sketch", "Az_Extrude"]))
         self.assertEqual(type(workbench).__module__, "azdesign.workbench")
 
 
