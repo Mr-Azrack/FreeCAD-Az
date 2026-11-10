@@ -108,6 +108,7 @@ class StartupTest(unittest.TestCase):
         app = types.ModuleType("FreeCAD")
         app.ActiveDocument = None
         app.addDocumentObserver = Mock()
+        app.ParamGet = Mock(return_value=types.SimpleNamespace(SetBool=Mock()))
         app.Console = types.SimpleNamespace(PrintError=Mock())
         self.gui.Control = types.SimpleNamespace(activeDialog=Mock(return_value=False))
         self.gui.activeWorkbench = Mock(
@@ -121,12 +122,16 @@ class StartupTest(unittest.TestCase):
             ephemeral_locals = {}
             self.execute("InitGui.py", ephemeral_globals, ephemeral_locals)
             self.assertEqual(len(callbacks), 1)
-            self.assertEqual(callbacks[0][0], 1200)
+            self.assertEqual(callbacks[0][0], 250)
             # The real FreeCAD loader may discard either/both dictionaries.
             ephemeral_globals.clear()
             ephemeral_locals.clear()
             callbacks[0][1]()
             self.gui.activateWorkbench.assert_called_once_with("AzDesignWorkbench")
+            app.ParamGet.assert_called_once_with(
+                "User parameter:BaseApp/Preferences/General"
+            )
+            app.ParamGet.return_value.SetBool.assert_called_once_with("ShowSplasher", False)
             app.Console.PrintError.assert_not_called()
 
     def test_native_home_keeps_existing_document_workspace(self):
