@@ -269,10 +269,10 @@ class Session:
         self.history_dock.setTitleBarWidget(QtWidgets.QWidget())
         self.history = History()
         self.history_dock.setWidget(self.history)
-        self.history_dock.setMinimumHeight(47)
-        self.history_dock.setMaximumHeight(72)
+        self.history_dock.setMinimumHeight(60)
+        self.history_dock.setMaximumHeight(94)
         self.main.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.history_dock)
-        self.main.resizeDocks([self.history_dock], [58], QtCore.Qt.Vertical)
+        self.main.resizeDocks([self.history_dock], [75], QtCore.Qt.Vertical)
         self.sketch_dock = QtWidgets.QDockWidget("Sketch Palette", self.main)
         self.sketch_dock.setObjectName("AzSketchPaletteDock")
         self.sketch_dock.setAllowedAreas(QtCore.Qt.RightDockWidgetArea)
@@ -316,7 +316,7 @@ QDockWidget#AzDesignBrowserDock { background: #f8f9fa; border-right: 1px solid #
 QDockWidget#AzDesignHistoryDock { background: #e8ecef; border-top: 1px solid #cdd5dc; }
 QDockWidget#AzSketchPaletteDock { background: #f7f9fb; border-left: 1px solid #ccd9e4; }
 QDockWidget#Tasks { color: #41515d; background: #f7f8fa; }
-QStatusBar { background: #e8ecef; color: #657583; font-size: 10px; }
+QStatusBar { background: #e8ecef; color: #657583; font-size: 12px; }
 QWidget#AzHoleForm, QWidget#AzExtrudeForm {
     background: #f8fafb; color: #374f5f; }
 QWidget#AzHoleForm QLabel, QWidget#AzExtrudeForm QLabel { color: #52697a; }
