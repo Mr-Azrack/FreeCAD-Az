@@ -152,6 +152,8 @@ class SolidPatternPanel(QtWidgets.QFrame):
             lambda _axis: self.spacing.value(),
             lambda _axis, value: self.spacing.setValue(max(0.001, value)),
             mode="solid", parent=session.mdi.viewport(),
+            get_axis_name=lambda: str(self.axis.currentText()).split()[0],
+            get_counts=lambda: (self.count.value(), 1),
         )
         self.handles.hide()
         self.adjustSize()
