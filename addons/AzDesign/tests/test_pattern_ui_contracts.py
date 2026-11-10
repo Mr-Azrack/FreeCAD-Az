@@ -42,7 +42,7 @@ class FakeFeature:
 class FakePattern(FakeFeature):
     TypeId = "PartDesign::LinearPattern"
     PropertiesList = ("TransformMode", "Originals", "Direction", "Mode",
-                      "Offset", "Occurrences", "Reversed")
+                      "Offset", "Length", "Occurrences", "Reversed")
     def __init__(self):
         super().__init__("DesignLinearPattern")
 
@@ -100,7 +100,7 @@ class PatternContracts(unittest.TestCase):
         self.assertEqual(obj.Originals, [self.feature])
         self.assertEqual(obj.Direction[0].Role, "Y_Axis")
         self.assertEqual(obj.Occurrences, 4)
-        self.assertEqual(obj.Offset, 13.5)
+        self.assertEqual(obj.Length, 40.5)
         self.assertFalse(self.feature.ViewObject.Visibility)
         self.assertEqual(self.body.Tip, obj)
         self.assertFalse(any(a[0] == "commit" for a in self.doc.actions))
