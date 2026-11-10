@@ -118,6 +118,10 @@ TOOLS = {
         "D · Smart dimension: length, distance, radius, diameter or angle from the selection.",
         "Sketcher_Dimension",
     ),
+    "labels": Tool(
+        "Show / Hide Labels", "Az_SketchLabels",
+        "Temporarily toggle sketch constraint labels without changing dimensions, geometry or solver.",
+    ),
     "horizontal": Tool(
         "Horizontal", "Sketcher_ConstrainHorizontal", "Constrain selected lines horizontally."
     ),
