@@ -3,6 +3,15 @@ name: Az Native Windows Patch
 # Routine modeling/UI changes take this path. Do not rebuild or publish the
 # 1.8 GB installer for every source change.
 on:
+  # Test current trusted development branch directly; PR checks alone can
+  # remain absent for a long-lived draft PR and do not represent every SHA.
+  push:
+    branches: [codex/az-design-workbench]
+    paths:
+      - 'addons/AzDesign/**'
+      - 'native-core/windows/**'
+      - '.github/workflows/az-native-patch.yml'
+      - '.github/workflows/az-design.yml'
   pull_request:
     paths:
       - '.github/workflows/az-native-patch.yml'
