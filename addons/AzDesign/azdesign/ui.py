@@ -12,25 +12,25 @@ STYLE = """
 QWidget#AzRibbon { background: #f7f8f9; color: #354551; }
 QWidget#AzRibbon QLabel { color: #53616c; background: transparent; }
 QWidget#AzRibbon QToolButton { border: 1px solid transparent; border-radius: 3px;
- padding: 3px; color: #354551; background: transparent; font-size: 11px; }
+ padding: 3px; color: #354551; background: transparent; font-size: 13px; }
 QWidget#AzRibbon QToolButton:hover { background: #e3ebf2; border-color: #c4d5e3; }
 QWidget#AzRibbon QToolButton:pressed { background: #d5e6f3; }
 QWidget#AzRibbon QToolButton:disabled { color: #9aa5ad; }
 QWidget#AzRibbon QToolButton#AzFinish { background: #e3efdf; color: #386334; }
 QWidget#AzRibbon QToolButton#AzFinish:hover { background: #cde4c5; }
 QWidget#AzRibbon QTabBar::tab { background: transparent; border: 0; padding: 5px 20px;
- color: #65717a; font-size: 10px; font-weight: 600; }
+ color: #65717a; font-size: 12px; font-weight: 600; }
 QWidget#AzRibbon QTabBar::tab:selected { border-bottom: 2px solid #d57a3f; color: #354551; }
 QWidget#AzRibbon QTabBar#AzDocumentTabs::tab { padding: 6px 16px; min-width: 100px;
- background: #e8ecef; border-right: 1px solid #d1d8de; font-size: 11px; font-weight: normal; }
+ background: #e8ecef; border-right: 1px solid #d1d8de; font-size: 13px; font-weight: normal; }
 QWidget#AzRibbon QTabBar#AzDocumentTabs::tab:selected { background: #f7f8f9; border-bottom: 2px solid #4588ba; }
 QWidget#AzRibbon QComboBox { border: 0; border-right: 1px solid #d3dbe1;
  background: #e9edf0; padding: 10px; color: #374d5c; font-size: 14px; font-weight: 600; }
 QWidget#AzRibbon QFrame#AzSeparator { background: #d8dfe4; border: 0; min-width: 1px; max-width: 1px; }
-QWidget#AzRibbon QLabel#AzGroupLabel { color: #65717b; font-size: 9px; }
-QWidget#AzRibbon QLabel#AzHint { color: #6a7782; padding: 2px 10px; font-size: 10px; }
+QWidget#AzRibbon QLabel#AzGroupLabel { color: #65717b; font-size: 11px; }
+QWidget#AzRibbon QLabel#AzHint { color: #6a7782; padding: 3px 10px; font-size: 12px; }
 QWidget#AzHistory { background: #e8ecef; color: #41515d; }
-QWidget#AzHistory QToolButton { background: transparent; border: 1px solid transparent;
+QWidget#AzHistory QToolButton { background: transparent; font-size: 12px; border: 1px solid transparent;
  border-radius: 2px; padding: 3px; color: #41515d; }
 QWidget#AzHistory QToolButton:hover { border-color: #a2bdcf; background: #dbe6ef; }
 QWidget#AzHistory QToolButton:checked { border: 1px solid #398ddf; background: #cde3f5; }
@@ -41,7 +41,7 @@ QWidget#AzHistory QSlider::handle:horizontal { background: #367ea7;
  width: 12px; height: 15px; margin: -5px 0; border-radius: 5px; }
 QWidget#AzHistory QSlider::handle:horizontal:hover { background: #215b80; }
 QWidget#AzHistory QPushButton { border: 1px solid #ccd9e3; border-radius: 4px;
- background: #f4f7fa; padding: 4px 8px; color: #375368; font-size: 10px; }
+ background: #f4f7fa; padding: 6px 10px; color: #375368; font-size: 12px; }
 QWidget#AzHistory QPushButton:hover { background: #dbeaf5; border-color: #a9c4d7; }
 QWidget#AzHistory QPushButton:disabled { color: #9faab4; }
 QWidget#AzRibbon QPushButton#AzUpdateButton { border: 1px solid #aac8d5;
@@ -92,7 +92,7 @@ def tool_button(key, small=False):
     button.setToolButtonStyle(
         QtCore.Qt.ToolButtonIconOnly if small else QtCore.Qt.ToolButtonTextUnderIcon
     )
-    button.setMinimumSize(30 if small else 56, 28 if small else 51)
+    button.setMinimumSize(36 if small else 78, 34 if small else 64)
     button.clicked.connect(lambda _checked=False: commands.invoke(tool.command))
     if key == "finish":
         button.setObjectName("AzFinish")
@@ -180,7 +180,7 @@ class Ribbon(QtWidgets.QFrame):
         content.addWidget(self.tabs)
         self.pages = QtWidgets.QStackedWidget()
         self.pages.setObjectName("AzRibbonPages")
-        self.pages.setFixedHeight(72)
+        self.pages.setMinimumHeight(90)
         for groups in (SOLID, SKETCH, UTILITIES):
             self.pages.addWidget(self.make_page(groups))
         self.tabs.currentChanged.connect(self.pages.setCurrentIndex)
@@ -360,7 +360,7 @@ class FeatureButton(QtWidgets.QToolButton):
         self.setIconSize(QtCore.QSize(22, 22))
         self.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
         self.setCheckable(True)
-        self.setFixedSize(31, 34)
+        self.setFixedSize(38, 42)
         self.setAccessibleName(obj.Label)
         self.setToolTip(
             obj.Label + " · " + obj.TypeId
@@ -584,7 +584,7 @@ class History(QtWidgets.QWidget):
         self.scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.scroll.setMinimumHeight(37)
+        self.scroll.setMinimumHeight(45)
         self.scroll.setStyleSheet(
             "QScrollArea, QScrollArea > QWidget > QWidget {background: transparent; border: 0;}"
         )
@@ -596,7 +596,7 @@ class History(QtWidgets.QWidget):
         scrub_layout.setSpacing(0)
         label = QtWidgets.QLabel("HISTORY")
         label.setToolTip("Drag the marker to roll back to an earlier solid.")
-        label.setStyleSheet("color: #657b8b; font-size: 9px; font-weight: 600;")
+        label.setStyleSheet("color: #657b8b; font-size: 11px; font-weight: 600;")
         scrub_layout.addWidget(label)
         self.scrub = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.scrub.setObjectName("AzHistoryScrub")
