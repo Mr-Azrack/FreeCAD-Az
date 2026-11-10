@@ -41,8 +41,9 @@ class FakeFeature:
 
 class FakePattern(FakeFeature):
     TypeId = "PartDesign::LinearPattern"
-    PropertiesList = ("TransformMode", "Originals", "Direction", "Mode",
-                      "Offset", "Length", "Occurrences", "Reversed")
+    PropertiesList = ("TransformMode", "Originals", "Direction", "Direction2",
+                      "Mode", "Mode2", "Offset", "Length", "Length2",
+                      "Occurrences", "Occurrences2", "Reversed")
     def __init__(self):
         super().__init__("DesignLinearPattern")
 
@@ -106,6 +107,16 @@ class PatternContracts(unittest.TestCase):
         self.assertFalse(any(a[0] == "commit" for a in self.doc.actions))
         draft.accept()
         self.assertEqual(self.doc.actions[-1], ("commit",))
+
+    def test_two_axis_grid_is_owned_and_committed_once(self):
+        draft = self.engine.PatternDraft(self.feature)
+        pattern = draft.preview(2, 12, "X_Axis", count2=2,
+                                spacing2=18, direction2="Y_Axis")
+        self.assertEqual(pattern.Occurrences2, 2)
+        self.assertEqual(pattern.Direction2[0].Role, "Y_Axis")
+        self.assertEqual(pattern.Length2, 18)
+        draft.accept()
+        self.assertEqual(len([a for a in self.doc.actions if a[0] == "commit"]), 1)
 
     def test_cancel_aborts_and_restores_original_visibility(self):
         draft = self.engine.PatternDraft(self.feature)
