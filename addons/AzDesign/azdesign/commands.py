@@ -265,7 +265,7 @@ def dispatch(key):
         "sizedrect": lambda: __import__(
             "azdesign.sketch_rectangle", fromlist=["prompt_sized_rectangle"]
         ).prompt_sized_rectangle(),
-        "finish": modeling.finish_sketch,
+        "finish": finish_sketch_command,
         "body": modeling.new_body,
         "plane": lambda: __import__(
             "azdesign.offset_plane", fromlist=["show"]
@@ -287,6 +287,14 @@ def dispatch(key):
         "update": update_az_design,
     }
     return adapters[key]()
+
+
+def finish_sketch_command():
+    """Exit sketch edit and, for face-originated holes, open Hole settings."""
+    sketch = modeling.finish_sketch()
+    from .hole import finish_face_hole
+    finish_face_hole(sketch)
+    return sketch
 
 
 def smart_dimension():
