@@ -122,9 +122,14 @@ class PatternDraft:
             if choices:
                 obj.TransformMode = choices[0]
         obj.Direction = (axis, [""])
-        obj.Mode = "Spacing"
-        obj.Offset = spacing
+        # Legacy FreeCAD names this enum "Overall Length", while newer
+        # builds use "Extent". Both are the first native mode. The source
+        # space between instances is exactly Length / (Occurrences-1).
+        modes = getattr(obj, "getEnumerationsOfProperty", lambda _name: ())("Mode")
+        if modes:
+            obj.Mode = modes[0]
         obj.Occurrences = count
+        obj.Length = spacing * (count - 1)
         if reversed_direction:
             if "Reversed" not in obj.PropertiesList:
                 raise DesignError("This FreeCAD build does not expose reverse pattern direction.")
