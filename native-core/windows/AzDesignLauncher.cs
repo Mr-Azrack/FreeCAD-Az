@@ -34,6 +34,10 @@ static class AzDesignLauncher
             ProcessStartInfo psi = new ProcessStartInfo(executable);
             psi.WorkingDirectory = Path.Combine(root, "bin");
             psi.UseShellExecute = false;
+            // Only ordinary launches default to Design Home. File arguments
+            // retain their stored workbench routing and specialized contexts.
+            if (args.Length == 0)
+                psi.EnvironmentVariables["AZ_DESIGN_NATIVE_HOME"] = "1";
             psi.EnvironmentVariables["FREECAD_USER_HOME"] = profile;
             psi.EnvironmentVariables["FREECAD_USER_DATA"] = Path.Combine(profile, "Data");
             psi.EnvironmentVariables["QT_PLUGIN_PATH"] = Path.Combine(root, "bin");
