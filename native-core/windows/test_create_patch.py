@@ -65,11 +65,13 @@ class PatchCreationTests(unittest.TestCase):
     def test_does_not_patch_system_uninstaller_or_version_state(self):
         self.write(self.before, "unins000.exe", b"old")
         self.write(self.after, "unins000.exe", b"new")
-        self.write(self.before, "Az Native Version.json", b'{"version":"1"}')
-        self.write(self.after, "Az Native Version.json", b'{"version":"2"}')
+        self.write(self.before, "AZ Native Version.json", b'{"version":"1"}')
+        self.write(self.after, "AZ Native Version.json", b'{"version":"2"}')
         manifest = patcher.make_patch(self.before, self.after, self.output, "1", "2")
         self.assertEqual(manifest["files"], [])
         self.assertEqual(manifest["delete"], [])
+        with self.assertRaises(ValueError):
+            patcher.safe_rel("AZ Native Version.json")
 
 
 if __name__ == "__main__":
