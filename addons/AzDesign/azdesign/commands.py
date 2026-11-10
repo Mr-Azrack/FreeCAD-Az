@@ -281,8 +281,8 @@ def dispatch(key):
             "azdesign.feature_transform", fromlist=["show"]
         ).show("mirror"),
         "pattern": lambda: __import__(
-            "azdesign.feature_transform", fromlist=["show"]
-        ).show("linear"),
+            "azdesign.solid_pattern", fromlist=["show"]
+        ).show(),
         "home": home,
         "palette": palette,
         "help": help_dialog,
