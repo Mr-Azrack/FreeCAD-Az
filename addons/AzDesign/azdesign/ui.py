@@ -81,13 +81,96 @@ def command_icon(name):
     return icon
 
 
+
+def design_icon(key):
+    """Draw recognizable, resolution-independent icons even without FreeCAD resources.
+
+    The native Windows runtime may omit registered SVG command resources; paint
+    locally instead of leaving the SOLID ribbon and floating navigator blank.
+    """
+    pixmap = QtGui.QPixmap(40, 40)
+    pixmap.fill(QtCore.Qt.transparent)
+    painter = QtGui.QPainter(pixmap)
+    painter.setRenderHint(QtGui.QPainter.Antialiasing, True)
+    painter.setPen(QtGui.QPen(QtGui.QColor("#24648a"), 2.5))
+    painter.setBrush(QtCore.Qt.NoBrush)
+    k = key.lower()
+    if k in ("sketch", "rectangle", "sizedrect", "centerrect"):
+        painter.drawRect(7, 10, 25, 20)
+        painter.drawLine(7, 30, 32, 10)
+    elif k in ("extrude", "presspull", "body"):
+        painter.drawRect(6, 15, 21, 18)
+        painter.drawLine(6, 15, 16, 7)
+        painter.drawLine(27, 15, 34, 7)
+        painter.drawLine(16, 7, 34, 7)
+        painter.drawLine(27, 33, 34, 25)
+        painter.drawLine(34, 7, 34, 25)
+    elif k in ("cut", "hole", "circle"):
+        painter.drawEllipse(8, 8, 24, 24)
+        painter.drawEllipse(15, 15, 10, 10)
+        if k == "cut":
+            painter.drawLine(6, 34, 34, 6)
+    elif k in ("fillet", "chamfer"):
+        painter.drawLine(8, 31, 8, 10)
+        painter.drawLine(8, 31, 31, 31)
+        if k == "fillet":
+            painter.drawArc(8, 8, 24, 24, 0, 90 * 16)
+        else:
+            painter.drawLine(8, 17, 17, 8)
+    elif k in ("plane", "offset"):
+        painter.drawRect(8, 8, 22, 17)
+        painter.drawLine(13, 32, 35, 32)
+        painter.drawLine(19, 28, 19, 24)
+        painter.drawLine(19, 28, 15, 24)
+        painter.drawLine(19, 28, 23, 24)
+    elif k in ("snaps", "dimension", "parameters"):
+        painter.drawLine(5, 19, 35, 19)
+        painter.drawLine(8, 13, 8, 25)
+        painter.drawLine(32, 13, 32, 25)
+        painter.drawEllipse(17, 16, 6, 6)
+    elif k in ("home", "fit", "history-start", "history-back",
+               "history-next", "history-end", "zoom-in", "zoom-out"):
+        if k in ("home", "fit"):
+            painter.drawRect(12, 15, 16, 15)
+            painter.drawLine(9, 16, 20, 6)
+            painter.drawLine(20, 6, 31, 16)
+        else:
+            right = k in ("history-next", "history-end")
+            if right:
+                painter.drawLine(11, 9, 27, 20)
+                painter.drawLine(27, 20, 11, 31)
+            else:
+                painter.drawLine(29, 9, 13, 20)
+                painter.drawLine(13, 20, 29, 31)
+            if k.endswith(("start", "end")):
+                x = 33 if right else 7
+                painter.drawLine(x, 8, x, 32)
+    elif k in ("line", "project", "trim", "construction"):
+        painter.drawLine(8, 31, 32, 9)
+        painter.drawEllipse(5, 28, 6, 6)
+        painter.drawEllipse(29, 6, 6, 6)
+    else:
+        initials = {
+            "new": "+", "palette": "?", "help": "?",
+            "save": "S", "undo": "↶", "redo": "↷",
+            "settings": "⚙", "display": "D", "standard": "V",
+        }.get(k, k[:1].upper())
+        painter.setPen(QtGui.QColor("#24648a"))
+        font = painter.font()
+        font.setBold(True)
+        font.setPixelSize(24)
+        painter.setFont(font)
+        painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, initials)
+    painter.end()
+    return QtGui.QIcon(pixmap)
+
 def tool_button(key, small=False):
     tool = TOOLS[key]
     button = QtWidgets.QToolButton()
     button.setObjectName("AzTool_" + key)
     button.setText(tool.label)
     button.setToolTip(tool.tip)
-    button.setIcon(command_icon(tool.icon or tool.command))
+    button.setIcon(design_icon(key))
     button.setIconSize(QtCore.QSize(18 if small else 29, 18 if small else 29))
     button.setToolButtonStyle(
         QtCore.Qt.ToolButtonIconOnly if small else QtCore.Qt.ToolButtonTextUnderIcon
