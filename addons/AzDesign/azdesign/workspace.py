@@ -55,7 +55,15 @@ def action_button(text, name, callback, parent=None):
     button.setText(text)
     button.setToolTip(text)
     button.setAccessibleName(text)
-    actual_icon = icon(name)
+    from .ui import design_icon
+    icon_keys = {
+        "Home view": "home", "Fit": "fit", "Zoom in": "zoom-in",
+        "Zoom out": "zoom-out", "Display settings": "display",
+        "Standard views": "standard", "Show native properties": "parameters",
+        "First solid": "history-start", "Previous feature": "history-back",
+        "Next feature": "history-next", "Latest history": "history-end",
+    }
+    actual_icon = design_icon(icon_keys.get(text, "settings"))
     button.setIcon(actual_icon)
     button.setIconSize(QtCore.QSize(20, 20))
     # FreeCAD/Qt may globally configure QToolButton text beside the icon.
