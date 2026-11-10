@@ -580,6 +580,12 @@ def finish_face_hole(sketch):
     return True
 
 
+def cancel_pending_face_hole():
+    """Do not carry transient Hole placement into a different workspace."""
+    global _pending_face_hole
+    _pending_face_hole = None
+
+
 def complete_pending_face_hole():
     """Handle the native Sketch Tasks Close button as well as Design Finish."""
     global _pending_face_hole
