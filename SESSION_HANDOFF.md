@@ -1153,3 +1153,12 @@ Owner directs: treat integrated FreeCAD core as implementation detail; do not ex
 - New package tests: `test_command_boundary.py` and `test_workspace_route.py`; both registered in `.github/workflows/az-design.yml`. Startup test expectations updated for menu rename.
 - First add-on CI run 42733420327: **6 workspace-routing tests passed**, but command-boundary test found the remaining raw Revolve listing in Solid. Fixed in commit `e4eb11e`; check the next CI run. First run did not finish packaging; do not declare a passed package yet.
 - Remaining: inspect all other pathways (context menus, keyboard dispatch, native edit handlers) that might still invoke unwanted raw task panels; design proper replacement panels per feature instead of silently bypassing FreeCAD's native kernel. Preserve explicit native CAD access and document interchange. Windows interactive workbench-restore and Home testing not yet verified by owner. Never promise exact last-used on unsaved workbench changes; FreeCAD persists its workbench association when saving a document.
+
+
+## 2026-11-09 evening — Native update 0.5.3 handoff
+
+User asked for one integrated update button after confirming installed native 0.5.2 works. Implemented source: `native-core/windows/AzOnlineUpdates.cs`, updated `AzUpdater.cs`, `commands.py`, Windows installer CI and `test_online_updates.cs`, plus manual publish workflow. Search commit history around `52dcf69`, `e762ad0`, `fd150ff`, `faf4e64`, `3001596`, `d16e9c5`, `8c86d26`. Verify branch HEAD because subsequent docs/edits may have advanced it.
+
+Behavior: inside native 0.5.3, Design Update opens bundled AzUpdater.exe; online Check for Updates queries latest non-prerelease GitHub Release, selects exact source-version patch and verifies GitHub SHA256 digest before calling existing rollback-safe PowerShell process. For currently installed 0.5.2, UI still lacks these new features: first run Windows Native - Update with verified 0.5.2→0.5.3 .azpatch (manual selector), only AFTER artifact passes CI. Manual promotion workflow cannot run from draft feature branch alone because workflow_dispatch requires default-branch presence; no public release published yet.
+
+Critical next action: fetch current run jobs and failures for Az Native Windows Installer workflow, verify `patch-tests` compiler and complete native 0.5.3 patch generation/Qt/rollback/artifact. Correct any compile or scripted build failure. Do not claim success until those gates pass; do not force-push/merge draft PR/replace stock FreeCAD. Update docs at next verified milestone.
