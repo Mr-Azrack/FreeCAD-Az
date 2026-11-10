@@ -66,9 +66,9 @@ TOOLS = {
         "Sketcher_CreatePoint",
     ),
     "shell": Tool("Shell", "PartDesign_Thickness", "Hollow a solid; select the faces to remove."),
-    "mirror": Tool("Mirror", "PartDesign_Mirrored", "Mirror selected features across a plane."),
+    "mirror": Tool("Mirror", "Az_Mirror", "Mirror a selected solid feature across an origin plane."),
     "pattern": Tool(
-        "Linear Pattern", "PartDesign_LinearPattern", "Repeat selected features in a line."
+        "Linear Pattern", "Az_LinearPattern", "Repeat a selected feature along a body origin axis."
     ),
     "polar": Tool(
         "Circular Pattern", "PartDesign_PolarPattern", "Repeat selected features around an axis."
@@ -174,7 +174,7 @@ SOLID = [
             "fillet",
             "chamfer",
             "move",
-            ("More", ["parameters"]),
+            ("More", ["parameters", "mirror", "pattern"]),
         ],
     ),
     ("CONSTRUCT", ["plane"]),
@@ -228,7 +228,7 @@ SKETCH_KEYS = {
 # arbitrary PartDesign task panels: our workbench keeps the surrounding UI.
 RAW_FEATURE_COMMANDS = frozenset(
     tool.command for key, tool in TOOLS.items()
-    if key in {"revolve", "loft", "sweep", "shell", "mirror", "pattern", "polar", "measure"}
+    if key in {"revolve", "loft", "sweep", "shell", "polar", "measure"}
 )
 
 ALLOWED_NATIVE_COMMANDS = frozenset(
