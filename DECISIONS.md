@@ -411,3 +411,8 @@ Keep existing tested 0.5.2 installed app as the baseline. Native installed Desig
 ## 2026-11-10 — 0.5.4 release baseline decision
 
 Patch a real first-successful 0.5.3 installed baseline from workflow run 42752856389 (original 43.5 KiB patch-generation artifact) to 0.5.4, preserving exact old-file baseline hashes. Do not generate another patch from 0.5.2 or a late rebuild labeled 0.5.3. Verify original installer .sha256 before install and use current rollback-protected updater, Windows Qt smoke, real Inno install/uninstall. Keep release promotion separate and explicitly approved from main; don't merge draft feature branch without consent.
+
+
+## 2026-11-10 — Separate routine patch CI from full installer
+
+Routine Python workspace/UI/updater edits must produce only a hash-verified 0.5.3→0.5.4 native patch, testing actual old-version apply, Qt startup, rollback and uninstall. Old baseline must be the pinned successful original Windows 0.5.3 installer and checksum; do not silently rebuild a pseudo-baseline. Construct old/new **allowlisted file overlays** from the installed baseline and current source, so the patch cannot include unrelated FreeCAD runtime/C++ core files. Run the expensive full native core/Inno 1.8GB installer workflow only manually for major releases; preserve manual GitHub Release approval. The pinned baseline setup still must be downloaded for safety until a separately validated content-addressed baseline cache exists.
