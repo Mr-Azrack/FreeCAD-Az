@@ -106,6 +106,26 @@ def create_sketch(support=None, plane=None):
                     break
             if support:
                 break
+            # An edge does not uniquely define a sketch plane. If it borders
+            # exactly one planar face, reuse that face; at a corner with two
+            # plausible faces, leave the in-canvas plane picker active rather
+            # than silently choosing the wrong support.
+            for edge_name, subshape in zip(selection.SubElementNames, selection.SubObjects):
+                if not edge_name.startswith("Edge"):
+                    continue
+                import Part
+                faces = selection.Object.Shape.ancestorsOfType(subshape, Part.Face)
+                planar = [face for face in faces if isinstance(face.Surface, Part.Plane)]
+                if len(planar) != 1:
+                    continue
+                for number, candidate in enumerate(selection.Object.Shape.Faces, 1):
+                    if candidate.isSame(planar[0]):
+                        support = (selection.Object, ["Face" + str(number)])
+                        break
+                if support:
+                    break
+            if support:
+                break
     if support is None and plane is None:
         from .sketch_plane_picker import show
         show()
