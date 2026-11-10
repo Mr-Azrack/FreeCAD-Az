@@ -270,6 +270,9 @@ def dispatch(key):
         "plane": lambda: __import__(
             "azdesign.offset_plane", fromlist=["show"]
         ).show(),
+        "move": lambda: __import__(
+            "azdesign.move_body", fromlist=["show"]
+        ).show(),
         "home": home,
         "palette": palette,
         "help": help_dialog,
@@ -348,6 +351,7 @@ def menu_commands():
             "sizedrect",
             "body",
             "plane",
+            "move",
             "home",
             "palette",
             "help",
