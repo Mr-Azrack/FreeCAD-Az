@@ -22,57 +22,59 @@ static class AzNativeUpdater
         Application.SetCompatibleTextRenderingDefault(false);
         root = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
         window = new Form();
-        window.Text = "Az Design Native – Update";
-        window.ClientSize = new Size(470, 275);
+        window.Text = "Design Native – Update";
+        window.AutoScaleMode = AutoScaleMode.Font;
+        window.Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 10.5f, FontStyle.Regular);
+        window.ClientSize = new Size(560, 318);
         window.FormBorderStyle = FormBorderStyle.FixedDialog;
         window.StartPosition = FormStartPosition.CenterScreen;
         window.MaximizeBox = false;
         window.MinimizeBox = false;
 
         Label heading = new Label();
-        heading.Text = "Az Design Native updater";
-        heading.Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 13, FontStyle.Bold);
+        heading.Text = "Design Native updater";
+        heading.Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 15, FontStyle.Bold);
         heading.Location = new Point(20, 18);
-        heading.Size = new Size(420, 30);
+        heading.Size = new Size(520, 34);
         window.Controls.Add(heading);
 
         versionLabel = new Label();
         versionLabel.Text = VersionText();
-        versionLabel.Location = new Point(20, 55);
-        versionLabel.Size = new Size(420, 26);
+        versionLabel.Location = new Point(20, 64);
+        versionLabel.Size = new Size(520, 28);
         window.Controls.Add(versionLabel);
 
         Label help = new Label();
         help.Text = "Check approved GitHub releases for a small verified patch. Save and close Design before installing. Manual patch and rollback remain available.";
-        help.Location = new Point(20, 85);
-        help.Size = new Size(420, 54);
+        help.Location = new Point(20, 105);
+        help.Size = new Size(520, 68);
         window.Controls.Add(help);
 
         Button check = new Button();
         check.Text = "Check for Updates";
-        check.Location = new Point(20, 145);
-        check.Size = new Size(430, 42);
+        check.Location = new Point(20, 188);
+        check.Size = new Size(520, 46);
         check.Click += (sender, e) => CheckOnline(check);
         window.Controls.Add(check);
 
         Button apply = new Button();
         apply.Text = "Install patch ZIP...";
-        apply.Location = new Point(20, 207);
-        apply.Size = new Size(145, 37);
+        apply.Location = new Point(20, 256);
+        apply.Size = new Size(166, 43);
         apply.Click += (s, e) => ChoosePatch();
         window.Controls.Add(apply);
 
         Button rollback = new Button();
         rollback.Text = "Roll back update";
-        rollback.Location = new Point(179, 207);
-        rollback.Size = new Size(145, 37);
+        rollback.Location = new Point(197, 256);
+        rollback.Size = new Size(166, 43);
         rollback.Click += (s, e) => Rollback();
         window.Controls.Add(rollback);
 
         Button close = new Button();
         close.Text = "Close";
-        close.Location = new Point(338, 207);
-        close.Size = new Size(112, 37);
+        close.Location = new Point(375, 256);
+        close.Size = new Size(165, 43);
         close.Click += (s, e) => window.Close();
         window.Controls.Add(close);
 
