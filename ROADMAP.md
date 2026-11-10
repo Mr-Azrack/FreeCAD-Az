@@ -348,3 +348,14 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [ ] Later signed binaries/installer, branding/icon improvements,
       patch channel/certificate policy and Windows DPI tests at
       100/125/150 percent.
+
+
+## Design-first command and document routing (2026-11-09)
+
+- [x] Rename visible workbench/menu and Find a Tool presentation to **Design**; retain internal Az identifiers for compatibility.
+- [x] Remove raw PartDesign feature task commands from the main Design Solid ribbon and Find a Tool results; retain Native CAD explicit escape.
+- [x] Add command whitelist/blocked raw-feature guards and CI command-boundary regression test.
+- [x] Add document observer for Home → new ordinary model → Design; preserve reopened file saved workbench and specialized CAM context; headless regression tests pass.
+- [ ] Pass current full add-on packaging/modeling CI after correcting first discovered Revolve command escape; verify Windows native app integration.
+- [ ] Add Design-owned replacement task panels for Revolve, Loft, Sweep, Shell, Mirror, Patterns, Move, and Measure, with native parametric semantics and tested Undo/Redo/Cancel.
+- [ ] Owner Windows acceptance for Home, new models, reopened Design/CAM files, and active task preservation; investigate imported non-FCStd formats individually.
