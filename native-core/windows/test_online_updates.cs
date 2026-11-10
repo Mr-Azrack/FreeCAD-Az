@@ -18,21 +18,21 @@ static class OnlineUpdateTests {
     }
     public static void Main() {
         string hash = "sha256:" + new string('a', 64);
-        var good = AzOnlineUpdates.Select(Asset("0.5.4", "0.5.5", hash), "0.5.4");
-        Assert(good != null && good.To == "0.5.5" && good.Bytes == 12345,
+        var good = AzOnlineUpdates.Select(Asset("0.5.5", "0.5.6", hash), "0.5.5");
+        Assert(good != null && good.To == "0.5.6" && good.Bytes == 12345,
             "Verified release patch was not selected");
-        Assert(AzOnlineUpdates.Select(Asset("0.5.4", "0.5.5", hash), "0.5.3") == null,
+        Assert(AzOnlineUpdates.Select(Asset("0.5.5", "0.5.6", hash), "0.5.4") == null,
             "Wrong baseline was accepted");
-        Assert(AzOnlineUpdates.Select(Asset("0.5.4", "0.5.4", hash), "0.5.4") == null,
+        Assert(AzOnlineUpdates.Select(Asset("0.5.5", "0.5.5", hash), "0.5.5") == null,
             "Downgrade was accepted");
-        Assert(AzOnlineUpdates.Select(Asset("0.5.4", "0.5.5", hash, null, true), "0.5.4") == null,
+        Assert(AzOnlineUpdates.Select(Asset("0.5.5", "0.5.6", hash, null, true), "0.5.5") == null,
             "Prerelease was accepted");
-        Assert(AzOnlineUpdates.Select(Asset("0.5.4", "0.5.5", ""), "0.5.4") == null,
+        Assert(AzOnlineUpdates.Select(Asset("0.5.5", "0.5.6", ""), "0.5.5") == null,
             "Missing GitHub digest was accepted");
-        Assert(AzOnlineUpdates.Select(Asset("0.5.4", "0.5.5", "sha256:bad"), "0.5.4") == null,
+        Assert(AzOnlineUpdates.Select(Asset("0.5.5", "0.5.6", "sha256:bad"), "0.5.5") == null,
             "Bad digest was accepted");
         Assert(AzOnlineUpdates.Select(
-            Asset("0.5.4", "0.5.5", hash, "https://example.com/evil.azpatch"),
+            Asset("0.5.5", "0.5.6", hash, "https://example.com/evil.azpatch"),
             "0.5.4") == null, "Untrusted download host was accepted");
         Console.WriteLine("PASS: verified GitHub update selection and rejected unsafe releases");
     }
