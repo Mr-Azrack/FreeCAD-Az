@@ -153,8 +153,8 @@ static class AzNativeUpdater
             }
             if (MessageBox.Show(window,
                 "Verified patch: " + patch.From + " to " + patch.To +
-                "\\nSize: " + (patch.Bytes / 1024) + " KB" +
-                "\\n\\nDownload this GitHub release patch? Your documents will not be modified. " +
+                "\nSize: " + (patch.Bytes / 1024) + " KB" +
+                "\n\nDownload this GitHub release patch? Your documents will not be modified. " +
                 "You must save and close Design before applying it.",
                 "Design Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
                 return;
