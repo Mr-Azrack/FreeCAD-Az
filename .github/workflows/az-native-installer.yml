@@ -1,11 +1,8 @@
 name: Az Native Windows Installer
 
+# Full installer requires an explicit manual run. Routine pull requests use
+# az-native-patch.yml and never recompress the whole native FreeCAD runtime.
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/az-native-installer.yml'
-      - 'native-core/windows/**'
-      - 'addons/AzDesign/azdesign/workspace.py'
   workflow_dispatch:
 
 permissions:
