@@ -152,6 +152,7 @@ class SketchPatternPanel(QtWidgets.QFrame):
                 self.pitch_x if axis == "x" else self.pitch_y
             ).setValue(value),
             mode="sketch", parent=session.mdi.viewport(),
+            get_counts=lambda: (self.columns.value(), self.rows.value()),
         )
         self.handles.hide()
         self.adjustSize()
