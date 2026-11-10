@@ -1,0 +1,16 @@
+Design Native v0.5.6 — Batch candidate 1
+Source revision: a882178990d14a20eeda8d21e4119e292a3ac3fb
+Scope:
+- Native Home launch and in-app incremental updater
+- Sketch plane/face selection, Esc cancellation and navigation
+- Sketch external edge projection and reference-label handling
+- Solid Move, face-first Hole, Mirror and Linear Pattern
+- Extrude-first workflow and UI button / selection fixes
+Preflight:
+- Previous fast package run failed obsolete Sketcher_External command,
+  now corrected to Sketcher_Projection in source revision above.
+- Native Windows job must run every listed headless test before the large
+  pinned installer download. Any failure blocks patch artifact and release.
+Acceptance:
+- Validate patch apply on 0.5.5, Qt smoke, rollback and uninstall.
+- Manual GUI acceptance and owner release approval remain separate.
