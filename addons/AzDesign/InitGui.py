@@ -24,18 +24,23 @@ if _az_os.environ.get("AZ_DESIGN_NATIVE_HOME") == "1":
         from azdesign.qt import QtCore as _AzQtCore
         import FreeCAD as _az_App
 
-        def _az_show_native_home():
-            if _az_App.ActiveDocument is not None:
+        # FreeCAD executes InitGui.py with an ephemeral namespace. Qt invokes
+        # this callback *after* that namespace has been cleared; bind App and
+        # Gui to immutable defaults rather than looking up vanished globals.
+        def _az_show_native_home(app=_az_App, gui=Gui):
+            if app.ActiveDocument is not None:
                 return
-            if Gui.Control.activeDialog():
+            if gui.Control.activeDialog():
                 return
-            current = Gui.activeWorkbench()
+            current = gui.activeWorkbench()
             if current and current.name() == "AzDesignWorkbench":
                 return
             try:
-                Gui.activateWorkbench("AzDesignWorkbench")
-            except (RuntimeError, ValueError):
-                _az_App.Console.PrintError("Unable to activate Design Home at startup.\\n")
+                gui.activateWorkbench("AzDesignWorkbench")
+            except (RuntimeError, ValueError) as exc:
+                app.Console.PrintError(
+                    "Unable to activate Design Home at startup: " + str(exc) + "\\n"
+                )
 
         _AzQtCore.QTimer.singleShot(1200, _az_show_native_home)
     except ImportError:
