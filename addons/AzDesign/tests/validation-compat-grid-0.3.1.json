@@ -1,0 +1,121 @@
+{
+  "version": "0.3.1",
+  "date": "2026-11-06",
+  "base_commit": "d6d9611917a9e47745659c87fedda456cab4c5dc",
+  "reported_snippets": [
+    "Midplane is deprecated and replaced by SideType",
+    "('Boolean',)"
+  ],
+  "reproduced_before_fix": {
+    "boolean_preference_restore": "KeyError: Boolean",
+    "empty_parameter_group": "TypeError: NoneType object is not iterable",
+    "regressions_run": 2,
+    "errors": 2
+  },
+  "fixes": [
+    "Capability-based SideType/Type2 on modern native extrusion features; Midplane/TwoLengths only on legacy features.",
+    "Native Press/Pull reads SideType where present.",
+    "Boolean/Integer and legacy Bool/Int preference names are accepted; empty GetContents is supported.",
+    "Grid defaults on, uses 10 mm major and 2 mm minor modeling lines, and remembers the Az preference.",
+    "Native aligned sketch grid follows the same toggle and restores its previous view property on exit.",
+    "World grid is unpickable and contributes no native scene bounds; entering a sketch and Az Home/Fit exclude floor decoration."
+  ],
+  "tests": {
+    "modern_legacy_extrusion_contracts": {
+      "count": 3,
+      "passed": true,
+      "scope": "Modern setter/read contract tested with deprecated Midplane access forbidden; no native FreeCAD 1.1 runtime available."
+    },
+    "preference_lifecycle": {
+      "count": 4,
+      "passed": true
+    },
+    "document_context": {
+      "count": 13,
+      "passed": true
+    },
+    "startup": {
+      "count": 5,
+      "passed": true
+    },
+    "installer": {
+      "count": 4,
+      "passed": true
+    },
+    "native_modeling": {
+      "count": 26,
+      "passed": true,
+      "platform": "Linux FreeCAD 1.0"
+    },
+    "native_grid": {
+      "freecad_version": [
+        "1",
+        "0",
+        "0",
+        "",
+        "https://code.launchpad.net/~vcs-imports/freecad/trunk",
+        "2026/08/25 11:49:11"
+      ],
+      "checks": [
+        "fresh Az grid preference defaults to visible",
+        "display menu reflects visible grid",
+        "floor decoration does not contribute to native scene bounds",
+        "3D canvas grid is visible",
+        "sketch editor shows its native aligned grid",
+        "world XY grid is hidden in sketch mode",
+        "entering the sketch fits its profile instead of the floor grid",
+        "display toggle hides the sketch grid",
+        "display toggle restores the sketch grid",
+        "leaving sketch restores its prior view property",
+        "leaving sketch restores the world grid",
+        "grids create no saved model objects",
+        "pre-existing native Boolean preference restores without exception",
+        "old workspace is fully removed",
+        "grid-off preference survives re-entry",
+        "grid is restored after re-entry"
+      ],
+      "passed": true,
+      "model_scene_bounds": [
+        20.0,
+        20.0,
+        0.0
+      ],
+      "sketch_camera_height": 4.1421356201171875,
+      "native_saved_boolean_kind": "Boolean"
+    },
+    "native_solid_smoke": {
+      "valid": true,
+      "volume": 2399.9999999999995,
+      "problem": null
+    },
+    "earlier_v02_gui": {
+      "count": 27,
+      "passed": true,
+      "provenance": "Before final scene-bounds correction; not a final-source GUI rerun."
+    },
+    "earlier_original_gui": {
+      "count": 30,
+      "passed": true,
+      "provenance": "Before final scene-bounds correction; not a final-source GUI rerun."
+    }
+  },
+  "manual_visual_checks": [
+    "3D floor with major/minor grid and model framed at usable scale.",
+    "20 mm square sketch displays native aligned grid with readable geometry in the Sketch Palette."
+  ],
+  "native_coin_bounds_probe": {
+    "with_grid_bounds_reset": [
+      20,
+      30,
+      10
+    ],
+    "without_grid_bounds_reset": [
+      400,
+      400,
+      10
+    ],
+    "passed": true
+  },
+  "additional_run_provenance": "Earlier 0.3.1 candidate completed 27 v0.2 and 30 original GUI checks. The workspace suite was interrupted after 21 checks and the long-lived desktop later required test-document recovery; it is not a passing workspace run. Final scene-bound correction was installed in a fresh app session and verified by the 16-check native grid suite, solid smoke test and manual 3D/sketch inspection. No fresh 28-check workspace pass is claimed.",
+  "platform_limits": "Native GUI/kernel checks ran on Linux FreeCAD 1.0/Qt5/PySide2. Modern property contracts were checked against repository C++ declarations and sentinel tests. Windows/FreeCAD 1.1 execution remains unverified."
+}

@@ -1,0 +1,130 @@
+{
+  "version": "0.2.2",
+  "date": "2026-11-05",
+  "base_commit": "788e74da80a86f30a0b48747f9d2bbe52da06bd7",
+  "reported_environment": "Windows, FreeCAD v1-1",
+  "reported_error": "AttributeError: 'NoneType' object has no attribute 'activeView' in modeling.active_body",
+  "owner_workaround": "Creating a New document stopped the reported error.",
+  "root_cause": "An App-only hidden geometry calculator was treated as a visible modeling document. Gui.activeDocument() was None.",
+  "before_fix": {
+    "initial_regressions": 10,
+    "passed": 1,
+    "failures": 6,
+    "errors": 3,
+    "exact_reported_traceback_reproduced": true
+  },
+  "tests": {
+    "document_context": {
+      "command": "python3 addons/AzDesign/tests/test_document_context.py",
+      "count": 13,
+      "passed": true,
+      "includes_stale_python_document_attribute": true
+    },
+    "startup": {
+      "command": "python3 addons/AzDesign/tests/test_startup.py",
+      "count": 5,
+      "passed": true
+    },
+    "installer": {
+      "command": "python3 addons/AzDesign/tests/test_install.py",
+      "count": 4,
+      "passed": true
+    },
+    "native_modeling": {
+      "command": "QT_QPA_PLATFORM=offscreen /usr/bin/python3 addons/AzDesign/tests/run_workflow.py",
+      "count": 26,
+      "passed": true
+    },
+    "native_gui": {
+      "freecad_version": [
+        "1",
+        "0",
+        "0",
+        "",
+        "https://code.launchpad.net/~vcs-imports/freecad/trunk",
+        "2026/08/25 11:49:11"
+      ],
+      "checks": [
+        "nested sketch exposes two independently selectable regions",
+        "multi-region sketch starts in canvas profile selection",
+        "canvas selection toggles the exact profile",
+        "live selected-region preview is an exact solid",
+        "native viewport distance dragger is installed",
+        "viewport dragger updates the distance and solid",
+        "Cancel restores all objects including preview overlays",
+        "OK commits the complete operation",
+        "accepted document has no presentation geometry",
+        "native file has one valid Body with exact geometry",
+        "one Undo removes the solid and retains source sketch",
+        "Redo restores the editable custom feature",
+        "face profile switches from Join to Cut in one task",
+        "two-sided operation creates two independent handles",
+        "face extrusion accepts",
+        "editing retains feature identity",
+        "rollback changes the Body Tip",
+        "resume restores the latest native history position",
+        "Q on an end face edits the originating length",
+        "Press/Pull Cancel restores its source dimension",
+        "Parameters updates exact geometry through native expressions",
+        "D starts native Smart Dimension without leaving Az Design",
+        "saved model reopens and recomputes feature proxies and face references",
+        "native downstream Fillet survives an upstream Az dimension edit",
+        "mixed native and Az feature history reopens correctly",
+        "leaving the workbench cancels an unfinished Az task",
+        "history omits all transient presentation objects"
+      ],
+      "passed": true,
+      "preview_diagnostic": {
+        "valid": true,
+        "status": "New body \u00b7 1 body \u00b7 23528.761 mm\u00b3",
+        "outputs": [
+          [
+            "Extrude",
+            6.0,
+            23528.761101961525,
+            ""
+          ]
+        ]
+      },
+      "calculator_preserved_visible_context": true
+    }
+  },
+  "installed_gui_first_command": {
+    "platform": "Linux / Qt5 / PySide2",
+    "full_quit_and_relaunch": true,
+    "workbench_registered_automatically": true,
+    "before_click": {
+      "version": "0.2.2",
+      "freecad_version": [
+        "1",
+        "0",
+        "0",
+        "",
+        "https://code.launchpad.net/~vcs-imports/freecad/trunk",
+        "2026/08/25 11:49:11"
+      ],
+      "app_document": "AzGeometry",
+      "gui_document": null,
+      "workbench": "AzDesignWorkbench"
+    },
+    "actions": [
+      "Create Sketch from Start page without New",
+      "Accept XY plane",
+      "Draw rectangle",
+      "Finish Sketch",
+      "Extrude",
+      "Accept"
+    ],
+    "result": {
+      "document": "Design",
+      "visible_gui_matches": true,
+      "volume": 5.76435702078,
+      "valid": true,
+      "manual_new_document": false
+    },
+    "note": "FreeCAD can leave the Python App.ActiveDocument attribute pointing to AzGeometry after its native active pointer is cleared. The visible Gui document determines the modeling context."
+  },
+  "final_calculator_adjustment": "Reads App.activeDocument(), the native getter, when preserving the calculation context. Final installed-module GUI suite rerun after this adjustment passed all 27 checks and preserved the visible context.",
+  "native_windows_retest": "pending",
+  "platform_limits": "No Windows, macOS, Qt6 or FreeCAD 1.1 validation was executed in this session."
+}

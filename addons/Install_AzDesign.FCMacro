@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# Run from FreeCAD's Macro menu after extracting the Az Design ZIP.
+import sys
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+
+try:
+    from PySide import QtWidgets
+except ImportError:
+    try:
+        from PySide2 import QtWidgets
+    except ImportError:
+        from PySide6 import QtWidgets
+
+
+def install_az_design():
+    macro_file = globals().get("__file__")
+    source = Path(macro_file).resolve().parent / "AzDesign" if macro_file else None
+    if source is None or not (source / "InitGui.py").is_file():
+        chosen = QtWidgets.QFileDialog.getExistingDirectory(
+            Gui.getMainWindow(), "Select the extracted AzDesign folder"
+        )
+        if not chosen:
+            return
+        source = Path(chosen)
+    target = Path(App.getUserAppDataDir()) / "Mod" / "AzDesign"
+    answer = QtWidgets.QMessageBox.question(
+        Gui.getMainWindow(),
+        "Install Az Design",
+        "Install Az Design in your FreeCAD user folder?\n\n{}\n\n"
+        "An existing version will be kept as a dated backup.\n"
+        "Restart FreeCAD after installation.".format(target),
+        QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+        QtWidgets.QMessageBox.Yes,
+    )
+    if answer != QtWidgets.QMessageBox.Yes:
+        return
+    sys.path.insert(0, str(source))
+    try:
+        # Import by path so an already installed version cannot shadow this
+        # update's installer module.
+        import runpy
+
+        installer = runpy.run_path(str(source / "azdesign" / "install.py"))
+        installed, backup = installer["install"](source, target.parent)
+        detail = "\nPrevious version: {}".format(backup) if backup else ""
+        QtWidgets.QMessageBox.information(
+            Gui.getMainWindow(),
+            "Az Design installed",
+            "Installed to {}.{}\n\nRestart FreeCAD, then choose Az Design in the workbench selector.".format(
+                installed, detail
+            ),
+        )
+    except Exception as exc:
+        QtWidgets.QMessageBox.critical(
+            Gui.getMainWindow(), "Az Design installation failed", str(exc)
+        )
+    finally:
+        sys.path.remove(str(source))
+
+
+install_az_design()

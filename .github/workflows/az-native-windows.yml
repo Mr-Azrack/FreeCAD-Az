@@ -1,0 +1,134 @@
+name: Az Design Native Windows (FreeCAD 1.1)
+
+on:
+  pull_request:
+    paths:
+      - 'native-core/**'
+      - '.github/workflows/az-native-windows.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: az-native-windows-dev
+  cancel-in-progress: true
+
+jobs:
+  verify-freecad-core-patch:
+    name: Verify source patch against exact FreeCAD 1.1.0
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test isolated Windows portable packaging
+        run: python native-core/windows/test_package_portable.py
+      - name: Fetch only Sketcher source from FreeCAD 1.1.0
+        run: |
+          git clone --branch 1.1.0 --depth 1 --filter=blob:none --sparse https://github.com/FreeCAD/FreeCAD.git freecad-core
+          git -C freecad-core sparse-checkout set src/Mod/Sketcher/Gui
+          git -C freecad-core rev-parse HEAD
+      - name: Validate native patch and exact touched files
+        run: |
+          git -C freecad-core apply --check "$GITHUB_WORKSPACE/native-core/patches/001-freecad-1.1.0-sketcher-circle-center.patch"
+          git -C freecad-core apply "$GITHUB_WORKSPACE/native-core/patches/001-freecad-1.1.0-sketcher-circle-center.patch"
+          test "$(git -C freecad-core diff --name-only | wc -l)" -eq 2
+          git -C freecad-core diff --name-only | grep -Fx 'src/Mod/Sketcher/Gui/SnapManager.cpp'
+          git -C freecad-core diff --name-only | grep -Fx 'src/Mod/Sketcher/Gui/SnapManager.h'
+          grep -q 'AzSnapCircleCenter' freecad-core/src/Mod/Sketcher/Gui/SnapManager.cpp
+          grep -q 'AltModifier' freecad-core/src/Mod/Sketcher/Gui/SnapManager.cpp
+
+  windows-native-build:
+    name: Compile and package Az Native Windows x64
+    needs: verify-freecad-core-patch
+    runs-on: windows-2022
+    timeout-minutes: 300
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone exact FreeCAD 1.1.0 and submodules outside installed FreeCAD
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git clone --branch 1.1.0 --depth 1 --recurse-submodules --shallow-submodules https://github.com/FreeCAD/FreeCAD.git freecad-core
+          if ($LASTEXITCODE -ne 0) { throw 'FreeCAD 1.1 source clone failed' }
+          git -C freecad-core rev-parse HEAD
+      - name: Apply native Sketcher C++ snap patch to isolated source tree
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $patch = Join-Path $env:GITHUB_WORKSPACE 'native-core/patches/001-freecad-1.1.0-sketcher-circle-center.patch'
+          git -C freecad-core apply --check "$patch"
+          if ($LASTEXITCODE -ne 0) { throw 'Native patch does not apply to FreeCAD 1.1.0' }
+          git -C freecad-core apply "$patch"
+          if ($LASTEXITCODE -ne 0) { throw 'Native patch application failed' }
+          git -C freecad-core -c core.whitespace=cr-at-eol diff --check
+          if ($LASTEXITCODE -ne 0) { throw 'Invalid patch formatting' }
+      - name: Install upstream-recommended Pixi tooling
+        uses: prefix-dev/setup-pixi@v0.11.3
+        with:
+          run-install: false
+      - name: Configure Release with FreeCAD 1.1 pinned Windows dependencies
+        working-directory: freecad-core
+        run: |
+          pixi run configure-release
+          if ($LASTEXITCODE -ne 0) { throw 'Native Release configure failed' }
+      - name: Compile real FreeCAD C++ core and SketcherGui
+        working-directory: freecad-core
+        run: |
+          pixi run build-release -j 2
+          if ($LASTEXITCODE -ne 0) { throw 'FreeCAD C++ compilation failed' }
+      - name: Install compiled native FreeCAD into isolated Pixi environment
+        working-directory: freecad-core
+        run: |
+          pixi run install-release
+          if ($LASTEXITCODE -ne 0) { throw 'FreeCAD install failed' }
+          if (!(Test-Path '.pixi/envs/default/Library/bin/FreeCAD.exe')) {
+            throw 'No compiled FreeCAD.exe installed - do not distribute'
+          }
+          if (!(Test-Path '.pixi/envs/default/Library/Mod/Sketcher')) {
+            throw 'No compiled Sketcher installed - do not distribute'
+          }
+      - name: Assemble separate Az Design native portable app
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python native-core/windows/package_portable.py `
+            --environment 'freecad-core/.pixi/envs/default' `
+            --freecad-source 'freecad-core' `
+            --addon 'addons/AzDesign' `
+            --patch 'native-core/patches/001-freecad-1.1.0-sketcher-circle-center.patch' `
+            --output 'dist/AzDesign-Native-1.1-Windows-x64' `
+            --commit $env:GITHUB_SHA
+          if ($LASTEXITCODE -ne 0) { throw 'Portable package validation failed' }
+      - name: Smoke-test actual Qt Windows GUI platform in portable bundle
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = (Resolve-Path 'dist/AzDesign-Native-1.1-Windows-x64').Path
+          $python = Join-Path $root 'bin/python.exe'
+          if (!(Test-Path $python)) { throw 'Portable bundle is missing Python for Qt platform smoke test' }
+          $env:PYTHONNOUSERSITE = '1'
+          & $python native-core/windows/smoke_qt.py --bundle "$root"
+          if ($LASTEXITCODE -ne 0) { throw 'Bundled qwindows Qt GUI failed real initialization test' }
+      - name: Make and integrity-check unsigned experimental Windows archive
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $sevenZip = Join-Path $env:ProgramFiles '7-Zip/7z.exe'
+          if (!(Test-Path $sevenZip)) { throw '7-Zip unavailable on Windows runner' }
+          $archive = 'dist/AzDesign-Native-1.1-Windows-x64-PREVIEW.7z'
+          & $sevenZip a -t7z -mx=5 $archive 'dist/AzDesign-Native-1.1-Windows-x64'
+          if ($LASTEXITCODE -ne 0) { throw 'Portable archive creation failed' }
+          & $sevenZip t $archive
+          if ($LASTEXITCODE -ne 0) { throw 'Portable archive failed integrity check' }
+          $sha = (Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$sha  AzDesign-Native-1.1-Windows-x64-PREVIEW.7z" | Set-Content 'dist/AzDesign-Native-1.1-Windows-x64-PREVIEW.sha256'
+      - name: Upload only a successfully compiled complete preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: AzDesign-Native-1.1-Windows-x64-PREVIEW
+          path: |
+            dist/AzDesign-Native-1.1-Windows-x64-PREVIEW.7z
+            dist/AzDesign-Native-1.1-Windows-x64-PREVIEW.sha256
+            dist/AzDesign-Native-1.1-Windows-x64/AZ_NATIVE_BUILD.json
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error

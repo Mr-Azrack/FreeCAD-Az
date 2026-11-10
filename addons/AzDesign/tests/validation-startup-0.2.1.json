@@ -1,0 +1,39 @@
+{
+  "version": "0.2.1",
+  "base_commit": "8b27bb09993a40d4c52b64f210951cb17aee5c40",
+  "reported_environment": "Windows, FreeCAD v1-1 user module directory",
+  "reproduced_error": "name '__file__' is not defined",
+  "before_fix": {
+    "version": "0.2.0",
+    "tests_run": 5,
+    "errors": 4,
+    "failures": 1
+  },
+  "native_windows_retest": "pending",
+  "tests": {
+    "startup": {
+      "count": 5,
+      "passed": true,
+      "command": "python3 addons/AzDesign/tests/test_startup.py",
+      "output": "test_gui_entry_without_file_registers_the_workbench (__main__.StartupTest.test_gui_entry_without_file_registers_the_workbench) ... ok\ntest_headless_entry_without_file_imports_only_the_package (__main__.StartupTest.test_headless_entry_without_file_imports_only_the_package) ... ok\ntest_hooks_keep_module_scope_after_loader_namespace_is_gone (__main__.StartupTest.test_hooks_keep_module_scope_after_loader_namespace_is_gone) ... ok\ntest_separate_loader_globals_and_locals_are_supported (__main__.StartupTest.test_separate_loader_globals_and_locals_are_supported) ... ok\ntest_unrelated_loader_file_does_not_change_resource_paths (__main__.StartupTest.test_unrelated_loader_file_does_not_change_resource_paths) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.011s\n\nOK\n"
+    },
+    "installer": {
+      "count": 4,
+      "passed": true,
+      "command": "python3 addons/AzDesign/tests/test_install.py",
+      "output": "....\n----------------------------------------------------------------------\nRan 4 tests in 0.004s\n\nOK\n"
+    }
+  },
+  "date": "2026-11-05",
+  "installed_gui_startup": {
+    "platform": "Linux",
+    "freecad_version": "1.0.0",
+    "installed_in_user_mod": true,
+    "full_quit_and_relaunch": true,
+    "automatic_registration": true,
+    "ribbon_activation": true,
+    "manual_initgui_registration": false,
+    "startup_file_value_injected": false,
+    "windows_1_1_retest": "pending"
+  }
+}

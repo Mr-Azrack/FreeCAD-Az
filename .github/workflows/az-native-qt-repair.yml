@@ -1,0 +1,111 @@
+name: Az Native Windows Qt platform quick fix
+
+on:
+  pull_request:
+    paths:
+      - 'native-core/windows/**'
+      - '.github/workflows/az-native-qt-repair.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: az-native-qt-fix-dev
+  cancel-in-progress: true
+
+jobs:
+  qt-preview-fix:
+    name: Repair already compiled preview and verify Windows Qt startup
+    runs-on: windows-2022
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download original compiled native preview, no recompilation
+        uses: actions/download-artifact@v4
+        with:
+          name: AzDesign-Native-1.1-Windows-x64-PREVIEW
+          repository: Mr-Azrack/FreeCAD-Az
+          run-id: 42488156221
+          github-token: ${{ github.token }}
+          path: original-preview
+      - name: Extract original preview for Qt plugin diagnosis and repair
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $sevenZip = Join-Path $env:ProgramFiles '7-Zip/7z.exe'
+          $archive = Get-ChildItem original-preview -Recurse -Filter '*.7z' | Select-Object -First 1
+          if (!$archive) { throw 'Original compiled preview archive not found' }
+          $extract = Join-Path $env:GITHUB_WORKSPACE 'recovered'
+          & $sevenZip x '-y' "-o$extract" "$($archive.FullName)"
+          if ($LASTEXITCODE -ne 0) { throw 'Original preview extraction failed' }
+          $launcher = Get-ChildItem $extract -Recurse -File -Filter 'Az Design.cmd' | Select-Object -First 1
+          if (!$launcher) { throw 'No original Az Design.cmd found in compiled preview' }
+          $root = $launcher.DirectoryName
+          "$root" | Set-Content -Encoding utf8 'original-bundle-root.txt'
+          Write-Output "Extracted preview root: $root"
+          Get-ChildItem $root -Recurse -File -Filter qwindows.dll |
+            Select-Object -ExpandProperty FullName
+          Write-Output "Qt conf locations:"
+          Get-ChildItem $root -Recurse -File -Include 'qt.conf','qt6.conf' |
+            Select-Object -ExpandProperty FullName
+      - uses: prefix-dev/setup-pixi@v0.11.3
+        with:
+          run-install: false
+      - name: Restore exact matching FreeCAD 1.1 Pixi Qt runtime only if plugin is missing
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = (Get-Content 'original-bundle-root.txt' -Raw).Trim()
+          $existing = Get-ChildItem $root -Recurse -File -Filter qwindows.dll | Select-Object -First 1
+          if (!$existing) {
+            Write-Output 'Original preview omitted qwindows.dll. Restoring from exact FreeCAD 1.1.0 Pixi pinned Qt runtime.'
+            git clone --branch 1.1.0 --depth 1 --filter=blob:none --sparse https://github.com/FreeCAD/FreeCAD.git freecad-core
+            if ($LASTEXITCODE -ne 0) { throw 'Could not fetch matching dependency lockfile' }
+            pixi install --manifest-path 'freecad-core/pixi.toml' --locked
+            if ($LASTEXITCODE -ne 0) { throw 'Could not restore matching Qt runtime' }
+            'freecad-core/.pixi/envs/default' | Set-Content -Encoding utf8 'original-environment.txt'
+          }
+      - name: Produce small original-preview patch rather than another 1.3 GB download
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -Type Directory -Force dist | Out-Null
+          $root = (Get-Content 'original-bundle-root.txt' -Raw).Trim()
+          $args = @('--bundle', $root, '--output', 'dist/AzDesign-Native-Qt-QuickFix.zip')
+          if (Test-Path 'original-environment.txt') {
+            $args += @('--environment', (Get-Content 'original-environment.txt' -Raw).Trim())
+          }
+          & python native-core/windows/make_qt_fixkit.py @args
+          if ($LASTEXITCODE -ne 0) { throw 'Matching qwindows.dll could not be staged into preview' }
+      - name: Smoke-test actual bundled Qt Windows platform before distributing fix
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = (Get-Content 'original-bundle-root.txt' -Raw).Trim()
+          $py = Join-Path $root 'bin/python.exe'
+          if (!(Test-Path $py)) { throw 'Compiled native preview omitted embedded Python runtime' }
+          $env:PYTHONNOUSERSITE = '1'
+          & $py native-core/windows/smoke_qt.py --bundle "$root"
+          if ($LASTEXITCODE -ne 0) { throw 'Original bundle cannot initialize Windows Qt after repair' }
+      - name: Verify quick fix ZIP CRC and SHA256
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = 'dist/AzDesign-Native-Qt-QuickFix.zip'
+          $sevenZip = Join-Path $env:ProgramFiles '7-Zip/7z.exe'
+          & $sevenZip t "$archive"
+          if ($LASTEXITCODE -ne 0) { throw 'Quick fix ZIP failed integrity validation' }
+          $sha = (Get-FileHash "$archive" -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$sha  AzDesign-Native-Qt-QuickFix.zip" |
+            Set-Content -Encoding utf8 'dist/AzDesign-Native-Qt-QuickFix.sha256'
+      - name: Upload verified small fix for owner's already extracted preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: AzDesign-Native-Qt-QuickFix
+          path: |
+            dist/AzDesign-Native-Qt-QuickFix.zip
+            dist/AzDesign-Native-Qt-QuickFix.sha256
+          if-no-files-found: error
+          retention-days: 7

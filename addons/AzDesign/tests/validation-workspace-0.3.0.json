@@ -1,0 +1,231 @@
+{
+  "version": "0.3.0",
+  "date": "2026-11-06",
+  "base_commit": "5d9cc1056615878e320fcee107d8008ff0d1e698",
+  "environment": "Linux / FreeCAD 1.0.0 / Qt5 / PySide2",
+  "scope": "Repo-owned workspace frontend over native FreeCAD documents, geometry, transactions and selections. No core C++ patch or full application binary is required for this milestone.",
+  "tests": {
+    "workspace_gui": {
+      "freecad_version": [
+        "1",
+        "0",
+        "0",
+        "",
+        "https://code.launchpad.net/~vcs-imports/freecad/trunk",
+        "2026/08/25 11:49:11"
+      ],
+      "checks": [
+        "grouped Browser contains bodies and sketches",
+        "Browser separates feature history from bodies",
+        "compact timeline contains the native feature sequence",
+        "native bottom tabs are hidden behind top document tabs",
+        "top tabs omit the hidden calculator",
+        "Browser selection uses FreeCAD selection",
+        "Browser eye toggles actual body visibility",
+        "Browser eye restores actual body visibility",
+        "canvas face selection highlights its body in the Browser",
+        "Browser search filters unrelated objects",
+        "previous timeline step rolls back the actual Body Tip",
+        "rolled timeline has a visible position marker",
+        "next timeline step restores the actual latest feature",
+        "timeline labels can be enabled without changing feature order",
+        "grid is presentation only",
+        "construction grid does not enlarge Home fit",
+        "camera menu changes the native projection",
+        "camera menu restores orthographic projection",
+        "navigation modes are mutually exclusive",
+        "Pan button makes left drag translate without rotation",
+        "Orbit button makes left drag rotate the native camera",
+        "top tabs activate the native design",
+        "Browser follows the newly active document",
+        "leaving restores every changed canvas preference including absence",
+        "leaving restores the prior application stylesheet",
+        "leaving restores the prior menu visibility",
+        "leaving removes the custom workspace widgets",
+        "re-entry builds one workspace and preserves the solid"
+      ],
+      "passed": true,
+      "fit_heights": [
+        94.67840576171875,
+        94.67840576171875
+      ]
+    },
+    "v02_gui": {
+      "freecad_version": [
+        "1",
+        "0",
+        "0",
+        "",
+        "https://code.launchpad.net/~vcs-imports/freecad/trunk",
+        "2026/08/25 11:49:11"
+      ],
+      "checks": [
+        "nested sketch exposes two independently selectable regions",
+        "multi-region sketch starts in canvas profile selection",
+        "canvas selection toggles the exact profile",
+        "live selected-region preview is an exact solid",
+        "native viewport distance dragger is installed",
+        "viewport dragger updates the distance and solid",
+        "Cancel restores all objects including preview overlays",
+        "OK commits the complete operation",
+        "accepted document has no presentation geometry",
+        "native file has one valid Body with exact geometry",
+        "one Undo removes the solid and retains source sketch",
+        "Redo restores the editable custom feature",
+        "face profile switches from Join to Cut in one task",
+        "two-sided operation creates two independent handles",
+        "face extrusion accepts",
+        "editing retains feature identity",
+        "rollback changes the Body Tip",
+        "resume restores the latest native history position",
+        "Q on an end face edits the originating length",
+        "Press/Pull Cancel restores its source dimension",
+        "Parameters updates exact geometry through native expressions",
+        "D starts native Smart Dimension without leaving Az Design",
+        "saved model reopens and recomputes feature proxies and face references",
+        "native downstream Fillet survives an upstream Az dimension edit",
+        "mixed native and Az feature history reopens correctly",
+        "leaving the workbench cancels an unfinished Az task",
+        "history omits all transient presentation objects"
+      ],
+      "passed": true,
+      "preview_diagnostic": {
+        "valid": true,
+        "status": "New body \u00b7 1 body \u00b7 23528.761 mm\u00b3",
+        "outputs": [
+          [
+            "Extrude",
+            6.0,
+            23528.761101961525,
+            ""
+          ]
+        ]
+      }
+    },
+    "original_gui": {
+      "freecad_version": [
+        "1",
+        "0",
+        "0",
+        "",
+        "https://code.launchpad.net/~vcs-imports/freecad/trunk",
+        "2026/08/25 11:49:11"
+      ],
+      "checks": [
+        "all catalog commands are registered",
+        "one ribbon is visible",
+        "base sketch is fully constrained",
+        "extrude preview creates an exact 80 x 50 x 6 solid",
+        "extrude creates a native Pad",
+        "one Undo removes the complete extrusion",
+        "Redo restores exact volume",
+        "cut preview removes the specified cylinder",
+        "cut creates a native Pocket",
+        "Cancel removes every preview object",
+        "Cancel restores the previous Body Tip",
+        "Cancel restores visibility",
+        "invalid dimensions are rejected",
+        "inch fractions convert exactly",
+        "history follows native features",
+        "editing a sketch stays in Az Design",
+        "sketch editing preference is immediately restored",
+        "native sketch editor opens",
+        "Finish Sketch stays in Az Design",
+        "compatible camera navigation exists",
+        "middle mouse pans without rotating",
+        "Shift plus middle mouse orbits",
+        "leaving restores camera navigation",
+        "leaving removes the ribbon",
+        "re-entry creates exactly one ribbon",
+        "saved objects require no custom proxies",
+        "temporary ribbon hiding preserves native toolbar preferences",
+        "switching to native CAD preserves its modeling toolbar",
+        "switching back restores the Az ribbon",
+        "native file reopens with exact cut geometry"
+      ],
+      "passed": true,
+      "viewport_class": "Gui::View3DInventorViewer",
+      "mouse_pan": {
+        "before": [
+          0.4247081321999479,
+          0.1759200437218226,
+          0.339851090706265,
+          0.8204732639190053
+        ],
+        "after": [
+          0.4247081321999479,
+          0.1759200437218226,
+          0.339851090706265,
+          0.8204732639190053
+        ],
+        "position_before": [
+          66.62430572509766,
+          -1.3510551452636719,
+          30.633440017700195
+        ],
+        "position_after": [
+          60.479068756103516,
+          -4.940530776977539,
+          33.18919372558594
+        ]
+      }
+    },
+    "native_modeling": {
+      "command": "QT_QPA_PLATFORM=offscreen /usr/bin/python3 addons/AzDesign/tests/run_workflow.py",
+      "count": 26,
+      "passed": true
+    },
+    "startup": {
+      "command": "python3 addons/AzDesign/tests/test_startup.py",
+      "count": 5,
+      "passed": true
+    },
+    "document_context": {
+      "command": "python3 addons/AzDesign/tests/test_document_context.py",
+      "count": 13,
+      "passed": true
+    },
+    "installer": {
+      "command": "python3 addons/AzDesign/tests/test_install.py",
+      "count": 4,
+      "passed": true
+    },
+    "appearance_preferences": {
+      "command": "python3 addons/AzDesign/tests/test_appearance.py",
+      "count": 2,
+      "passed": true,
+      "native_behavior_modeled": "Sketcher caches its current edit color and uses that as fallback when an unsigned color preference is removed."
+    }
+  },
+  "installed_restart": {
+    "version": "0.3.0",
+    "automatic_registration": true,
+    "workbench": "AzDesignWorkbench",
+    "visible_document": "Design",
+    "native_document": "Design",
+    "last_problem": null,
+    "full_restart": true,
+    "manual_file_injected": false
+  },
+  "final_installed_visual_followup": {
+    "edited_edge_color": 679129087,
+    "last_problem": null,
+    "reinstalled_and_reloaded_final_source": true
+  },
+  "manual_observations": [
+    "Solid canvas has light background, grouped Browser, top document tabs, compact timeline and bottom navigation.",
+    "Idle Solid canvas right-click opens the eight-tool radial palette.",
+    "Double-clicking a Browser sketch opens the contextual ribbon and right-hand Sketch Palette.",
+    "Dark sketch edges remain readable on the light canvas; native dimensional annotations remain visible.",
+    "Finish Sketch returns to the Solid ribbon and closes the native task palette."
+  ],
+  "provenance": "After the full installed restart, a sketch-contrast follow-up was installed/reloaded. All final 28/27/30 GUI suites were rerun against that installed source. Startup entry scripts are unchanged by the contrast follow-up. A final cleanup hardening primes native Sketcher color defaults before removing previously absent preferences; its two focused Python lifecycle regressions pass. The 85 GUI suites preceded that deactivation-only hardening.",
+  "platform_limits": "No Windows, macOS, Qt6 or FreeCAD 1.1 execution was performed in this session.",
+  "remaining_limits": [
+    "Advanced tools retain native FreeCAD task behavior.",
+    "Radial tools are click-to-activate in idle Solid; active tasks and sketch drawing retain native context/cancel behavior.",
+    "Timeline stepping uses Body Tips and starts at the first solid. Full history reordering is not implemented.",
+    "Construction grid is fixed at 10 mm and is presentation only.",
+    "Complete Fusion feature parity and full application distribution remain future work."
+  ]
+}
