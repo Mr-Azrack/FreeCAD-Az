@@ -115,7 +115,7 @@ jobs:
           if (!$oldSetup) { throw 'Verified 0.5.3 baseline setup not found' }
           $expectedSha = Get-ChildItem 'baseline-installer' -Recurse -File -Filter '*.sha256' | Select-Object -First 1
           if (!$expectedSha) { throw 'Verified 0.5.3 installer SHA256 missing' }
-          $expected = ((Get-Content $expectedSha.FullName -Raw).Trim() -split '\\s+')[0].ToLowerInvariant()
+          $expected = ((Get-Content $expectedSha.FullName -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
           $actual = (Get-FileHash $oldSetup.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
           if ($expected -ne $actual) { throw 'Baseline installer SHA256 mismatch' }
           $baseline = Join-Path $env:RUNNER_TEMP 'AzOldNative'
