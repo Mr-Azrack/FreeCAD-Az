@@ -406,3 +406,8 @@ Owner approved the visible name **Design** (or Modeling when context warrants). 
 ## 2026-11-09 — Native update channel / one-click UI
 
 Keep existing tested 0.5.2 installed app as the baseline. Native installed Design now routes Update into the bundled Windows updater; standalone workbench installation retains independent add-on updates. Trust a verified versioned GitHub Release asset only if its API SHA256 digest, pinned baseline and official HTTPS URL are consistent; reject drafts, prereleases, missing hashes, mismatched paths and downgrades. Download to staging; apply only after owner consent and close; old-version hash preflight, backup and rollback remain enforced by ApplyAzPatch.ps1. Ship 0.5.3 via actual 0.5.2-to-0.5.3 delta test, not a speculative patch from source folders. Publish verified patch to latest GitHub Release only after manual promotion on a reviewed default-branch workflow, never as an uncontrolled PR job.
+
+
+## 2026-11-10 — 0.5.4 release baseline decision
+
+Patch a real first-successful 0.5.3 installed baseline from workflow run 42752856389 (original 43.5 KiB patch-generation artifact) to 0.5.4, preserving exact old-file baseline hashes. Do not generate another patch from 0.5.2 or a late rebuild labeled 0.5.3. Verify original installer .sha256 before install and use current rollback-protected updater, Windows Qt smoke, real Inno install/uninstall. Keep release promotion separate and explicitly approved from main; don't merge draft feature branch without consent.
