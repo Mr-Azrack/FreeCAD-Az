@@ -9,11 +9,14 @@ from .qt import QtCore, QtGui, QtWidgets
 
 
 class PatternCanvasHandles(QtWidgets.QWidget):
-    def __init__(self, get_value, set_value, mode="solid", parent=None):
+    def __init__(self, get_value, set_value, mode="solid", parent=None,
+                 get_axis_name=None, get_counts=None):
         super().__init__(parent)
         self.get_value = get_value
         self.set_value = set_value
         self.mode = mode
+        self.get_axis_name = get_axis_name or (lambda: "X")
+        self.get_counts = get_counts or (lambda: (3, 2))
         self._dragging = None
         self._start_pos = (0, 0)
         self._start_pitch = 0.0
@@ -44,18 +47,25 @@ class PatternCanvasHandles(QtWidgets.QWidget):
         p.drawLine(147, 38, 158, 45)
         p.drawLine(147, 52, 158, 45)
         p.setBrush(QtGui.QColor("#2b729e"))
-        for x in (28, 72, 116):
-            p.drawEllipse(x - 5, 40, 10, 10)
+        count_x, count_y = self.get_counts()
+        sample_x = max(1, min(int(count_x), 5))
+        for i in range(sample_x):
+            x = 28 + 96 * i / max(1, sample_x - 1)
+            p.drawEllipse(int(x) - 5, 40, 10, 10)
         p.setPen(QtGui.QColor("#264f68"))
-        p.drawText(14, 22, "X spacing  ·  drag →")
+        p.drawText(14, 22, "{} spacing  ·  drag →".format(
+            "X" if self.mode == "sketch" else self.get_axis_name()
+        ))
         if self.mode == "sketch":
             p.setPen(QtGui.QPen(QtGui.QColor("#2b729e"), 2.5))
             p.drawLine(31, 85, 31, 133)
             p.drawLine(24, 124, 31, 134)
             p.drawLine(38, 124, 31, 134)
             p.setBrush(QtGui.QColor("#2b729e"))
-            p.drawEllipse(27, 88, 8, 8)
-            p.drawEllipse(27, 108, 8, 8)
+            sample_y = max(1, min(int(count_y), 4))
+            for i in range(sample_y):
+                y = 90 + 33 * i / max(1, sample_y - 1)
+                p.drawEllipse(27, int(y) - 4, 8, 8)
             p.setPen(QtGui.QColor("#264f68"))
             p.drawText(47, 112, "Y spacing · drag ↓")
         else:
