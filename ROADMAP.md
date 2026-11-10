@@ -444,3 +444,16 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [x] Document batch scope, severity exceptions, same-SHA release verification, and GitHub-first continuity in `BATCH_VALIDATION.md`
 - [ ] Finish current sketch/Hole/Move/Mirror/Pattern integration batch, resolve all currently failing add-on test contracts and obtain fast green CI
 - [ ] Commit candidate marker with reviewed exact SHA and scope; verify Windows patch and Qt/rollback tests, then perform owner GUI acceptance before manual publication
+
+
+## 2026-11-10 — 0.5.7 integrated correction batch
+
+- [x] Fix delayed Design Home activation NameError from FreeCAD exec loader dropping globals
+- [x] Add regression simulating Qt callback after both transient InitGui namespaces have disappeared
+- [x] Disable FreeCAD splasher on subsequent Design launcher runs using Design's separate native profile and shorten Home delay to 250 ms
+- [x] Add Sketch Modify Rectangular Pattern for real constrained 2×2 circle pattern; each hole center is a Sketcher geometry, with editable pitch/radius constraints
+- [x] Add native FreeCAD test to cut four holes in an 80×60×8 plate from the patterned sketch; reject duplicates without mutation
+- [x] Prepare version-correct 0.5.6→0.5.7 Windows patch pipeline from hash-checked pinned 0.5.6 candidate #20
+- [x] Gate Windows patch on real FreeCAD geometry job before downloading installed baseline
+- [ ] Obtain green Linux geometry, headless packaging, Windows native install/Qt/rollback for 0.5.7 candidate and exercise native GUI on owner's machine
+- [ ] Confirm no stock FreeCAD launcher/profile regressions; promote public update only after owner acceptance
