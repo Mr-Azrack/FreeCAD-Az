@@ -31,6 +31,17 @@ static class AzDesignLauncher
             Directory.CreateDirectory(profile);
             Directory.CreateDirectory(Path.Combine(profile, "Data"));
 
+            // Only this Design Native profile is changed. The ordinary
+            // FreeCAD installation and its preferences remain untouched.
+            // Set this before launching FreeCAD: InitGui.py runs too late
+            // to prevent the *first* FreeCAD splash from appearing.
+            try {
+                PrepareNoSplash(Path.Combine(profile, "user.cfg"));
+            } catch (Exception) {
+                // Splash is cosmetic: never prevent modeling because a user
+                // preference file is locked, malformed or unavailable.
+            }
+
             ProcessStartInfo psi = new ProcessStartInfo(executable);
             psi.WorkingDirectory = Path.Combine(root, "bin");
             psi.UseShellExecute = false;
@@ -54,6 +65,72 @@ static class AzDesignLauncher
         {
             MessageBox.Show(ex.Message, "Az Design Native – Launch error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private static System.Xml.XmlElement EnsureGroup(
+        System.Xml.XmlDocument document, System.Xml.XmlElement parent, string name)
+    {
+        foreach (System.Xml.XmlNode node in parent.ChildNodes)
+        {
+            System.Xml.XmlElement child = node as System.Xml.XmlElement;
+            if (child != null && child.Name == "FCParamGroup"
+                && child.GetAttribute("Name") == name)
+                return child;
+        }
+        System.Xml.XmlElement added = document.CreateElement("FCParamGroup");
+        added.SetAttribute("Name", name);
+        parent.AppendChild(added);
+        return added;
+    }
+
+    internal static void PrepareNoSplash(string filename)
+    {
+        System.Xml.XmlDocument document = new System.Xml.XmlDocument();
+        if (File.Exists(filename))
+            document.Load(filename);
+        else
+            document.LoadXml("<FCParameters><FCParamGroup Name=\"Root\"/></FCParameters>");
+        System.Xml.XmlElement top = document.DocumentElement;
+        if (top == null || top.Name != "FCParameters")
+            throw new InvalidDataException("Unexpected FreeCAD preferences document.");
+        System.Xml.XmlElement group = EnsureGroup(document, top, "Root");
+        group = EnsureGroup(document, group, "BaseApp");
+        group = EnsureGroup(document, group, "Preferences");
+        group = EnsureGroup(document, group, "General");
+        System.Xml.XmlElement splasher = null;
+        foreach (System.Xml.XmlNode node in group.ChildNodes)
+        {
+            System.Xml.XmlElement child = node as System.Xml.XmlElement;
+            if (child != null && child.Name == "FCBool"
+                && child.GetAttribute("Name") == "ShowSplasher")
+            {
+                splasher = child;
+                break;
+            }
+        }
+        if (splasher != null && splasher.GetAttribute("Value") == "0")
+            return;
+        if (splasher == null)
+        {
+            splasher = document.CreateElement("FCBool");
+            splasher.SetAttribute("Name", "ShowSplasher");
+            group.AppendChild(splasher);
+        }
+        splasher.SetAttribute("Value", "0");
+        string staged = filename + ".az-tmp-" + Guid.NewGuid().ToString("N");
+        try
+        {
+            document.Save(staged);
+            if (File.Exists(filename))
+                File.Replace(staged, filename, filename + ".az-backup", true);
+            else
+                File.Move(staged, filename);
+        }
+        finally
+        {
+            if (File.Exists(staged))
+                File.Delete(staged);
         }
     }
 
