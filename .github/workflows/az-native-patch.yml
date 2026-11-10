@@ -27,6 +27,10 @@ jobs:
         shell: pwsh
     steps:
       - uses: actions/checkout@v4
+      - name: Compile-check Python UI and sketch workflow
+        run: |
+          python -m compileall -q addons/AzDesign/azdesign
+          if ($LASTEXITCODE -ne 0) { throw 'Design UI or Sketcher Python syntax failed' }
       - name: Verify release metadata and patch safety contracts
         run: |
           $ErrorActionPreference = 'Stop'
