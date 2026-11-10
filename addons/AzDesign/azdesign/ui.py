@@ -172,6 +172,35 @@ def design_icon(key):
             if k.endswith(("start", "end")):
                 x = 33 if right else 7
                 painter.drawLine(x, 8, x, 32)
+    elif k in ("new", "save", "undo", "redo", "palette", "help"):
+        if k == "new":
+            painter.drawRect(9, 5, 22, 30)
+            painter.drawLine(15, 20, 25, 20)
+            painter.drawLine(20, 15, 20, 25)
+        elif k == "save":
+            painter.drawRect(7, 7, 27, 27)
+            painter.drawRect(12, 7, 16, 10)
+            painter.drawRect(12, 24, 16, 10)
+            painter.drawLine(25, 8, 25, 16)
+        elif k in ("undo", "redo"):
+            if k == "undo":
+                painter.drawArc(8, 10, 26, 24, 40 * 16, 220 * 16)
+                painter.drawLine(8, 18, 7, 8)
+                painter.drawLine(7, 8, 17, 11)
+            else:
+                painter.drawArc(6, 10, 26, 24, -85 * 16, 220 * 16)
+                painter.drawLine(32, 18, 33, 8)
+                painter.drawLine(33, 8, 23, 11)
+        elif k == "palette":
+            painter.drawEllipse(8, 8, 22, 22)
+            painter.drawLine(24, 25, 34, 35)
+            painter.drawLine(17, 13, 17, 19)
+            painter.drawLine(14, 16, 20, 16)
+        else:
+            painter.drawEllipse(7, 7, 26, 26)
+            painter.drawArc(15, 12, 13, 11, 0, 180 * 16)
+            painter.drawLine(21, 23, 21, 26)
+            painter.drawPoint(21, 30)
     elif k in ("line", "project", "trim", "construction"):
         painter.drawLine(8, 31, 32, 9)
         painter.drawEllipse(5, 28, 6, 6)
