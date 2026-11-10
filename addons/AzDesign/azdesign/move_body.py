@@ -72,8 +72,7 @@ def show():
     doc = obj.Document
     doc.openTransaction("Design: Move " + obj.Label)
     try:
-        placement = App.Placement(old)
-        placement.Base = App.Vector(*new_coordinates)
+        placement = App.Placement(App.Vector(*new_coordinates), old.Rotation)
         obj.Placement = placement
         doc.recompute()
         if "Invalid" in getattr(obj, "State", ()):
