@@ -117,10 +117,16 @@ class DocumentContextTest(unittest.TestCase):
 
     def test_create_sketch_with_only_hidden_calculator_opens_visible_design(self):
         hidden = self.app.newDocument("AzGeometry", hidden=True, temp=True)
-        self.assertIsNone(self.modeling.create_sketch())  # Cancel the plane picker.
+        # New Design behavior is nonmodal: opening the canvas plane picker
+        # must NOT invoke the old Qt InputDialog or mutate the hidden document.
+        picker = types.ModuleType("azdesign.sketch_plane_picker")
+        picker.show = Mock(return_value=None)
+        with patch.dict(sys.modules, {"azdesign.sketch_plane_picker": picker}):
+            self.assertIsNone(self.modeling.create_sketch())
         self.assertNotEqual(self.app.ActiveDocument, hidden)
         self.assertIsNotNone(self.gui.activeDocument())
-        self.widgets.QInputDialog.getItem.assert_called_once()
+        picker.show.assert_called_once_with()
+        self.widgets.QInputDialog.getItem.assert_not_called()
         self.assertEqual(hidden.Objects, [])
 
     def test_active_body_without_a_gui_document_returns_none(self):
