@@ -108,8 +108,16 @@ class SolidPatternPanel(QtWidgets.QFrame):
         self.spacing.setRange(0.001, 100000)
         self.spacing.setDecimals(3)
         self.spacing.setSuffix(" mm")
-        old_offset = getattr(editing, "Offset", None) if editing else None
-        self.spacing.setValue(float(getattr(old_offset, "Value", old_offset or 20)))
+        # Pattern pitch is Length / (Occurrences - 1) in the native
+        # extent mode, independent of whether FreeCAD labels it "Extent"
+        # or the older "Overall Length".
+        old_length = getattr(editing, "Length", None) if editing else None
+        pitch = (
+            float(getattr(old_length, "Value", old_length)) /
+            max(1, self.count.value() - 1)
+            if old_length is not None else 20.0
+        )
+        self.spacing.setValue(max(0.001, pitch))
         form.addRow("Distance", self.spacing)
         self.reversed = QtWidgets.QCheckBox("Reverse direction")
         self.reversed.setChecked(bool(getattr(editing, "Reversed", False)))
