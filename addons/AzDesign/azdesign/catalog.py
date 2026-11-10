@@ -122,6 +122,10 @@ TOOLS = {
         "Show / Hide Labels", "Az_SketchLabels",
         "Temporarily toggle sketch constraint labels without changing dimensions, geometry or solver.",
     ),
+    "sketchpattern": Tool(
+        "Rectangular Pattern", "Az_SketchPattern",
+        "Create a 2D array of real, constrained sketch circles for multiple holes.",
+    ),
     "horizontal": Tool(
         "Horizontal", "Sketcher_ConstrainHorizontal", "Constrain selected lines horizontally."
     ),
@@ -186,7 +190,7 @@ SOLID = [
 ]
 SKETCH = [
     ("CREATE", ["line", "rectangle", "sizedrect", "circle", ("More", ["centerrect", "arc", "slot"])]),
-    ("MODIFY", ["trim", "offset", "project", "construction"]),
+    ("MODIFY", ["trim", "offset", "project", "sketchpattern", "construction"]),
     (
         "CONSTRAIN",
         [
