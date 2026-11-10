@@ -113,7 +113,14 @@ class PatternDraft:
             raise DesignError("Native FreeCAD Linear Pattern has no Originals property.")
         obj.Originals = [self.source]
         if "TransformMode" in obj.PropertiesList:
-            obj.TransformMode = "Features"
+            # FreeCAD versions label this native enum differently:
+            # 1.0: 'Transform tools'; 1.1: 'Features'. The first enum
+            # is the documented source-feature mode in both versions.
+            choices = getattr(obj, "getEnumerationsOfProperty", lambda _name: ())(
+                "TransformMode"
+            )
+            if choices:
+                obj.TransformMode = choices[0]
         obj.Direction = (axis, [""])
         obj.Mode = "Spacing"
         obj.Offset = spacing
