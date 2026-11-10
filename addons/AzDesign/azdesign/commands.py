@@ -262,6 +262,7 @@ def dispatch(key):
         "parameters": parameters.show,
         "resume": history.resume_all,
         "dimension": smart_dimension,
+        "labels": toggle_sketch_labels,
         "sizedrect": lambda: __import__(
             "azdesign.sketch_rectangle", fromlist=["prompt_sized_rectangle"]
         ).prompt_sized_rectangle(),
@@ -295,6 +296,19 @@ def finish_sketch_command():
     from .hole import finish_face_hole
     finish_face_hole(sketch)
     return sketch
+
+
+def toggle_sketch_labels():
+    if not modeling.in_sketch():
+        raise modeling.ModelingError("Edit a sketch to show or hide its constraint labels.")
+    command = "Sketcher_SwitchVirtualSpace"
+    if command not in Gui.listCommands():
+        raise modeling.ModelingError("This FreeCAD build does not expose Sketcher label visibility.")
+    # Do not accidentally move only the selected constraints to the other
+    # virtual space; clear the selection to toggle the complete view.
+    Gui.Selection.clearSelection()
+    Gui.runCommand(command, 0)
+    notify("Sketch constraint label visibility toggled. Dimensions and solver unchanged.")
 
 
 def smart_dimension():
@@ -362,6 +376,7 @@ def menu_commands():
             "parameters",
             "resume",
             "dimension",
+            "labels",
             "sizedrect",
             "body",
             "plane",
