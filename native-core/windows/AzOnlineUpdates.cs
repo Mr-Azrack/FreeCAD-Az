@@ -34,8 +34,9 @@ internal static class AzOnlineUpdates {
         return obj.Contains(key) && obj[key] != null && Convert.ToBoolean(obj[key]);
     }
     private static IDictionary Parse(string raw) {
-        return new JavaScriptSerializer().DeserializeObject(raw) as IDictionary
-            ?? throw new InvalidDataException("Invalid release metadata.");
+        IDictionary result = new JavaScriptSerializer().DeserializeObject(raw) as IDictionary;
+        if (result == null) throw new InvalidDataException("Invalid release metadata.");
+        return result;
     }
     internal static string InstalledVersion(string root) {
         string marker = Path.Combine(root, "AZ Native Version.json");
