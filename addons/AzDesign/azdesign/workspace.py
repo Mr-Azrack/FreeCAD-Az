@@ -59,6 +59,8 @@ def action_button(text, name, callback, parent=None):
     icon_keys = {
         "Home view": "home", "Fit": "fit", "Zoom in": "zoom-in",
         "Zoom out": "zoom-out", "Display settings": "display",
+        "Orbit · drag with the left button · Esc to finish": "orbit",
+        "Pan · drag with the left button · Esc to finish": "pan",
         "Standard views": "standard", "Show native properties": "parameters",
         "First solid": "history-start", "Previous feature": "history-back",
         "Next feature": "history-next", "Latest history": "history-end",
