@@ -1,0 +1,17 @@
+Design Native v0.5.7 — Corrective candidate 1
+Source revision: 50727ae9ab472e6ae768c074e5732c3082593061
+Installed owner baseline: 0.5.6
+Release target: 0.5.7
+Scope:
+- Repair native startup NameError after FreeCAD's InitGui loader drops globals
+- Show Design Home quickly instead of stock Start workspace
+- Disable the FreeCAD splash on later Design-native launches only
+- Add Sketch Modify Rectangular Pattern for constrained 2x2 hole centers
+- Prove native PartDesign Hole produces four real cut holes from patterned circles
+Safety gate:
+- Run Debian FreeCAD Python geometry integration tests first
+- Run all addon headless UI/packaging contracts before large Windows download
+- Reconstruct exact installed 0.5.6 from pinned 0.5.4 setup + 0.5.5 and
+  verified 0.5.6 #20 patches, checking each SHA256
+- Verify 0.5.6-to-0.5.7 patch, real Windows Qt startup, backup/rollback, uninstall
+Manual GUI acceptance and public publication remain separate.
