@@ -122,6 +122,37 @@ class SolidPatternPanel(QtWidgets.QFrame):
         self.reversed = QtWidgets.QCheckBox("Reverse direction")
         self.reversed.setChecked(bool(getattr(editing, "Reversed", False)))
         form.addRow("", self.reversed)
+        self.second_enabled = QtWidgets.QCheckBox("Second direction · rectangular grid")
+        current_second = int(getattr(editing, "Occurrences2", 1)) if editing else 1
+        self.second_enabled.setChecked(current_second > 1)
+        form.addRow("", self.second_enabled)
+        self.axis2 = QtWidgets.QComboBox()
+        for axis_label, axis_role in AXES:
+            self.axis2.addItem(axis_label, axis_role)
+        if editing:
+            old_ref = getattr(editing, "Direction2", None)
+            old_direction = old_ref[0] if isinstance(old_ref, (tuple, list)) and old_ref else None
+            old_role = getattr(old_direction, "Role", "Y_Axis")
+        else:
+            old_role = "Y_Axis"
+        for index in range(self.axis2.count()):
+            if self.axis2.itemData(index) == old_role:
+                self.axis2.setCurrentIndex(index)
+        self.count2 = QtWidgets.QSpinBox()
+        self.count2.setRange(2, 20)
+        self.count2.setValue(max(2, current_second))
+        self.spacing2 = QtWidgets.QDoubleSpinBox()
+        self.spacing2.setRange(0.001, 100000)
+        self.spacing2.setDecimals(3)
+        self.spacing2.setSuffix(" mm")
+        previous_total = getattr(editing, "Length2", None) if editing else None
+        previous_extent = float(getattr(previous_total, "Value", previous_total)) if previous_total is not None else 40.0
+        self.spacing2.setValue(max(0.001, previous_extent / max(1, current_second - 1)))
+        form.addRow("Grid axis", self.axis2)
+        form.addRow("Grid occurrences", self.count2)
+        form.addRow("Grid spacing", self.spacing2)
+        for field in (self.axis2, self.count2, self.spacing2):
+            field.setEnabled(self.second_enabled.isChecked())
         box.addLayout(form)
 
         self.message = QtWidgets.QLabel("Adjust the controls for a live preview.")
@@ -140,23 +171,33 @@ class SolidPatternPanel(QtWidgets.QFrame):
         self.timer.setSingleShot(True)
         self.timer.setInterval(180)
         self.timer.timeout.connect(self.preview)
-        for field in (self.source, self.axis, self.distance_mode):
+        for field in (self.source, self.axis, self.distance_mode, self.axis2):
             field.currentIndexChanged.connect(self.queue_preview)
-        self.count.valueChanged.connect(self.queue_preview)
-        self.spacing.valueChanged.connect(self.queue_preview)
+        for field in (self.count, self.count2, self.spacing, self.spacing2):
+            field.valueChanged.connect(self.queue_preview)
         self.reversed.toggled.connect(self.queue_preview)
+        self.second_enabled.toggled.connect(self.second_changed)
         self.apply.clicked.connect(self.accept)
         cancel.clicked.connect(self.cancel)
 
         self.handles = PatternCanvasHandles(
-            lambda _axis: self.spacing.value(),
-            lambda _axis, value: self.spacing.setValue(max(0.001, value)),
-            mode="solid", parent=session.mdi.viewport(),
+            lambda axis: self.spacing.value() if axis == "x" else self.spacing2.value(),
+            lambda axis, value: (
+                self.spacing if axis == "x" else self.spacing2
+            ).setValue(max(0.001, value)),
+            mode="grid", parent=session.mdi.viewport(),
             get_axis_name=lambda: str(self.axis.currentText()).split()[0],
-            get_counts=lambda: (self.count.value(), 1),
+            get_counts=lambda: (
+                self.count.value(), self.count2.value() if self.second_enabled.isChecked() else 1
+            ),
         )
         self.handles.hide()
         self.adjustSize()
+
+    def second_changed(self, enabled):
+        for field in (self.axis2, self.count2, self.spacing2):
+            field.setEnabled(enabled)
+        self.queue_preview()
 
     def selected_source(self):
         name = self.source.currentData()
@@ -194,13 +235,17 @@ class SolidPatternPanel(QtWidgets.QFrame):
             distance = self.spacing.value()
             if self.distance_mode.currentData() == "extent":
                 distance /= (self.count.value() - 1)
+            grid_count = self.count2.value() if self.second_enabled.isChecked() else 1
             obj = self.draft.preview(
                 self.count.value(), distance, self.axis.currentData(),
                 self.reversed.isChecked(),
+                count2=grid_count, spacing2=self.spacing2.value(),
+                direction2=self.axis2.currentData(),
             )
+            self.handles.update()
             self.message.setText(
-                "{} solid occurrences · {:.3f} mm spacing · Undo supported.".format(
-                    obj.Occurrences, distance
+                "{} × {} solid occurrences · {:.3f} mm pitch · Undo supported.".format(
+                    obj.Occurrences, grid_count, distance
                 )
             )
             self.message.setStyleSheet("color: #2b7457;")
