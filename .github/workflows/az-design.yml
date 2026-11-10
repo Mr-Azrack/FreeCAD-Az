@@ -61,6 +61,8 @@ jobs:
           python addons/AzDesign/tests/test_hole_panel.py
       - name: Test in-app updater and backups without live GitHub downloads
         run: python addons/AzDesign/tests/test_updater.py
+      - name: Reject raw FreeCAD modeling tasks in Design ribbon
+        run: python addons/AzDesign/tests/test_command_boundary.py
       - name: Test unified edit routes and canvas selection policy
         run: python addons/AzDesign/tests/test_interaction.py
       - name: Test compact native Sketch Palette controls and theme-safe layout
