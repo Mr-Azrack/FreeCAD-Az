@@ -33,7 +33,7 @@ static class OnlineUpdateTests {
             "Bad digest was accepted");
         Assert(AzOnlineUpdates.Select(
             Asset("0.5.5", "0.5.6", hash, "https://example.com/evil.azpatch"),
-            "0.5.4") == null, "Untrusted download host was accepted");
+            "0.5.5") == null, "Untrusted download host was accepted");
         Console.WriteLine("PASS: verified GitHub update selection and rejected unsafe releases");
     }
 }
