@@ -393,3 +393,15 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [ ] First patch-only Windows CI run 42818046881 must pass; resolve any errors before declaring optimized pipeline validated.
 - [ ] Publish 0.5.4 only after approved successful run; owner visually validates readable labels/history and help version.
 - [ ] Consider separately content-addressed old-file baseline cache to remove original installer download safely once Windows byte-for-byte baseline identity is proven.
+
+
+## Native Design Home — 0.5.6 candidate
+
+- [x] Add Design-specific welcome view with New Design/Open File actions and clear modeling shortcuts.
+- [x] Remove eager blank-model creation on activating Design; overlay hides on document open and is cleaned up when leaving Design.
+- [x] Signal ordinary native launcher startup to select Design; preserve explicit CAD file arguments.
+- [x] Differentiate native navigation orbit/pan/zoom/view icons rather than generic fallback glyphs.
+- [x] Extend Qt smoke to construct Design Home and validate New/Open widgets.
+- [x] Stage a pinned 0.5.5→0.5.6 patch pipeline by reconstructing 0.5.5 from verified 0.5.4 installer+0.5.5 delta; include recompiled native launcher.
+- [ ] Confirm add-on CI, real Windows patch installation/Qt smoke/rollback and GUI launch behavior; repair as needed.
+- [ ] Publish 0.5.6 in the controlled release channel after passing verification; visual owner acceptance for Home and icon legibility.
