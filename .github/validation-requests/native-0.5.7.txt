@@ -1,5 +1,5 @@
-Design Native v0.5.7 — Corrective candidate 2 (supersedes candidate 1)
-Source revision: e0d09524b4da8b1ed992216fb869f2368317d363
+Design Native v0.5.7 — Corrective candidate 3 (repairs rejected workflow; supersedes candidates 1–2)
+Source revision: 27569ea33f04685077d88b08d095d9883bb2e803
 Installed owner baseline: 0.5.6
 Target: 0.5.7
 Release gate:
@@ -19,3 +19,5 @@ Source scope:
 Do not publish or advise owner to install until all gates green AND actual native
 Design GUI is smoke-tested on owner's machine. Candidate 1 omitted C# splash
 launcher correction and MUST NOT be mistaken for current source.
+
+CI workflow structural repair: restored single contiguous 0.5.6 baseline reconstruction, removed duplicated/truncated content, corrected explicit candidate marker trigger to v0.5.7, and restored System.Xml compilation reference.
