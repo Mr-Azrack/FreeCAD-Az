@@ -187,6 +187,7 @@ class SolidPatternPanel(QtWidgets.QFrame):
             ).setValue(max(0.001, value)),
             mode="grid", parent=session.mdi.viewport(),
             get_axis_name=lambda: str(self.axis.currentText()).split()[0],
+            get_second_axis_name=lambda: str(self.axis2.currentText()).split()[0],
             get_counts=lambda: (
                 self.count.value(), self.count2.value() if self.second_enabled.isChecked() else 1
             ),
