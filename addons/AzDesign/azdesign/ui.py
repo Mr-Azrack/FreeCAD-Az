@@ -5,7 +5,7 @@ import os
 import FreeCAD as App
 import FreeCADGui as Gui
 from .qt import QtCore, QtGui, QtWidgets, QAction, menu_exec
-from .catalog import TOOLS, SOLID, SKETCH, UTILITIES
+from .catalog import TOOLS, SOLID, SKETCH, UTILITIES, RAW_FEATURE_COMMANDS
 from . import modeling, commands, history as model_history
 
 STYLE = """
@@ -133,11 +133,10 @@ class Ribbon(QtWidgets.QFrame):
             "Check for Design updates…", lambda: commands.invoke("Az_Update")
         )
         self.advanced_menu = self.file_menu.addMenu("Advanced native features")
-        for key in ("revolve", "loft", "sweep", "shell", "mirror", "pattern", "polar", "move", "measure"):
-            self.advanced_menu.addAction(
-                TOOLS[key].label + " (Native CAD)",
-                lambda _checked=False: commands.invoke("Az_Native"),
-            )
+        self.advanced_menu.addAction(
+            "Open FreeCAD advanced modeling workspace",
+            lambda _checked=False: commands.invoke("Az_Native"),
+        )
         self.advanced_menu.setToolTipsVisible(True)
         file_button.setMenu(self.file_menu)
         top.addWidget(file_button)
@@ -308,6 +307,8 @@ class CommandPalette(QtWidgets.QDialog):
         self.results.clear()
         text = text.casefold().strip()
         for key, tool in TOOLS.items():
+            if tool.command in RAW_FEATURE_COMMANDS:
+                continue
             if text not in (tool.label + " " + tool.tip + " " + tool.command).casefold():
                 continue
             if tool.command not in Gui.listCommands():
