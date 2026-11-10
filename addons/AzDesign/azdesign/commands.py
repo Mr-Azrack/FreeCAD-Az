@@ -263,6 +263,9 @@ def dispatch(key):
         "resume": history.resume_all,
         "dimension": smart_dimension,
         "labels": toggle_sketch_labels,
+        "sketchpattern": lambda: __import__(
+            "azdesign.sketch_pattern", fromlist=["show"]
+        ).show(),
         "sizedrect": lambda: __import__(
             "azdesign.sketch_rectangle", fromlist=["prompt_sized_rectangle"]
         ).prompt_sized_rectangle(),
@@ -377,6 +380,7 @@ def menu_commands():
             "resume",
             "dimension",
             "labels",
+            "sketchpattern",
             "sizedrect",
             "body",
             "plane",
