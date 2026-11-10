@@ -22,7 +22,23 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  geometry:
+    runs-on: ubuntu-latest
+    container: debian:trixie-slim
+    steps:
+      - name: Install FreeCAD native Python geometry engine
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends git ca-certificates python3 freecad-python3
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: addons/AzDesign
+      - name: Verify real sketch solver and 2x2 four-hole Hole integration
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: /usr/bin/python3 addons/AzDesign/tests/run_workflow.py
   patch:
+    needs: [geometry]
     runs-on: windows-2022
     timeout-minutes: 100
     defaults:
