@@ -83,9 +83,10 @@ jobs:
           if (Test-Path $icon) { $iconArgs = @("/win32icon:$icon") }
           $launcherSource = (Resolve-Path 'native-core/windows/AzDesignLauncher.cs').Path
           $updaterSource = (Resolve-Path 'native-core/windows/AzUpdater.cs').Path
+          $onlineSource = (Resolve-Path 'native-core/windows/AzOnlineUpdates.cs').Path
           & $csc /nologo /codepage:65001 /target:winexe "/out:$(Join-Path $root 'AzDesign.exe')" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll @iconArgs "$launcherSource"
           if ($LASTEXITCODE -ne 0) { throw "AzDesign GUI launcher did not compile" }
-          & $csc /nologo /codepage:65001 /target:winexe "/out:$(Join-Path $root 'AzUpdater.exe')" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll @iconArgs "$updaterSource"
+          & $csc /nologo /codepage:65001 /target:winexe "/out:$(Join-Path $root 'AzUpdater.exe')" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll @iconArgs "$updaterSource" "$onlineSource"
           if ($LASTEXITCODE -ne 0) { throw "AzUpdater GUI did not compile" }
       - name: Install Inno Setup 6
         run: |
