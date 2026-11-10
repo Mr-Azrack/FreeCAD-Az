@@ -25,7 +25,7 @@ jobs:
       - name: Verify GitHub update selection and reject untrusted releases
         shell: pwsh
         run: |
-          $csc = Join-Path $env:windir 'Microsoft.NET\\Framework\\v4.0.30319\\csc.exe'
+          $csc = Join-Path $env:windir 'Microsoft.NET\Framework\v4.0.30319\csc.exe'
           if (!(Test-Path $csc)) { throw 'Framework C# compiler missing' }
           $online = (Resolve-Path 'native-core/windows/AzOnlineUpdates.cs').Path
           $tests = (Resolve-Path 'native-core/windows/test_online_updates.cs').Path
