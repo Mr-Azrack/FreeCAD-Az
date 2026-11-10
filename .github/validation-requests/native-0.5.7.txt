@@ -1,17 +1,21 @@
-Design Native v0.5.7 — Corrective candidate 1
-Source revision: 50727ae9ab472e6ae768c074e5732c3082593061
+Design Native v0.5.7 — Corrective candidate 2 (supersedes candidate 1)
+Source revision: e0d09524b4da8b1ed992216fb869f2368317d363
 Installed owner baseline: 0.5.6
-Release target: 0.5.7
-Scope:
-- Repair native startup NameError after FreeCAD's InitGui loader drops globals
-- Show Design Home quickly instead of stock Start workspace
-- Disable the FreeCAD splash on later Design-native launches only
-- Add Sketch Modify Rectangular Pattern for constrained 2x2 hole centers
-- Prove native PartDesign Hole produces four real cut holes from patterned circles
-Safety gate:
-- Run Debian FreeCAD Python geometry integration tests first
-- Run all addon headless UI/packaging contracts before large Windows download
-- Reconstruct exact installed 0.5.6 from pinned 0.5.4 setup + 0.5.5 and
-  verified 0.5.6 #20 patches, checking each SHA256
-- Verify 0.5.6-to-0.5.7 patch, real Windows Qt startup, backup/rollback, uninstall
-Manual GUI acceptance and public publication remain separate.
+Target: 0.5.7
+Release gate:
+- Debian native FreeCAD geometry: 2x2 sketch-circle array feeds one actual 4-hole Hole feature
+- All headless add-on, startup and packaging test contracts
+- Windows native launcher profile test: disable splash BEFORE first application launch,
+  preserve unrelated preferences and avoid data loss from malformed config
+- Reconstruct pinned 0.5.6 baseline (verified 0.5.4 setup, 0.5.5 patch,
+  checksum-verified 0.5.6 #20 patch), build 0.5.6-to-0.5.7 changed-files patch
+- Test patched GUI Qt startup, patch application, rollback and uninstall
+Source scope:
+- Fix _az_App disappearing from deferred FreeCAD InitGui native Home callback
+- Activate Design Home sooner instead of stock FreeCAD Start
+- Suppress FreeCAD splash for Design native launcher, including first patched launch
+- Sketch Modify > Rectangular Pattern (one circle -> four real constrained hole centers)
+- Source circle diameter and grid pitches remain editable; reject invalid arrays
+Do not publish or advise owner to install until all gates green AND actual native
+Design GUI is smoke-tested on owner's machine. Candidate 1 omitted C# splash
+launcher correction and MUST NOT be mistaken for current source.
