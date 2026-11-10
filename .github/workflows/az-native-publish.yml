@@ -36,7 +36,7 @@ jobs:
           [[ "$VERSION" == '0.5.3' ]] || { echo 'This promotion currently supports only 0.5.3'; exit 1; }
           gh api "repos/${GITHUB_REPOSITORY}/actions/runs/$RUN_ID" --jq '{status,conclusion,name,head_branch,event}' > /tmp/source.json
           jq -e '.status=="completed" and .conclusion=="success" and .name=="Az Native Windows Installer" and .head_branch=="codex/az-design-workbench"' /tmp/source.json
-          if gh release view "v$VERSION" >/dev/null 2>&1; then
+          if gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo 'Release tag already published: refusing overwrite.'
             exit 1
           fi
