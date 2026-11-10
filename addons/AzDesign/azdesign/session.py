@@ -72,6 +72,8 @@ class InteractionFilter(QtCore.QObject):
         if kind == QtCore.QEvent.Resize and watched == self.session.mdi.viewport():
             self.session.navigation.place()
             self.session.canvas_actions.place()
+            if self.session.home.isVisible():
+                self.session.home.setGeometry(self.session.mdi.viewport().rect())
         if kind == QtCore.QEvent.ContextMenu and self.is_viewport(watched):
             if not Gui.Control.activeDialog() and not modeling.in_sketch():
                 selections = Gui.Selection.getSelectionEx()
@@ -285,6 +287,8 @@ class Session:
         self.sketch_dock.setMaximumHeight(210)
         self.main.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.sketch_dock)
         self.sketch_dock.hide()
+        from .home import DesignHome
+        self.home = DesignHome(self)
         self.navigation = Navigation(self, self.mdi.viewport())
         self.canvas_actions = CanvasActions(self, self.mdi.viewport())
         self.snap_guides = HoverGuides()
@@ -361,8 +365,9 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
         self.browser_dock.show()
         self.history_dock.show()
         self.main.resizeDocks([self.browser_dock], [260], QtCore.Qt.Horizontal)
-        if not modeling.current_document() and not Gui.Control.activeDialog():
-            modeling.document()
+        # A no-document startup belongs to Design Home, not an empty model.
+        # Do not create a document until the user selects New Design or a tool.
+        self.home.refresh()
         QtWidgets.QApplication.instance().installEventFilter(self.filter)
         self.timer.start()
         QtWidgets.QApplication.instance().aboutToQuit.connect(self.appearance.deactivate)
@@ -395,6 +400,7 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
             return
         try:
             self.configure_view()
+            self.home.refresh()
             sketch = modeling.in_sketch()
             editing = sketch.Name if sketch else None
             if editing != self.last_edit:
@@ -491,6 +497,7 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
             pass
         self.appearance.deactivate()
         self.style_tasks(restore=True)
+        self.home.hide()
         self.navigation.hide()
         self.canvas_actions.hide()
         self.snap_guides.release()
@@ -559,6 +566,7 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
         self.history_dock.deleteLater()
         self.browser_dock.deleteLater()
         self.sketch_dock.deleteLater()
+        self.home.deleteLater()
         self.navigation.deleteLater()
         self.canvas_actions.deleteLater()
         self.radial.deleteLater()
