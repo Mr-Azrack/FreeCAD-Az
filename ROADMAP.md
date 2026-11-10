@@ -382,3 +382,14 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [ ] Confirm full Windows patch-tests, actual patch/Qt/rollback, installer/uninstaller, uploaded artifact and hashes pass in current CI.
 - [ ] After approval, publish 0.5.4 release and verify Design's Check for Updates discovers/downloads it.
 - [ ] User Windows visual acceptance for larger ribbon, history/browser text and Quick Start version.
+
+
+## Windows CI speedup (2026-11-10)
+
+- [x] Implement separate routine native patch-only workflow with old/new allowlisted `Mod/AzDesign`, updater executable, patch applicator overlays.
+- [x] Skip separate compiled FreeCAD core download/extract and full Inno Setup build/upload on routine PRs; full installer remains manually available.
+- [x] Verify original 0.5.3 installer SHA256, real patch apply, Qt startup, rollback, uninstall, and output patch SHA256 in fast path source.
+- [x] Update 0.5.4 release-promotion gate to require successful patch-only CI.
+- [ ] First patch-only Windows CI run 42818046881 must pass; resolve any errors before declaring optimized pipeline validated.
+- [ ] Publish 0.5.4 only after approved successful run; owner visually validates readable labels/history and help version.
+- [ ] Consider separately content-addressed old-file baseline cache to remove original installer download safely once Windows byte-for-byte baseline identity is proven.
