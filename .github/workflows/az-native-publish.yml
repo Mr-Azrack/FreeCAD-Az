@@ -2,6 +2,12 @@ name: Publish approved Design Native patch
 
 # Manual promotion only: an accepted CI artifact is not automatically a public release.
 on:
+  # Owner-approved one-time release request. Future versions get separate
+  # reviewed requests; ordinary commits never cause release publication.
+  push:
+    branches: [main]
+    paths:
+      - '.github/release-requests/native-0.5.5.txt'
   workflow_dispatch:
     inputs:
       verified_run:
@@ -24,11 +30,19 @@ jobs:
     runs-on: ubuntu-latest
     environment: native-release
     steps:
+      - uses: actions/checkout@v4
+      - name: Validate owner-approved one-time release request
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .github/release-requests/native-0.5.5.txt
+          test "$(cat .github/release-requests/native-0.5.5.txt)" = "publish v0.5.5 from verified patch CI run 42819472920"
       - name: Validate requested release and upstream CI success
         env:
           GH_TOKEN: ${{ github.token }}
-          RUN_ID: ${{ inputs.verified_run }}
-          VERSION: ${{ inputs.version }}
+          RUN_ID: ${{ inputs.verified_run || '42819472920' }}
+          VERSION: ${{ inputs.version || '0.5.5' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -45,7 +59,7 @@ jobs:
         with:
           name: AzDesignNative-0.5.4-to-0.5.5-PATCH
           repository: Mr-Azrack/FreeCAD-Az
-          run-id: ${{ inputs.verified_run }}
+          run-id: ${{ inputs.verified_run || '42819472920' }}
           github-token: ${{ github.token }}
           path: approved
       - name: Revalidate patch SHA256
