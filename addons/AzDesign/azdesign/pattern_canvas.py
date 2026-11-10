@@ -10,18 +10,20 @@ from .qt import QtCore, QtGui, QtWidgets
 
 class PatternCanvasHandles(QtWidgets.QWidget):
     def __init__(self, get_value, set_value, mode="solid", parent=None,
-                 get_axis_name=None, get_counts=None):
+                 get_axis_name=None, get_counts=None,
+                 get_second_axis_name=None):
         super().__init__(parent)
         self.get_value = get_value
         self.set_value = set_value
         self.mode = mode
         self.get_axis_name = get_axis_name or (lambda: "X")
+        self.get_second_axis_name = get_second_axis_name or (lambda: "Y")
         self.get_counts = get_counts or (lambda: (3, 2))
         self._dragging = None
         self._start_pos = (0, 0)
         self._start_pitch = 0.0
         self.setObjectName("AzPatternCanvasHandles")
-        self.setFixedSize(180, 146 if mode == "sketch" else 96)
+        self.setFixedSize(180, 146 if mode in ("sketch", "grid") else 96)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
         self.setToolTip(
             "Drag the blue arrow to adjust pattern spacing. "
@@ -30,9 +32,9 @@ class PatternCanvasHandles(QtWidgets.QWidget):
         self.setCursor(QtCore.Qt.OpenHandCursor)
 
     def _axis_for(self, pos):
-        if self.mode != "sketch":
+        if self.mode not in ("sketch", "grid"):
             return "x"
-        return "y" if pos.y() >= 80 else "x"
+        return "y" if pos.y() >= 80 and self.get_counts()[1] > 1 else "x"
 
     def paintEvent(self, _event):
         p = QtGui.QPainter(self)
@@ -56,7 +58,7 @@ class PatternCanvasHandles(QtWidgets.QWidget):
         p.drawText(14, 22, "{} spacing  ·  drag →".format(
             "X" if self.mode == "sketch" else self.get_axis_name()
         ))
-        if self.mode == "sketch":
+        if self.mode in ("sketch", "grid"):
             p.setPen(QtGui.QPen(QtGui.QColor("#2b729e"), 2.5))
             p.drawLine(31, 85, 31, 133)
             p.drawLine(24, 124, 31, 134)
@@ -67,7 +69,8 @@ class PatternCanvasHandles(QtWidgets.QWidget):
                 y = 90 + 33 * i / max(1, sample_y - 1)
                 p.drawEllipse(27, int(y) - 4, 8, 8)
             p.setPen(QtGui.QColor("#264f68"))
-            p.drawText(47, 112, "Y spacing · drag ↓")
+            name = "Y" if self.mode == "sketch" else self.get_second_axis_name()
+            p.drawText(47, 112, "{} spacing · drag ↓".format(name))
         else:
             p.setPen(QtGui.QColor("#607f90"))
             p.drawText(14, 76, "Live solid preview")
