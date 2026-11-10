@@ -77,7 +77,7 @@ TOOLS = {
         "New Body", "Az_Body", "Create and activate a separate solid body.", "PartDesign_Body"
     ),
     "plane": Tool(
-        "Offset Plane", "PartDesign_Plane", "Create a datum plane and set its attachment offset."
+        "Offset Plane", "Az_OffsetPlane", "Select a flat face or origin plane, then enter a signed normal offset."
     ),
     "move": Tool("Move", "Std_TransformManip", "M · Transform the selected object."),
     "measure": Tool("Measure", "Std_Measure", "Measure selected edges, faces or objects."),
