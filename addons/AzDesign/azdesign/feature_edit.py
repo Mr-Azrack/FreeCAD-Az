@@ -27,6 +27,10 @@ def edit(obj):
     if obj.isDerivedFrom("PartDesign::Hole"):
         from .hole import edit_feature
         return edit_feature(obj)
+    if obj.isDerivedFrom("PartDesign::LinearPattern"):
+        # Editing a Design pattern never opens the native FreeCAD task pane.
+        from .solid_pattern import show
+        return show(editing=obj)
     if obj.isDerivedFrom("PartDesign::Body"):
         view = gui_doc.activeView()
         if view is not None:
