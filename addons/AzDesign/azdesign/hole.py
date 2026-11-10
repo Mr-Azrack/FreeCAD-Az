@@ -494,6 +494,24 @@ def finish_face_hole(sketch):
     return True
 
 
+def complete_pending_face_hole():
+    """Handle the native Sketch Tasks Close button as well as Design Finish."""
+    global _pending_face_hole
+    if _pending_face_hole is None or modeling.in_sketch():
+        return False
+    doc = modeling.current_document()
+    if doc is None or doc.Name != _pending_face_hole[0]:
+        return False
+    sketch = doc.getObject(_pending_face_hole[1])
+    if sketch is None:
+        _pending_face_hole = None
+        return False
+    if sketch.GeometryCount == 0:
+        # Nothing placed: do not create a meaningless Hole on empty input.
+        return False
+    return finish_face_hole(sketch)
+
+
 def start_on_face():
     """One-click entry from a selected planar solid face; no manual sketch step."""
     global _pending_face_hole
