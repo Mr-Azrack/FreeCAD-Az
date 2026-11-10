@@ -405,3 +405,17 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [x] Stage a pinned 0.5.5→0.5.6 patch pipeline by reconstructing 0.5.5 from verified 0.5.4 installer+0.5.5 delta; include recompiled native launcher.
 - [ ] Confirm add-on CI, real Windows patch installation/Qt smoke/rollback and GUI launch behavior; repair as needed.
 - [ ] Publish 0.5.6 in the controlled release channel after passing verification; visual owner acceptance for Home and icon legibility.
+
+
+## 2026-11-10 practical-part acceptance testing (owner recordings)
+
+- [x] Implement nonmodal sketch-plane chooser: choose XY/XZ/YZ directly within canvas, or click a planar model face, Cancel/Esc without creating a sketch
+- [x] Route Esc to active native Sketcher viewport when Design ribbon stole focus; retain existing nav-mode cancel and picker cancel
+- [x] Remove obstructive viewport Activate/Isolate strip; retain selection actions through Browser/context menu
+- [x] Provide separate Home control next to FreeCAD 1.1 navigation cube
+- [x] Draw recognizable top ribbon New/Save/Undo/Redo/Find/Help icons rather than letters
+- [x] Avoid empty Cut task without an existing solid; auto-select lone valid unused sketch for Extrude
+- [x] Add visible checked radio style scoped to native Preferences controls
+- [x] Add Windows patch CI Python compileall step
+- [ ] Validate the full native GUI behavior in Windows: picker face observer, Esc Rectangle exit, Preferences checked radio indicator, Home button position, and valid first extrusion. Resolve regressions before release
+- [ ] Resolve why GitHub commit-workflow run lookup is returning no runs for latest branch SHA; don't claim patched build exists until verified
