@@ -121,10 +121,10 @@ class CanvasActions(QtWidgets.QFrame):
         keys = selection_actions(sel.Object, sel.SubElementNames) if sel else ()
         for key, button in self.buttons.items():
             button.setVisible(key in keys)
-        self.setVisible(bool(keys))
-        if keys:
-            self.adjustSize()
-            self.place()
+        # Selection actions must not cover the native view cube, its home
+        # corner or the region where users click to select sketch faces.
+        # Keep actions accessible from the Browser context menu instead.
+        self.hide()
 
     def place(self):
         parent = self.parentWidget()
