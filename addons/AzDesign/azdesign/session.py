@@ -113,6 +113,16 @@ class InteractionFilter(QtCore.QObject):
                 event.accept()
                 return True
         if kind == QtCore.QEvent.KeyPress and event.key() == QtCore.Qt.Key_Escape:
+            # Design-owned preview transactions must abort on global Esc,
+            # even when the actual Coin viewport has keyboard focus.
+            from .solid_pattern import cancel_active as cancel_solid_pattern
+            if cancel_solid_pattern():
+                event.accept()
+                return True
+            from .sketch_pattern_ui import cancel_active as cancel_sketch_pattern
+            if cancel_sketch_pattern():
+                event.accept()
+                return True
             from .hole import cancel_face_picker
             if cancel_face_picker():
                 event.accept()
@@ -535,7 +545,11 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
 
     def deactivate(self):
         from .tasks import cancel_active
+        from .solid_pattern import cancel_active as cancel_solid_pattern
+        from .sketch_pattern_ui import cancel_active as cancel_sketch_pattern
 
+        cancel_solid_pattern()
+        cancel_sketch_pattern()
         cancel_active()
         self.active = False
         self.timer.stop()
