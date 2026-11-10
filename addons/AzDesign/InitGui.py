@@ -5,3 +5,12 @@ import FreeCADGui as Gui
 from azdesign.workbench import AzDesignWorkbench
 
 Gui.addWorkbench(AzDesignWorkbench())
+
+# Register document routing early, without forcing a workspace at startup.
+# Keep the Home screen until a new modeling document actually appears.
+try:
+    from azdesign.workspace_route import install as _install_design_routing
+    _install_design_routing()
+except ImportError:
+    # Headless startup harnesses don't provide native FreeCAD/Qt.
+    pass
