@@ -7,7 +7,7 @@ import FreeCAD as App
 import FreeCADGui as Gui
 from . import modeling
 from .features import DesignError
-from .catalog import TOOLS
+from .catalog import TOOLS, RAW_FEATURE_COMMANDS, ALLOWED_NATIVE_COMMANDS
 from .qt import QtWidgets
 
 _registered = False
@@ -25,6 +25,18 @@ def notify(message, error=False):
 
 
 def invoke(command):
+    # No accidental raw PartDesign task surfaces from the Design UI.
+    # Native geometry and Sketcher canvas controls remain intentional.
+    if command in RAW_FEATURE_COMMANDS:
+        notify(
+            "This advanced feature still uses FreeCAD's original task editor. "
+            "Use Utilities → Native CAD explicitly until its Design editor is ready.",
+            True,
+        )
+        return False
+    if not command.startswith("Az_") and command not in ALLOWED_NATIVE_COMMANDS:
+        notify("Unreviewed native command blocked in Design: " + command, True)
+        return False
     try:
         if command == "Std_ViewFitAll":
             from .session import current
