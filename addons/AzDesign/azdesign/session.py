@@ -98,14 +98,39 @@ class InteractionFilter(QtCore.QObject):
                     self.session.radial.popup(event.globalPos())
                 event.accept()
                 return True
-        if (
-            kind == QtCore.QEvent.KeyPress
-            and event.key() == QtCore.Qt.Key_Escape
-            and self.session.navigation.mode
-        ):
-            self.session.navigation.set_mode(None)
-            event.accept()
-            return True
+        if kind == QtCore.QEvent.KeyPress and event.key() == QtCore.Qt.Key_Escape:
+            from .sketch_plane_picker import cancel_active as cancel_sketch_plane
+            if cancel_sketch_plane():
+                event.accept()
+                return True
+            if self.session.navigation.mode:
+                self.session.navigation.set_mode(None)
+                event.accept()
+                return True
+            # FreeCAD's Sketcher only sees Esc when its Coin3D viewport owns
+            # keyboard focus. Clicking Design's ribbon moves focus to Qt
+            # buttons, leaving native Rectangle/Line in an active command.
+            # Forward the event once to the actual 3D view, not the main window.
+            if modeling.in_sketch() and not self.is_viewport(watched) and not self.editable_focus():
+                window = self.session.mdi.activeSubWindow()
+                root = window.widget() if window else self.session.mdi
+                target = next(
+                    (w for w in root.findChildren(QtWidgets.QWidget)
+                     if self.is_viewport(w) and w.isVisible()), None
+                )
+                if target is not None:
+                    target.setFocus(QtCore.Qt.OtherFocusReason)
+                    forwarded = QtGui.QKeyEvent(
+                        QtCore.QEvent.KeyPress, QtCore.Qt.Key_Escape,
+                        QtCore.Qt.NoModifier
+                    )
+                    self.forwarding = True
+                    try:
+                        QtWidgets.QApplication.sendEvent(target, forwarded)
+                    finally:
+                        self.forwarding = False
+                    event.accept()
+                    return True
         if kind == QtCore.QEvent.MouseButtonDblClick and event.button() == QtCore.Qt.LeftButton:
             parent = watched if isinstance(watched, QtWidgets.QWidget) else None
             in_browser = False
@@ -497,6 +522,8 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
             pass
         self.appearance.deactivate()
         self.style_tasks(restore=True)
+        from .sketch_plane_picker import cancel_active as cancel_sketch_plane
+        cancel_sketch_plane()
         self.home.hide()
         self.navigation.hide()
         self.canvas_actions.hide()
