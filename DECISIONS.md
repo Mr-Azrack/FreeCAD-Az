@@ -401,3 +401,8 @@ than rendering truncated words under inherited global FreeCAD styles.
 ## 2026-11-09 — Design-first command and workspace policy
 
 Owner approved the visible name **Design** (or Modeling when context warrants). Keep the internal `AzDesignWorkbench`, `Az_*` IDs, package paths and document compatibility until a separately validated migration exists. Native FreeCAD geometry, Sketcher solver, document IO, and undo remain the engine; do not allow exposed Design feature commands to silently launch raw PartDesign task dialogs. Legacy advanced native features not yet wrapped must remain available through an explicitly selected Native CAD workspace, with truthful capability labels. Preserve the Home screen, default ordinary new models to Design, respect native saved workbench per reopened FCStd document, and do not hijack CAM/specialized contexts.
+
+
+## 2026-11-09 — Native update channel / one-click UI
+
+Keep existing tested 0.5.2 installed app as the baseline. Native installed Design now routes Update into the bundled Windows updater; standalone workbench installation retains independent add-on updates. Trust a verified versioned GitHub Release asset only if its API SHA256 digest, pinned baseline and official HTTPS URL are consistent; reject drafts, prereleases, missing hashes, mismatched paths and downgrades. Download to staging; apply only after owner consent and close; old-version hash preflight, backup and rollback remain enforced by ApplyAzPatch.ps1. Ship 0.5.3 via actual 0.5.2-to-0.5.3 delta test, not a speculative patch from source folders. Publish verified patch to latest GitHub Release only after manual promotion on a reviewed default-branch workflow, never as an uncontrolled PR job.
