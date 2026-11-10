@@ -476,6 +476,92 @@ class HoleTask:
 # An explicit selected-face Hole creates a hidden parametric center sketch,
 # then continues into the native Hole editor after Finish Sketch.
 _pending_face_hole = None
+_active_hole_face_picker = None
+
+
+class _HoleFaceObserver:
+    def __init__(self, picker):
+        self.picker = picker
+
+    def addSelection(self, doc_name, obj_name, sub_name, _point):
+        if not sub_name.startswith("Face"):
+            return
+        from .qt import QtCore
+        picker = self.picker
+        QtCore.QTimer.singleShot(
+            0, lambda: picker.finish_pick(doc_name, obj_name, sub_name)
+        )
+
+
+class HoleFacePicker(QtWidgets.QFrame):
+    """Small, nonmodal canvas instruction while selecting an existing solid face."""
+    def __init__(self, session):
+        super().__init__(session.mdi.viewport())
+        self.setObjectName("AzHoleFacePicker")
+        self.setStyleSheet(
+            "QFrame#AzHoleFacePicker { background: #ffffff;"
+            " border: 1px solid #9dbaca; border-radius: 7px; }"
+        )
+        box = QtWidgets.QHBoxLayout(self)
+        box.setContentsMargins(12, 7, 12, 7)
+        box.addWidget(QtWidgets.QLabel("HOLE — click a flat face on the solid"))
+        cancel = QtWidgets.QPushButton("Cancel · Esc")
+        cancel.clicked.connect(self.cancel)
+        box.addWidget(cancel)
+        self.observer = _HoleFaceObserver(self)
+        self.adjustSize()
+        self.hide()
+
+    def begin(self):
+        global _active_hole_face_picker
+        if _active_hole_face_picker is not None:
+            _active_hole_face_picker.cancel()
+        _active_hole_face_picker = self
+        Gui.Selection.addObserver(self.observer)
+        self.move(max(8, (self.parentWidget().width() - self.width()) // 2), 16)
+        self.show()
+        self.raise_()
+
+    def cancel(self):
+        global _active_hole_face_picker
+        try:
+            Gui.Selection.removeObserver(self.observer)
+        except (RuntimeError, ReferenceError):
+            pass
+        self.hide()
+        if _active_hole_face_picker is self:
+            _active_hole_face_picker = None
+
+    def finish_pick(self, doc_name, obj_name, face_name):
+        if not self.isVisible():
+            return
+        self.cancel()
+        from . import commands
+        try:
+            if not start_on_face():
+                commands.notify("Select a planar face belonging to an existing solid.", True)
+        except features.DesignError as exc:
+            commands.notify(str(exc), True)
+
+
+def cancel_face_picker():
+    if _active_hole_face_picker is None:
+        return False
+    _active_hole_face_picker.cancel()
+    return True
+
+
+def choose_face_for_hole():
+    from .session import current
+    session = current()
+    if not session or not session.active:
+        raise features.DesignError("Activate Design to place a Hole.")
+    picker = getattr(session, "hole_face_picker", None)
+    if picker is None:
+        picker = HoleFacePicker(session)
+        session.hole_face_picker = picker
+    picker.begin()
+    return None
 
 
 def finish_face_hole(sketch):
@@ -566,6 +652,8 @@ def show_hole(editing=None):
         raise features.DesignError("Create a solid before placing a Hole.")
     if not editing and start_on_face():
         return None
+    if not editing and selected_sketch(doc) is None:
+        return choose_face_for_hole()
     task = HoleTask.__new__(HoleTask)
     try:
         task.__init__(doc, selected_sketch(doc), editing)
