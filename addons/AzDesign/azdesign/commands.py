@@ -201,16 +201,28 @@ def update_az_design():
 
 
 def help_dialog():
-    text = """<h2>Az Design · Quick start</h2>
+    from pathlib import Path
+    import json
+    title = "Design · Quick Start"
+    root = Path(__file__).resolve().parents[3]
+    marker = root / "AZ Native Version.json"
+    if marker.is_file():
+        try:
+            state = json.loads(marker.read_text(encoding="utf-8-sig"))
+            if state.get("product") == "AzDesignNative":
+                title = "Design " + str(state["version"]) + " · Quick Start"
+        except (ValueError, KeyError, OSError):
+            pass
+    text = """<h2>Design · Quick start</h2>
     <p><b>1.</b> Create Sketch → choose XY, XZ, YZ or a flat face.<br>
     <b>2.</b> Draw or choose Sized Rectangle (exact native width/height), then finish the sketch.<br>
     <b>3.</b> Finish Sketch → Extrude → distance → OK.</p>
     <p>Select a solid face and create another sketch to make a Cut.</p>
-    <p><b>Solid shortcuts:</b> E Extrude · Q Press/Pull · F Fillet · H Hole · M Move · S Find a Tool.<br>
+    <p><b>Solid shortcuts:</b> E Extrude · Q Press/Pull · F Fillet · H Hole · S Find a Tool.<br>
     <b>Sketch shortcuts:</b> L Line · R Rectangle · C Circle · D Smart Dimension ·
     T Trim · P Project · X Construction · S Find a Tool.</p>
     <p><b>Mouse:</b> Middle button pans; Shift + middle button orbits.
-    Scroll to zoom. These controls apply only in Az Design.</p>
+    Scroll to zoom. These controls apply only in Design.</p>
     <p><b>History:</b> Click to select; double-click to edit a feature.
     Right-click a solid feature to roll back, insert a feature, suppress or resume history.</p>
     <p><b>Extrude:</b> Select shaded sketch regions, type or drag the distance,
@@ -218,13 +230,13 @@ def help_dialog():
     Through All or To Face when needed. Negative distances reverse direction.</p>
     <p><b>Parameters:</b> Utilities → Parameters edits native feature dimensions
     and user parameters. Use expressions such as Parameters.Width / 2.</p>
-    <p><b>Hole:</b> The Az task makes native, editable holes. Threads use cosmetic
+    <p><b>Hole:</b> Design creates native, editable holes. Threads use cosmetic
     specifications; real helical threads are available only with experimental consent and crash logs.</p>
-    <p><b>Native tools:</b> Fillet, Shell, Revolve and other advanced tools use
-    FreeCAD's task dialogs. The Tasks panel is on the right.</p>
+    <p><b>Advanced tools:</b> Revolve, Shell and other features without integrated
+    Design editors remain available only by explicitly switching to Native CAD.</p>
     <p><b>Return:</b> Utilities → Native CAD restores your previous layout.
     This is an independent interface, not an Autodesk product.</p>"""
-    QtWidgets.QMessageBox.information(Gui.getMainWindow(), "Az Design 0.5.1", text)
+    QtWidgets.QMessageBox.information(Gui.getMainWindow(), title, text)
 
 
 def dispatch(key):
