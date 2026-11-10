@@ -498,6 +498,19 @@ class Navigation(QtWidgets.QFrame):
             view_menu.addAction(title, lambda cmd=command: commands.invoke(cmd))
         views.setMenu(view_menu)
         row.addWidget(views)
+        # FreeCAD 1.1's navigation cube has no dedicated Home control.
+        # Provide a separate, unobstructed Home target beside the cube.
+        self.cube_home = action_button(
+            "Home view", "Std_ViewIsometric", commands.home, parent=parent
+        )
+        self.cube_home.setObjectName("AzCubeHome")
+        self.cube_home.setToolTip("Home — isometric view and fit the model")
+        self.cube_home.setStyleSheet(
+            "QToolButton#AzCubeHome { border: 1px solid #aac0d0;"
+            " border-radius: 6px; background: #f6fafc; }"
+            "QToolButton#AzCubeHome:hover { background: #dcecf7; }"
+        )
+        self.cube_home.hide()
         self.adjustSize()
 
     def camera(self, kind):
@@ -525,10 +538,15 @@ class Navigation(QtWidgets.QFrame):
             max(8, parent.height() - self.height() - 15),
         )
         gui = Gui.activeDocument()
-        self.setVisible(
-            bool(gui and gui.activeView() and hasattr(gui.activeView(), "getCameraNode"))
+        visible = bool(
+            gui and gui.activeView() and hasattr(gui.activeView(), "getCameraNode")
         )
-        self.raise_()
+        self.setVisible(visible)
+        self.cube_home.move(max(8, parent.width() - 202), 25)
+        self.cube_home.setVisible(visible)
+        if visible:
+            self.cube_home.raise_()
+            self.raise_()
 
 
 class RadialMenu(QtWidgets.QFrame):
