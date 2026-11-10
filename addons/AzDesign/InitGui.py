@@ -23,6 +23,15 @@ if _az_os.environ.get("AZ_DESIGN_NATIVE_HOME") == "1":
     try:
         from azdesign.qt import QtCore as _AzQtCore
         import FreeCAD as _az_App
+        # Native builds use their own FREECAD_USER_HOME profile; suppress the
+        # stock FreeCAD splash on subsequent launches of the Design launcher.
+        # Stock FreeCAD and file-argument launches are not modified.
+        try:
+            _az_App.ParamGet(
+                "User parameter:BaseApp/Preferences/General"
+            ).SetBool("ShowSplasher", False)
+        except (RuntimeError, AttributeError):
+            pass
 
         # FreeCAD executes InitGui.py with an ephemeral namespace. Qt invokes
         # this callback *after* that namespace has been cleared; bind App and
@@ -42,6 +51,6 @@ if _az_os.environ.get("AZ_DESIGN_NATIVE_HOME") == "1":
                     "Unable to activate Design Home at startup: " + str(exc) + "\\n"
                 )
 
-        _AzQtCore.QTimer.singleShot(1200, _az_show_native_home)
+        _AzQtCore.QTimer.singleShot(250, _az_show_native_home)
     except ImportError:
         pass
