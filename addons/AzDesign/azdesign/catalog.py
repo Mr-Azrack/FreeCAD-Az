@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
-"""The editable command layout. Labels never replace FreeCAD command IDs."""
+"""The editable command layout with explicit native UI escape hatches."""
 
 from dataclasses import dataclass
 
@@ -137,10 +137,10 @@ TOOLS = {
     "undo": Tool("Undo", "Std_Undo", "Undo the last document operation."),
     "redo": Tool("Redo", "Std_Redo", "Redo the last undone document operation."),
     "palette": Tool(
-        "Find a Tool", "Az_Search", "S · Search the Az Design command palette.", "search"
+        "Find a Tool", "Az_Search", "S · Search modeling tools.", "search"
     ),
     "update": Tool(
-        "Update Az Design", "Az_Update",
+        "Update Design", "Az_Update",
         "Check for the latest CI-tested build; install with automatic backup. Restart FreeCAD afterward.",
         "Std_Refresh",
     ),
@@ -173,12 +173,11 @@ SOLID = [
             "presspull",
             "fillet",
             "chamfer",
-            "shell",
-            ("More", ["mirror", "pattern", "polar", "move", "parameters"]),
+            ("More", ["parameters"]),
         ],
     ),
     ("CONSTRUCT", ["plane"]),
-    ("INSPECT", ["measure", "snaps", "home"]),
+    ("INSPECT", ["snaps", "home"]),
 ]
 SKETCH = [
     ("CREATE", ["line", "rectangle", "sizedrect", "circle", ("More", ["centerrect", "arc", "slot"])]),
@@ -219,3 +218,25 @@ SKETCH_KEYS = {
     "P": "project",
     "S": "palette",
 }
+
+
+# Raw FreeCAD modeling/task commands are deliberately not advertised in the
+# main Design ribbon. They remain available through an explicit Native CAD
+# workspace switch until a tested Design-owned task implementation replaces them.
+# Sketcher drawing tools below are low-level native canvas operations, NOT
+# arbitrary PartDesign task panels: our workbench keeps the surrounding UI.
+RAW_FEATURE_COMMANDS = frozenset(
+    tool.command for key, tool in TOOLS.items()
+    if key in {"revolve", "loft", "sweep", "shell", "mirror", "pattern", "polar", "move", "measure"}
+)
+
+ALLOWED_NATIVE_COMMANDS = frozenset(
+    tool.command for key, tool in TOOLS.items()
+    if key in {
+        "line", "rectangle", "centerrect", "circle", "arc", "slot",
+        "trim", "offset", "project", "construction", "horizontal",
+        "vertical", "coincident", "tangent", "equal", "diameter",
+        "new", "open", "save", "export", "undo", "redo",
+        "fit", "preferences",
+    }
+)
