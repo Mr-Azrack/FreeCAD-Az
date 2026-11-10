@@ -225,6 +225,9 @@ def dispatch(key):
         ).prompt_sized_rectangle(),
         "finish": modeling.finish_sketch,
         "body": modeling.new_body,
+        "plane": lambda: __import__(
+            "azdesign.offset_plane", fromlist=["show"]
+        ).show(),
         "home": home,
         "palette": palette,
         "help": help_dialog,
@@ -302,6 +305,7 @@ def menu_commands():
             "dimension",
             "sizedrect",
             "body",
+            "plane",
             "home",
             "palette",
             "help",
