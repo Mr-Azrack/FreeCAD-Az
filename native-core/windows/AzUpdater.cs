@@ -88,11 +88,38 @@ static class AzNativeUpdater
             "Could not read installed version.";
     }
 
+    static bool NativeRunning()
+    {
+        string binary = Path.Combine(root, "bin", "FreeCAD.exe");
+        foreach (Process process in Process.GetProcessesByName("FreeCAD")) {
+            try {
+                if (String.Equals(process.MainModule.FileName, binary,
+                                  StringComparison.OrdinalIgnoreCase))
+                    return true;
+            } catch { /* Do not interfere with unrelated protected processes. */ }
+            finally { process.Dispose(); }
+        }
+        return false;
+    }
+
     static bool Confirm()
     {
-        return MessageBox.Show(window, "Close all Az Design Native windows and save your documents before applying an update. Continue?",
-            "Az Design Native", MessageBoxButtons.YesNo,
-            MessageBoxIcon.Warning) == DialogResult.Yes;
+        if (NativeRunning()) {
+            MessageBox.Show(window,
+                "Save your documents, then CLOSE the Design application window. " +
+                "Leave this updater open. Click OK after Design has closed.",
+                "Close Design to update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (NativeRunning()) {
+                MessageBox.Show(window,
+                    "Design is still running. Nothing was changed. Close it and try again.",
+                    "Update not started", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+        }
+        return MessageBox.Show(window,
+            "Install the verified patch? A rollback backup will be kept.",
+            "Design Update", MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question) == DialogResult.Yes;
     }
 
     static void CheckOnline(Button button)
