@@ -276,11 +276,19 @@ class WorkflowTest(unittest.TestCase):
 
         # A draft must show a real native patterned solid before Apply.
         draft = PatternDraft(hole)
-        patterned = draft.preview(2, 32, "X_Axis")
+        patterned = draft.preview(
+            2, 32, "X_Axis", count2=2, spacing2=25, direction2="Y_Axis"
+        )
         self.assertEqual(patterned.TypeId, "PartDesign::LinearPattern")
+        self.assertEqual(patterned.Occurrences2, 2)
+        self.assertEqual(patterned.Length2.Value, 25)
         self.assertTrue(patterned.Shape.isValid())
         self.assertEqual(patterned.Occurrences, 2)
         self.assertLess(patterned.Shape.Volume, one_hole_volume)
+        self.assertAlmostEqual(
+            patterned.Shape.Volume, initial_volume - 4 * math.pi * 2.5**2 * 8,
+            delta=1,
+        )
         self.assertEqual(body.Tip, patterned)
         self.assertGreater(patterned.Shape.Volume, 0)
         draft.cancel()
@@ -289,7 +297,9 @@ class WorkflowTest(unittest.TestCase):
         self.assertAlmostEqual(body.Shape.Volume, one_hole_volume, places=4)
 
         draft = PatternDraft(hole)
-        saved = draft.preview(2, 32, "X_Axis")
+        saved = draft.preview(
+            2, 32, "X_Axis", count2=2, spacing2=25, direction2="Y_Axis"
+        )
         draft.accept()
         self.doc.recompute()
         self.assertTrue(saved.Shape.isValid())
