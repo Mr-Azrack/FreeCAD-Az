@@ -547,8 +547,9 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
         self.style_tasks(restore=True)
         from .sketch_plane_picker import cancel_active as cancel_sketch_plane
         cancel_sketch_plane()
-        from .hole import cancel_face_picker
+        from .hole import cancel_face_picker, cancel_pending_face_hole
         cancel_face_picker()
+        cancel_pending_face_hole()
         self.home.hide()
         self.navigation.hide()
         self.navigation.cube_home.hide()
