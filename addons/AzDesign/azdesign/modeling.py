@@ -75,50 +75,56 @@ def new_body():
         raise
 
 
-def create_sketch():
+def create_sketch(support=None, plane=None):
+    """Start a native sketch after canvas-based plane/face selection.
+
+    A preselected planar face is accepted immediately. Otherwise the
+    nonmodal picker lets users click an origin plane or model face.
+    Nothing is created until they select a valid target.
+    """
     if Gui.Control.activeDialog():
         raise ModelingError("Finish or cancel the current operation first.")
-    doc = document()
+    doc = current_document()
+    if not doc:
+        doc = document()
     body = active_body()
     if not body:
         bodies = [obj for obj in doc.Objects if obj.isDerivedFrom("PartDesign::Body")]
         if len(bodies) > 1:
-            raise ModelingError("Select the body you want to sketch in, then choose Create Sketch.")
+            raise ModelingError("Select the body to sketch in, then choose Create Sketch.")
         body = bodies[0] if bodies else None
-    support = None
-    for selection in Gui.Selection.getSelectionEx():
-        if selection.Object.Document != doc:
-            continue
-        for name, shape in zip(selection.SubElementNames, selection.SubObjects):
-            if name.startswith("Face"):
-                import Part
-
-                if not isinstance(shape.Surface, Part.Plane):
-                    raise ModelingError(
-                        "Choose a flat face or clear the selection to use an origin plane."
-                    )
-                support = (selection.Object, [name])
+    if support is None and plane is None:
+        for selection in Gui.Selection.getSelectionEx():
+            if selection.Object.Document != doc:
+                continue
+            for name, shape in zip(selection.SubElementNames, selection.SubObjects):
+                if name.startswith("Face"):
+                    import Part
+                    if not isinstance(shape.Surface, Part.Plane):
+                        raise ModelingError("Select a flat face for your sketch.")
+                    support = (selection.Object, [name])
+                    break
+            if support:
                 break
-    plane_name = None
-    if not support:
-        plane_name, accepted = QtWidgets.QInputDialog.getItem(
-            Gui.getMainWindow(),
-            "Create Sketch",
-            "Choose a plane, or Cancel and select a flat face:",
-            ["XY — Top", "XZ — Front", "YZ — Right"],
-            0,
-            False,
-        )
-        if not accepted:
-            return None
-    doc.openTransaction("Az: Create sketch")
+    if support is None and plane is None:
+        from .sketch_plane_picker import show
+        show()
+        return None
+    if plane is not None and plane not in ("XY", "XZ", "YZ"):
+        raise ModelingError("Select XY, XZ, or YZ for an origin sketch.")
+    doc.openTransaction("Design: Create sketch")
     try:
         if body is None:
             body = doc.addObject("PartDesign::Body", "Body")
         if support is None:
-            role = plane_name[:2] + "_Plane"
-            plane = next(obj for obj in body.Origin.OriginFeatures if obj.Role == role)
-            support = (plane, [""])
+            role = plane + "_Plane"
+            origin = getattr(body, "Origin", None)
+            if origin is None:
+                raise ModelingError("Active body has no origin planes.")
+            origin_planes = [obj for obj in origin.OriginFeatures if obj.Role == role]
+            if not origin_planes:
+                raise ModelingError("Origin plane " + plane + " is unavailable.")
+            support = (origin_planes[0], [""])
         sketch = body.newObject("Sketcher::SketchObject", "Sketch")
         property_name = (
             "AttachmentSupport" if "AttachmentSupport" in sketch.PropertiesList else "Support"
