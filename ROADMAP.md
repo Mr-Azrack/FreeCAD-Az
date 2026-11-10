@@ -419,3 +419,17 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [x] Add Windows patch CI Python compileall step
 - [ ] Validate the full native GUI behavior in Windows: picker face observer, Esc Rectangle exit, Preferences checked radio indicator, Home button position, and valid first extrusion. Resolve regressions before release
 - [ ] Resolve why GitHub commit-workflow run lookup is returning no runs for latest branch SHA; don't claim patched build exists until verified
+
+
+## 2026-11-10 — next real-part acceptance targets
+
+- [x] Make Solid Move visible and implement native reversible Body/component XYZ placement (not individual unsupported feature relocation)
+- [x] Put Hole on Solid ribbon and support select-face → auto sketch hole centers → Finish Sketch → editable native Hole settings; add nonmodal face selection for Hole-first flow
+- [x] Fix Sketch Project native command name for FreeCAD 1.1: `Sketcher_Projection`, replacing disabled legacy `Sketcher_External`
+- [x] Permit Create Sketch from a selected edge when exactly one adjacent face is planar; require user face choice when ambiguous
+- [x] Provide temporary Show/Hide constraint label control without altering solver or geometry
+- [x] Add guarded Design-native single-feature Mirror/Linear Pattern task paths with native parametrically linked features and rollback
+- [x] Update catalog command boundary test and add native transformation contract tests to package CI
+- [ ] Windows GUI integration tests: hole-face picker/center sketch continuity, Mirror/Pattern with real native FCStd (two pads/one pocket), Move Undo/Redo, projected edge selection, visibility toggle and existing features after edit
+- [ ] Improve sketch dimension label positioning, duplicate/ref-vs-driving clarity, over/underconstrained guidance; screenshot still shows overlap and remaining 2 DoF
+- [ ] Confirm fresh 0.5.5→0.5.6 Windows patch CI success and artifact, then controlled official release; currently no verified fresh run surfaced
