@@ -264,7 +264,7 @@ def dispatch(key):
         "dimension": smart_dimension,
         "labels": toggle_sketch_labels,
         "sketchpattern": lambda: __import__(
-            "azdesign.sketch_pattern", fromlist=["show"]
+            "azdesign.sketch_pattern_ui", fromlist=["show"]
         ).show(),
         "sizedrect": lambda: __import__(
             "azdesign.sketch_rectangle", fromlist=["prompt_sized_rectangle"]
