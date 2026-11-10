@@ -128,11 +128,17 @@ class Ribbon(QtWidgets.QFrame):
                 lambda cmd=tool.command: commands.invoke(cmd),
             )
         self.file_menu.addSeparator()
-        self.file_menu.addAction("Native CAD / Properties", lambda: commands.invoke("Az_Native"))
+        self.file_menu.addAction("Advanced FreeCAD workspace", lambda: commands.invoke("Az_Native"))
         self.file_menu.addAction(
-            "Check for Az Design updates…", lambda: commands.invoke("Az_Update")
+            "Check for Design updates…", lambda: commands.invoke("Az_Update")
         )
-        self.advanced_menu = self.file_menu.addMenu("Advanced")
+        self.advanced_menu = self.file_menu.addMenu("Advanced native features")
+        for key in ("revolve", "loft", "sweep", "shell", "mirror", "pattern", "polar", "move", "measure"):
+            self.advanced_menu.addAction(
+                TOOLS[key].label + " (Native CAD)",
+                lambda _checked=False: commands.invoke("Az_Native"),
+            )
+        self.advanced_menu.setToolTipsVisible(True)
         file_button.setMenu(self.file_menu)
         top.addWidget(file_button)
         for key in ("save", "undo", "redo"):
@@ -142,7 +148,7 @@ class Ribbon(QtWidgets.QFrame):
         top.addWidget(self.documents, 1)
         top.addWidget(tool_button("new", True))
         top.addWidget(tool_button("palette", True))
-        update_button = QtWidgets.QPushButton("Update Az")
+        update_button = QtWidgets.QPushButton("Update")
         update_button.setObjectName("AzUpdateButton")
         update_button.setToolTip(
             "Check GitHub for the latest tested Az Design build; install with an automatic backup."
@@ -281,7 +287,7 @@ class Ribbon(QtWidgets.QFrame):
 class CommandPalette(QtWidgets.QDialog):
     def __init__(self, parent):
         super().__init__(parent)
-        self.setWindowTitle("Az Design · Find a Tool")
+        self.setWindowTitle("Design · Find a Tool")
         self.resize(510, 430)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         layout = QtWidgets.QVBoxLayout(self)
