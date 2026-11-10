@@ -68,7 +68,17 @@ internal static class AzOnlineUpdates {
     internal static AzAvailablePatch Find(string installed) {
         if (!VersionPattern.IsMatch(installed)) throw new InvalidDataException("Invalid local version.");
         string raw;
-        using (var client = Client()) raw = client.DownloadString(ReleaseApi);
+        try {
+            using (var client = Client()) raw = client.DownloadString(ReleaseApi);
+        } catch (WebException ex) {
+            var response = ex.Response as HttpWebResponse;
+            if (response != null && response.StatusCode == HttpStatusCode.NotFound) {
+                // A private repository or one without public releases returns 404.
+                // No update is available through the public, verified release channel.
+                return null;
+            }
+            throw;
+        }
         return Select(raw, installed);
     }
     // Pure metadata-selection routine also used by Windows offline tests.
