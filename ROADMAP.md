@@ -359,3 +359,15 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [ ] Pass current full add-on packaging/modeling CI after correcting first discovered Revolve command escape; verify Windows native app integration.
 - [ ] Add Design-owned replacement task panels for Revolve, Loft, Sweep, Shell, Mirror, Patterns, Move, and Measure, with native parametric semantics and tested Undo/Redo/Cancel.
 - [ ] Owner Windows acceptance for Home, new models, reopened Design/CAM files, and active task preservation; investigate imported non-FCStd formats individually.
+
+
+## Native one-click update 0.5.3 — November 9
+
+- [x] Design Update button invokes installed AzUpdater.exe when running the native Windows app.
+- [x] Native GUI Check for Updates and verified GitHub Release digest-pinned download path; manual ZIP and rollback preserved.
+- [x] CI source wiring for .NET Framework compiler, offline metadata rejection tests and genuine installed-baseline delta/Qt/rollback.
+- [x] Manually gated GitHub Release promotion workflow, no automatic release of unreviewed development code.
+- [ ] Verify all 0.5.3 Windows CI jobs and uploaded patch artifact SHA256; repair any failures.
+- [ ] Approve publishing exact verified patch as GitHub Release. Workflow must be available on default branch.
+- [ ] Owner bootstrap using existing Native - Update manual patch selector, restart, then test Design Update → Check for Updates and rollback.
+- [ ] Longer term: support chains/multiple installed baselines, no-release behavior, signing/trust beyond GitHub digest, and stable release channel.
