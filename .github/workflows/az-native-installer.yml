@@ -78,7 +78,7 @@ jobs:
           Remove-Item (Join-Path $root 'Mod\AzDesign') -Recurse -Force
           Copy-Item 'addons\AzDesign' (Join-Path $root 'Mod\AzDesign') -Recurse
           Copy-Item 'native-core\windows\ApplyAzPatch.ps1' (Join-Path $root 'ApplyAzPatch.ps1')
-          '{"product":"AzDesignNative","version":"0.5.4"}' | Set-Content -LiteralPath (Join-Path $root 'AZ Native Version.json') -Encoding utf8
+          '{"product":"AzDesignNative","version":"0.5.5"}' | Set-Content -LiteralPath (Join-Path $root 'AZ Native Version.json') -Encoding utf8
           $csc = Join-Path $env:windir 'Microsoft.NET\Framework\v4.0.30319\csc.exe'
           if (!(Test-Path $csc)) { throw "Windows C# compiler missing" }
           $icon = Join-Path $env:RUNNER_TEMP 'Az.ico'
@@ -97,43 +97,43 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "AzDesign GUI launcher did not compile" }
           & $csc /nologo /codepage:65001 /target:winexe "/out:$(Join-Path $root 'AzUpdater.exe')" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll @iconArgs "$updaterSource" "$onlineSource"
           if ($LASTEXITCODE -ne 0) { throw "AzUpdater GUI did not compile" }
-      - name: Download verified installed 0.5.3 baseline for delta generation
+      - name: Download verified installed 0.5.4 baseline for delta generation
         uses: actions/download-artifact@v4
         with:
-          name: AzDesign-Native-Windows-Installer-0.5.3
+          name: AzDesign-Native-Windows-Installer-0.5.4
           repository: Mr-Azrack/FreeCAD-Az
-          run-id: 42752856389
+          run-id: 42809599278
           github-token: ${{ github.token }}
           path: baseline-installer
-      - name: Produce and test signed-metadata-ready 0.5.3 to 0.5.4 patch
+      - name: Produce and test signed-metadata-ready 0.5.4 to 0.5.5 patch
         run: |
           $ErrorActionPreference = 'Stop'
           $oldSetup = Get-ChildItem 'baseline-installer' -Recurse -File -Filter '*.exe' | Select-Object -First 1
-          if (!$oldSetup) { throw 'Verified 0.5.3 baseline setup not found' }
+          if (!$oldSetup) { throw 'Verified 0.5.4 baseline setup not found' }
           $expectedSha = Get-ChildItem 'baseline-installer' -Recurse -File -Filter '*.sha256' | Select-Object -First 1
-          if (!$expectedSha) { throw 'Verified 0.5.3 installer SHA256 missing' }
+          if (!$expectedSha) { throw 'Verified 0.5.4 installer SHA256 missing' }
           $expected = ((Get-Content $expectedSha.FullName -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
           $actual = (Get-FileHash $oldSetup.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
           if ($expected -ne $actual) { throw 'Baseline installer SHA256 mismatch' }
           $baseline = Join-Path $env:RUNNER_TEMP 'AzOldNative'
           $proc = Start-Process $oldSetup.FullName -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/DIR=$baseline") -PassThru -Wait
-          if ($proc.ExitCode -ne 0) { throw "0.5.3 baseline installation failed: $($proc.ExitCode)" }
+          if ($proc.ExitCode -ne 0) { throw "0.5.4 baseline installation failed: $($proc.ExitCode)" }
           $newRoot = (Get-Content 'payload-path.txt' -Raw).Trim()
           New-Item -ItemType Directory 'dist' -Force | Out-Null
-          $patch = (Join-Path (Resolve-Path 'dist').Path 'AzDesignNative-0.5.3-to-0.5.4.azpatch')
-          python native-core/windows/create_patch.py --old "$baseline" --new "$newRoot" --output "$patch" --from-version 0.5.3 --to-version 0.5.4
+          $patch = (Join-Path (Resolve-Path 'dist').Path 'AzDesignNative-0.5.4-to-0.5.5.azpatch')
+          python native-core/windows/create_patch.py --old "$baseline" --new "$newRoot" --output "$patch" --from-version 0.5.4 --to-version 0.5.5
           if ($LASTEXITCODE -ne 0) { throw 'Patch creation failed' }
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File native-core/windows/ApplyAzPatch.ps1 -InstallDir "$baseline" -PatchZip "$patch" -NoUI
           if ($LASTEXITCODE -ne 0) { throw 'Actual old installation cannot accept the patch' }
           $marker = Get-Content (Join-Path $baseline 'AZ Native Version.json') -Raw | ConvertFrom-Json
-          if ($marker.version -ne '0.5.4') { throw 'Installed patch version does not match' }
+          if ($marker.version -ne '0.5.5') { throw 'Installed patch version does not match' }
           $env:PYTHONNOUSERSITE = '1'
           & (Join-Path $baseline 'bin/python.exe') native-core/windows/smoke_qt.py --bundle "$baseline"
           if ($LASTEXITCODE -ne 0) { throw 'Patched Qt startup smoke failed' }
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File native-core/windows/ApplyAzPatch.ps1 -InstallDir "$baseline" -RollbackLatest -NoUI
           if ($LASTEXITCODE -ne 0) { throw 'Actual baseline rollback failed' }
           $marker = Get-Content (Join-Path $baseline 'AZ Native Version.json') -Raw | ConvertFrom-Json
-          if ($marker.version -ne '0.5.3') { throw 'Rollback version did not restore' }
+          if ($marker.version -ne '0.5.4') { throw 'Rollback version did not restore' }
           $hash = (Get-FileHash $patch -Algorithm SHA256).Hash.ToLowerInvariant()
           "$hash  $(Split-Path $patch -Leaf)" | Set-Content "$patch.sha256"
           $u = Start-Process (Join-Path $baseline 'unins000.exe') -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART') -PassThru -Wait
@@ -141,10 +141,10 @@ jobs:
       - name: Publish verified small patch as CI artifact (not yet a public release)
         uses: actions/upload-artifact@v4
         with:
-          name: AzDesignNative-0.5.3-to-0.5.4-PATCH
+          name: AzDesignNative-0.5.4-to-0.5.5-PATCH
           path: |
-            dist/AzDesignNative-0.5.3-to-0.5.4.azpatch
-            dist/AzDesignNative-0.5.3-to-0.5.4.azpatch.sha256
+            dist/AzDesignNative-0.5.4-to-0.5.5.azpatch
+            dist/AzDesignNative-0.5.4-to-0.5.5.azpatch.sha256
           compression-level: 0
           retention-days: 14
           if-no-files-found: error
@@ -164,14 +164,14 @@ jobs:
           $iscc = (Get-Content 'iscc-path.txt' -Raw).Trim()
           New-Item -ItemType Directory 'dist' -Force | Out-Null
           $out = (Resolve-Path 'dist').Path
-          & $iscc "/DSourceDir=$root" "/DOutputDir=$out" '/DAppVer=0.5.4' 'native-core/windows/AzDesignNative.iss'
+          & $iscc "/DSourceDir=$root" "/DOutputDir=$out" '/DAppVer=0.5.5' 'native-core/windows/AzDesignNative.iss'
           if ($LASTEXITCODE -ne 0) { throw 'Inno installer compilation failed' }
-          $setup = Get-Item 'dist/AzDesign-Native-Setup-0.5.4-x64.exe'
+          $setup = Get-Item 'dist/AzDesign-Native-Setup-0.5.5-x64.exe'
           if ($setup.Length -lt 1000000) { throw 'Suspiciously small Windows installer' }
       - name: Verify actual Windows install, Start Menu, Qt and uninstall
         run: |
           $ErrorActionPreference = 'Stop'
-          $setup = (Resolve-Path 'dist/AzDesign-Native-Setup-0.5.4-x64.exe').Path
+          $setup = (Resolve-Path 'dist/AzDesign-Native-Setup-0.5.5-x64.exe').Path
           $target = Join-Path $env:RUNNER_TEMP 'AzInstalled'
           $proc = Start-Process $setup -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/DIR=$target") -PassThru -Wait
           if ($proc.ExitCode -ne 0) { throw "Installer exit code $($proc.ExitCode)" }
@@ -196,15 +196,15 @@ jobs:
           if ($p.ExitCode -ne 0) { throw 'Uninstaller failed' }
       - name: Hash Windows installer
         run: |
-          $exe = 'dist/AzDesign-Native-Setup-0.5.4-x64.exe'
+          $exe = 'dist/AzDesign-Native-Setup-0.5.5-x64.exe'
           $sha = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLowerInvariant()
-          "$sha  AzDesign-Native-Setup-0.5.4-x64.exe" | Set-Content 'dist/AzDesign-Native-Setup-0.5.4-x64.sha256'
+          "$sha  AzDesign-Native-Setup-0.5.5-x64.exe" | Set-Content 'dist/AzDesign-Native-Setup-0.5.5-x64.sha256'
       - uses: actions/upload-artifact@v4
         with:
-          name: AzDesign-Native-Windows-Installer-0.5.4
+          name: AzDesign-Native-Windows-Installer-0.5.5
           path: |
-            dist/AzDesign-Native-Setup-0.5.4-x64.exe
-            dist/AzDesign-Native-Setup-0.5.4-x64.sha256
+            dist/AzDesign-Native-Setup-0.5.5-x64.exe
+            dist/AzDesign-Native-Setup-0.5.5-x64.sha256
           compression-level: 0
           retention-days: 14
           if-no-files-found: error
