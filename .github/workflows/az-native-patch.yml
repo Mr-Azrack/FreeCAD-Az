@@ -61,6 +61,7 @@ jobs:
             'test_hole_ui_policy.py', 'test_hole_panel.py', 'test_updater.py',
             'test_workspace_route.py', 'test_command_boundary.py',
             'test_interaction.py', 'test_native_transform_contracts.py',
+            'test_pattern_ui_contracts.py', 'test_timeline_icons.py',
             'test_sketch_palette.py', 'test_snap_hover.py',
             'test_snap_overlay.py'
           )
