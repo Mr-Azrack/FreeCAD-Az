@@ -93,11 +93,25 @@ class PatternDraft:
         self.started = False
         self.ready = False
 
-    def preview(self, count, spacing, direction="X_Axis", reversed_direction=False):
+    def preview(self, count, spacing, direction="X_Axis", reversed_direction=False,
+                count2=1, spacing2=20, direction2="Y_Axis"):
         count, spacing, direction, reversed_direction = validate(
             count, spacing, direction, reversed_direction
         )
+        try:
+            count2 = int(count2)
+            spacing2 = float(spacing2)
+        except (TypeError, ValueError) as exc:
+            raise DesignError("Second direction needs numeric repetitions and spacing.") from exc
+        if not 1 <= count2 <= 100 or count * count2 > 400:
+            raise DesignError("The rectangular solid array must have 1–400 occurrences.")
+        if count2 > 1:
+            if direction2 == direction:
+                raise DesignError("Second direction must use a different origin axis.")
+            if not math.isfinite(spacing2) or not 0.001 <= spacing2 <= 100000:
+                raise DesignError("Second spacing must be between 0.001 and 100000 mm.")
         axis = origin_axis(self.body, direction)
+        axis2 = origin_axis(self.body, direction2) if count2 > 1 else None
         if not self.started:
             self.doc.openTransaction(
                 "Design: Edit linear pattern" if self.existing
@@ -130,6 +144,21 @@ class PatternDraft:
             obj.Mode = modes[0]
         obj.Occurrences = count
         obj.Length = spacing * (count - 1)
+        if count2 > 1:
+            if not {"Direction2", "Occurrences2", "Length2"}.issubset(
+                set(obj.PropertiesList)
+            ):
+                raise DesignError(
+                    "This FreeCAD build cannot create a two-direction solid pattern."
+                )
+            obj.Direction2 = (axis2, [""])
+            modes2 = getattr(obj, "getEnumerationsOfProperty", lambda _name: ())("Mode2")
+            if "Mode2" in obj.PropertiesList and modes2:
+                obj.Mode2 = modes2[0]
+            obj.Occurrences2 = count2
+            obj.Length2 = spacing2 * (count2 - 1)
+        elif "Occurrences2" in obj.PropertiesList:
+            obj.Occurrences2 = 1
         if reversed_direction:
             if "Reversed" not in obj.PropertiesList:
                 raise DesignError("This FreeCAD build does not expose reverse pattern direction.")
