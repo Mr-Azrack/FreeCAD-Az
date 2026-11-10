@@ -128,8 +128,35 @@ def design_icon(key):
         painter.drawLine(8, 13, 8, 25)
         painter.drawLine(32, 13, 32, 25)
         painter.drawEllipse(17, 16, 6, 6)
+    elif k in ("orbit", "pan", "zoom-in", "zoom-out", "display", "standard"):
+        if k == "orbit":
+            painter.drawEllipse(9, 9, 22, 22)
+            painter.drawArc(3, 3, 34, 34, 35 * 16, 225 * 16)
+            painter.drawLine(28, 5, 36, 9)
+            painter.drawLine(28, 5, 29, 14)
+        elif k == "pan":
+            painter.drawLine(20, 5, 20, 35)
+            painter.drawLine(5, 20, 35, 20)
+            for end_x, end_y, back_x, back_y in ((20, 5, 14, 12), (20, 35, 14, 28),
+                                                  (5, 20, 12, 14), (35, 20, 28, 14)):
+                painter.drawLine(end_x, end_y, back_x, back_y)
+        elif k.startswith("zoom-"):
+            painter.drawEllipse(6, 5, 23, 23)
+            painter.drawLine(25, 27, 35, 37)
+            painter.drawLine(12, 17, 23, 17)
+            if k == "zoom-in":
+                painter.drawLine(17, 11, 17, 23)
+        elif k == "display":
+            painter.drawRect(5, 7, 30, 21)
+            painter.drawLine(16, 33, 24, 33)
+            painter.drawLine(20, 28, 20, 33)
+        else:
+            painter.drawRect(9, 10, 22, 22)
+            painter.drawLine(9, 10, 19, 5)
+            painter.drawLine(31, 10, 36, 5)
+            painter.drawLine(19, 5, 36, 5)
     elif k in ("home", "fit", "history-start", "history-back",
-               "history-next", "history-end", "zoom-in", "zoom-out"):
+               "history-next", "history-end"):
         if k in ("home", "fit"):
             painter.drawRect(12, 15, 16, 15)
             painter.drawLine(9, 16, 20, 6)
