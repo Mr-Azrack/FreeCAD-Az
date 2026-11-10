@@ -1191,3 +1191,8 @@ Owner requests **one Update button inside Design** for native Windows, increment
 - `.github/workflows/az-native-publish.yml` adds **manual approval/promotion only**, restricted to `main`, exact 0.5.3 and a successful relevant CI run; verifies downloaded patch checksum before publishing GitHub latest Release.
 
 **Not yet done/claimed:** complete 0.5.3 Windows CI and release artifact verification; owner-installed 0.5.2 does not yet include the online updater. First update must be bootstrapped via existing manual `Az Design Native - Update` once the verified .azpatch is available. The public GitHub Release is NOT published; the publisher workflow must be present on the default branch, reviewed and deliberately triggered. Do not merge draft PR #1 or imply working one-click remote updates yet.
+
+
+## 2026-11-10 — 0.5.4 incremental release pipeline (source committed, CI pending)
+
+Native CI now targets 0.5.4 and generates `AzDesignNative-0.5.3-to-0.5.4.azpatch` from the original verified 0.5.3 Windows installer artifact in run 42752856389 (the 43.5 KiB patch generation, matching owner's installed version), not later 0.5.3 rebuilds. The baseline installer download is SHA256 validated against its original published checksum; application is silently installed on Windows, patched, Qt-smoked, rolled back, uninstalled. CI also builds and tests a native 0.5.4 full installer. Manual GitHub Release promoter is adjusted to 0.5.4 with exact target artifact and existing main-branch approval restriction; no release has been published by these source edits. Includes 0.5.3→0.5.4 update metadata tests. Current source is not evidence of successful Windows build or owner installation.
