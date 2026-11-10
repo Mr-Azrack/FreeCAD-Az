@@ -12,7 +12,7 @@ from pathlib import Path, PurePosixPath
 from zipfile import ZipFile, ZIP_DEFLATED
 
 SCHEMA = 1
-EXCLUDES = {"unins000.exe", "unins000.dat", "Az Native Version.json", "patch.json"}
+EXCLUDES = {"unins000.exe", "unins000.dat", "az native version.json", "patch.json"}
 
 
 def hash_file(path):
@@ -31,7 +31,7 @@ def files_in(folder):
         if not file.is_file():
             continue
         rel = file.relative_to(folder).as_posix()
-        if file.name.lower().startswith("unins") or rel in EXCLUDES:
+        if file.name.lower().startswith("unins") or rel.casefold() in EXCLUDES:
             continue
         result[rel] = (file, hash_file(file))
     return result
@@ -46,6 +46,7 @@ def safe_rel(path):
         or posix.is_absolute() or ".." in posix.parts or "." in posix.parts
         or any(part in ("",) for part in posix.parts)
         or path.lower().startswith("unins")
+        or path.casefold() in EXCLUDES
     ):
         raise ValueError("Unsafe patch path: " + str(path))
     return path
