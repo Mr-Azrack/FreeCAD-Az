@@ -108,7 +108,7 @@ jobs:
           run-id: 42752856389
           github-token: ${{ github.token }}
           path: baseline-installer
-      - name: Produce and test signed-metadata-ready 0.5.4 to 0.5.4 patch
+      - name: Produce and test signed-metadata-ready 0.5.3 to 0.5.4 patch
         run: |
           $ErrorActionPreference = 'Stop'
           $oldSetup = Get-ChildItem 'baseline-installer' -Recurse -File -Filter '*.exe' | Select-Object -First 1
@@ -123,7 +123,7 @@ jobs:
           if ($proc.ExitCode -ne 0) { throw "0.5.3 baseline installation failed: $($proc.ExitCode)" }
           $newRoot = (Get-Content 'payload-path.txt' -Raw).Trim()
           New-Item -ItemType Directory 'dist' -Force | Out-Null
-          $patch = (Join-Path (Resolve-Path 'dist').Path 'AzDesignNative-0.5.4-to-0.5.4.azpatch')
+          $patch = (Join-Path (Resolve-Path 'dist').Path 'AzDesignNative-0.5.3-to-0.5.4.azpatch')
           python native-core/windows/create_patch.py --old "$baseline" --new "$newRoot" --output "$patch" --from-version 0.5.3 --to-version 0.5.4
           if ($LASTEXITCODE -ne 0) { throw 'Patch creation failed' }
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File native-core/windows/ApplyAzPatch.ps1 -InstallDir "$baseline" -PatchZip "$patch" -NoUI
@@ -144,10 +144,10 @@ jobs:
       - name: Publish verified small patch as CI artifact (not yet a public release)
         uses: actions/upload-artifact@v4
         with:
-          name: AzDesignNative-0.5.4-to-0.5.4-PATCH
+          name: AzDesignNative-0.5.3-to-0.5.4-PATCH
           path: |
-            dist/AzDesignNative-0.5.4-to-0.5.4.azpatch
-            dist/AzDesignNative-0.5.4-to-0.5.4.azpatch.sha256
+            dist/AzDesignNative-0.5.3-to-0.5.4.azpatch
+            dist/AzDesignNative-0.5.3-to-0.5.4.azpatch.sha256
           compression-level: 0
           retention-days: 14
           if-no-files-found: error
