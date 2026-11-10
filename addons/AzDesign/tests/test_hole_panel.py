@@ -185,7 +185,7 @@ class HolePanelSmokeTest(unittest.TestCase):
         sys.path.insert(0, str(ADDON))
         qt = types.ModuleType("azdesign.qt")
         qt.QtWidgets = types.SimpleNamespace(
-            QWidget=Widget, QVBoxLayout=Widget, QHBoxLayout=Widget,
+            QWidget=Widget, QFrame=Widget, QVBoxLayout=Widget, QHBoxLayout=Widget,
             QGroupBox=Widget, QFormLayout=Widget, QLabel=Widget,
             QComboBox=Widget, QDoubleSpinBox=Widget, QCheckBox=Widget,
             QPushButton=Widget,
