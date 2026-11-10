@@ -9,7 +9,7 @@ import FreeCAD as App
 import Part
 import PartDesign
 import Sketcher
-from azdesign import features, profiles, operations, history, presspull, parameters, quick_dimension, sketch_rectangle, edge_treatments, snap_targets
+from azdesign import features, profiles, operations, history, presspull, parameters, quick_dimension, sketch_rectangle, sketch_pattern, edge_treatments, snap_targets
 from azdesign.hole_operation import HoleOperation
 from azdesign.hole_spec import HoleSpec, thread_sizes
 
@@ -177,6 +177,77 @@ class WorkflowTest(unittest.TestCase):
         sketch_rectangle.dimensioned_rectangle(source, 20, 12)
         with self.assertRaisesRegex(features.DesignError, "empty sketch"):
             sketch_rectangle.dimensioned_rectangle(source, 10, 8)
+
+    def test_four_hole_rectangular_sketch_pattern_drives_native_hole(self):
+        """Owner acceptance: one circle → 2x2 pattern → four cut holes."""
+        body = self.doc.addObject("PartDesign::Body", "PlateBody")
+        plate_sketch = sketch(self.doc, [], body=body, name="PlateProfile")
+        sketch_rectangle.dimensioned_rectangle(plate_sketch, 80, 60)
+        plate = features.create_extrude(
+            body, (plate_sketch, []), whole=True, operation="New body"
+        )
+        plate.Length = 8
+        self.doc.recompute()
+        self.assertTrue(plate.Shape.isValid())
+        initial_volume = plate.Shape.Volume
+        centers = sketch(self.doc, [], body=body, name="FourHoleCenters", z=8)
+        circle = centers.addGeometry(
+            Part.Circle(App.Vector(12, 12, 0), App.Vector(0, 0, 1), 2.5),
+            False
+        )
+        size_id = centers.addConstraint(Sketcher.Constraint("Diameter", circle, 5))
+        centers.addConstraint(Sketcher.Constraint("DistanceX", circle, 3, 12))
+        centers.addConstraint(Sketcher.Constraint("DistanceY", circle, 3, 12))
+        self.doc.recompute()
+        copies = sketch_pattern.pattern_circles(
+            centers, circle, columns=2, rows=2, pitch_x=45, pitch_y=35
+        )
+        self.assertEqual(len(copies), 3)
+        self.assertEqual(centers.GeometryCount, 4)
+        self.assertEqual(len(sketch_pattern.circle_indices(centers)), 4)
+        self.assertEqual({
+            (round(g.Center.x, 3), round(g.Center.y, 3))
+            for g in centers.Geometry
+        }, {(12, 12), (57, 12), (12, 47), (57, 47)})
+        self.assertTrue(all(abs(g.Radius - 2.5) < 1e-6 for g in centers.Geometry))
+        self.assertTrue(centers.Shape.isValid())
+
+        # The source circle's driving dimension must update all copies.
+        centers.setDatum(size_id, App.Units.Quantity("6 mm"))
+        self.doc.recompute()
+        self.assertTrue(all(abs(g.Radius - 3) < 1e-5 for g in centers.Geometry))
+        op = HoleOperation(self.doc, centers)
+        op.preview(HoleSpec(diameter=6, depth=8, through_all=True))
+        hole = op.accept()
+        self.assertTrue(hole.Shape.isValid())
+        self.assertEqual(len(hole.Shape.Solids), 1)
+        self.assertLess(hole.Shape.Volume, initial_volume)
+        self.assertAlmostEqual(
+            hole.Shape.Volume, initial_volume - 4 * math.pi * 3 * 3 * 8,
+            delta=1,
+        )
+        self.assertEqual(body.Tip, hole)
+
+    def test_sketch_pattern_rejects_overlapping_centers_without_mutation(self):
+        body = self.doc.addObject("PartDesign::Body", "Body")
+        centers = sketch(self.doc, [], body=body)
+        src = centers.addGeometry(
+            Part.Circle(App.Vector(0, 0, 0), App.Vector(0, 0, 1), 2)
+        )
+        centers.addGeometry(
+            Part.Circle(App.Vector(45, 0, 0), App.Vector(0, 0, 1), 2)
+        )
+        before = centers.GeometryCount
+        with self.assertRaisesRegex(features.DesignError, "coincides"):
+            sketch_pattern.pattern_circles(
+                centers, src, columns=2, rows=1, pitch_x=45, pitch_y=0
+            )
+        self.assertEqual(centers.GeometryCount, before)
+        with self.assertRaisesRegex(features.DesignError, "nonzero"):
+            sketch_pattern.pattern_circles(
+                centers, src, columns=2, rows=2, pitch_x=0, pitch_y=45
+            )
+        self.assertEqual(centers.GeometryCount, before)
 
     def test_fixture_full_history_dimension_edit_hole_fillet_undo_and_save(self):
         """Release gate: one real machining fixture survives normal CAD edits."""
