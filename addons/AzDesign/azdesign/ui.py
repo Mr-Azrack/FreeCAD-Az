@@ -483,23 +483,15 @@ class FeatureButton(QtWidgets.QToolButton):
         self.document_name = obj.Document.Name
         self.feature_name = obj.Name
         self.history = history
-        self.setText(obj.Label)
-        symbol = (
-            "PartDesign_NewSketch"
-            if obj.isDerivedFrom("Sketcher::SketchObject")
-            else "PartDesign_Body"
-        )
-        if getattr(obj, "AzType", "") == "AzExtrude" or obj.TypeId == "PartDesign::Pad":
-            symbol = "extrude"
-        elif obj.TypeId == "PartDesign::Pocket":
-            symbol = "PartDesign_Pocket"
-        elif obj.TypeId == "PartDesign::Fillet":
-            symbol = "PartDesign_Fillet"
-        self.setIcon(command_icon(symbol))
-        self.setIconSize(QtCore.QSize(22, 22))
+        # Use our own per-feature SVG images rather than FreeCAD icon
+        # resources or the tiny, truncated text that appeared in the timeline.
+        from .timeline_icons import icon_path
+        self.setText("")
+        self.setIcon(QtGui.QIcon(icon_path(obj)))
+        self.setIconSize(QtCore.QSize(25, 25))
         self.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
         self.setCheckable(True)
-        self.setFixedSize(38, 42)
+        self.setFixedSize(38, 40)
         self.setAccessibleName(obj.Label)
         self.setToolTip(
             obj.Label + " · " + obj.TypeId
@@ -766,9 +758,7 @@ class History(QtWidgets.QWidget):
         settings.setToolTip("Timeline settings")
         settings.setPopupMode(QtWidgets.QToolButton.InstantPopup)
         menu = QtWidgets.QMenu(settings)
-        labels = menu.addAction("Feature labels")
-        labels.setCheckable(True)
-        labels.toggled.connect(self.show_labels)
+        # Feature labels are in tooltips; always render DPI-safe image icons.
         menu.addAction("Resume latest history", lambda: commands.invoke("Az_ResumeHistory"))
         settings.setMenu(menu)
         layout.addWidget(settings)
@@ -819,9 +809,8 @@ class History(QtWidgets.QWidget):
             commands.notify("Select a feature in the bottom timeline first.", True)
 
     def show_labels(self, enabled):
-        self.labels_visible = enabled
-        self.signature = None
-        self.refresh()
+        # Compatibility route for old settings; the timeline is icon-only.
+        self.labels_visible = False
 
     def step(self, direction):
         if Gui.Control.activeDialog():
@@ -888,7 +877,7 @@ class History(QtWidgets.QWidget):
             for obj in features:
                 button = FeatureButton(obj, self)
                 if getattr(obj, "Suppressed", False):
-                    button.setText(obj.Label + "\n(suppressed)")
+                    button.setToolTip(button.toolTip() + "\nSuppressed")
                 for body in rolled:
                     if (
                         obj in body.Group
@@ -896,11 +885,6 @@ class History(QtWidgets.QWidget):
                         and body.Group.index(obj) > body.Group.index(body.Tip)
                     ):
                         button.setStyleSheet("color: #9099a0; background: #e9edf0;")
-                if self.labels_visible:
-                    button.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
-                    button.setFixedWidth(
-                        max(90, button.fontMetrics().horizontalAdvance(obj.Label) + 34)
-                    )
                 self.buttons.append(button)
                 row.addWidget(button)
                 if any(obj == body.Tip for body in rolled):
