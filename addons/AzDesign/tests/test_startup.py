@@ -107,6 +107,7 @@ class StartupTest(unittest.TestCase):
         )
         app = types.ModuleType("FreeCAD")
         app.ActiveDocument = None
+        app.addDocumentObserver = Mock()
         app.Console = types.SimpleNamespace(PrintError=Mock())
         self.gui.Control = types.SimpleNamespace(activeDialog=Mock(return_value=False))
         self.gui.activeWorkbench = Mock(
@@ -139,6 +140,7 @@ class StartupTest(unittest.TestCase):
         )
         app = types.ModuleType("FreeCAD")
         app.ActiveDocument = object()
+        app.addDocumentObserver = Mock()
         app.Console = types.SimpleNamespace(PrintError=Mock())
         self.gui.Control = types.SimpleNamespace(activeDialog=Mock(return_value=False))
         self.gui.activeWorkbench = Mock(
