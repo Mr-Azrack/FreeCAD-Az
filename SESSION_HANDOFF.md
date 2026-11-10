@@ -1166,3 +1166,8 @@ Critical next action: fetch current run jobs and failures for Az Native Windows 
 ### Additional updater safety checkpoint — November 9
 
 Commit `417d25f` guards native patch initiation: if the currently installed Design FreeCAD.exe is running, AzUpdater presents a save/close instruction and rechecks the exact installed FreeCAD.exe path. It leaves the updater open and refuses mutation if the CAD process remains active. This avoids launching the independent patch process while an unsaved Design window is still running. Compiler-path fix commit `8eaa6d2` removed accidental duplicated path separators in patch-test CI. Verify those commits and the latest Windows CI status before announcing availability. Latest CI work is not yet verified passing; no public Release or downloadable 0.5.3 patch was confirmed in this session.
+
+
+### 2026-11-09 22:57 ET — Windows patch CI diagnosis
+
+Run 42735700610 completed: patch-tests succeeded; installer failed at actual 0.5.2→0.5.3 patch application. 44,382-byte patch included `AZ Native Version.json`, which ApplyAzPatch.ps1 correctly rejected. Cause was case-sensitive generator `EXCLUDES` containing `Az Native Version.json` rather than actual uppercase `AZ Native Version.json`. Fixed `files_in` exclusion using `rel.casefold()` and added safe_rel guard in commit `e29a928`; updated `test_create_patch.py` to use exact Windows marker casing and check rejection in `cd0ca8f`. New native installer workflow run 42752811713 was pending; do not announce update ready until patch apply, Qt startup, rollback and publication pass. Existing 0.5.2 remains unchanged.
