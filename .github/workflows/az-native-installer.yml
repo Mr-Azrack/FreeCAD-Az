@@ -22,6 +22,18 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Verify GitHub update selection and reject untrusted releases
+        shell: pwsh
+        run: |
+          $csc = Join-Path $env:windir 'Microsoft.NET\\Framework\\v4.0.30319\\csc.exe'
+          if (!(Test-Path $csc)) { throw 'Framework C# compiler missing' }
+          $online = (Resolve-Path 'native-core/windows/AzOnlineUpdates.cs').Path
+          $tests = (Resolve-Path 'native-core/windows/test_online_updates.cs').Path
+          $exe = Join-Path $env:RUNNER_TEMP 'AzOnlineUpdateTests.exe'
+          & $csc /nologo /target:exe "/out:$exe" /reference:System.Web.Extensions.dll "$online" "$tests"
+          if ($LASTEXITCODE -ne 0) { throw 'Online updater did not compile' }
+          & $exe
+          if ($LASTEXITCODE -ne 0) { throw 'Online updater metadata tests failed' }
       - name: Verify file-delta generation
         run: python native-core/windows/test_create_patch.py
       - name: Verify real Windows update and rollback
