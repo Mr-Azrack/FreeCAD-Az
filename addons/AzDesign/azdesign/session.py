@@ -113,6 +113,10 @@ class InteractionFilter(QtCore.QObject):
                 event.accept()
                 return True
         if kind == QtCore.QEvent.KeyPress and event.key() == QtCore.Qt.Key_Escape:
+            from .hole import cancel_face_picker
+            if cancel_face_picker():
+                event.accept()
+                return True
             from .sketch_plane_picker import cancel_active as cancel_sketch_plane
             if cancel_sketch_plane():
                 event.accept()
@@ -543,6 +547,8 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
         self.style_tasks(restore=True)
         from .sketch_plane_picker import cancel_active as cancel_sketch_plane
         cancel_sketch_plane()
+        from .hole import cancel_face_picker
+        cancel_face_picker()
         self.home.hide()
         self.navigation.hide()
         self.navigation.cube_home.hide()
@@ -614,6 +620,10 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
         self.browser_dock.deleteLater()
         self.sketch_dock.deleteLater()
         self.home.deleteLater()
+        if getattr(self, "hole_face_picker", None) is not None:
+            self.hole_face_picker.deleteLater()
+        if getattr(self, "sketch_plane_picker", None) is not None:
+            self.sketch_plane_picker.deleteLater()
         self.navigation.cube_home.deleteLater()
         self.navigation.deleteLater()
         self.canvas_actions.deleteLater()
