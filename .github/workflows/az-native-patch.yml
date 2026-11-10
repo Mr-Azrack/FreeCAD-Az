@@ -68,6 +68,17 @@ jobs:
             python "addons/AzDesign/tests/$test"
             if ($LASTEXITCODE -ne 0) { throw "Batch gate failed at $test. Native baseline download skipped." }
           }
+      - name: Verify native launcher suppresses first splash safely
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $csc = Join-Path $env:windir 'Microsoft.NET\\Framework\\v4.0.30319\\csc.exe'
+          $exe = Join-Path $env:RUNNER_TEMP 'AzNativeLauncherProfileTests.exe'
+          $launcher = (Resolve-Path 'native-core/windows/AzDesignLauncher.cs').Path
+          $test = (Resolve-Path 'native-core/windows/test_launcher_profile.cs').Path
+          & $csc /nologo /target:exe "/out:$exe" /main:TestNativeLauncherProfile /reference:System.Windows.Forms.dll /reference:System.Xml.dll "$launcher" "$test"
+          if ($LASTEXITCODE -ne 0) { throw 'Native launch profile compilation failed' }
+          & $exe
+          if ($LASTEXITCODE -ne 0) { throw 'Native first-launch splash or config-preservation test failed' }
       - name: Verify release metadata and patch safety contracts
         run: |
           $ErrorActionPreference = 'Stop'
@@ -177,7 +188,7 @@ jobs:
             $iconArgs = @("/win32icon:$icon")
           }
           $launcherSource = (Resolve-Path 'native-core/windows/AzDesignLauncher.cs').Path
-          & $csc /nologo /codepage:65001 /target:winexe "/out:$(Join-Path $new 'AzDesign.exe')" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll @iconArgs "$launcherSource"
+          & $csc /nologo /codepage:65001 /target:winexe "/out:$(Join-Path $new 'AzDesign.exe')" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Xml.dll @iconArgs "$launcherSource"
           if ($LASTEXITCODE -ne 0) { throw 'Native launcher compile failed' }
           $updaterSource = (Resolve-Path 'native-core/windows/AzUpdater.cs').Path
           $onlineSource = (Resolve-Path 'native-core/windows/AzOnlineUpdates.cs').Path
