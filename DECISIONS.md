@@ -396,3 +396,8 @@ remain untouched.
 For GUI clipping on Windows DPI, 32px custom QToolButtons must explicitly
 set `ToolButtonIconOnly`, full tooltips and short fallback labels rather
 than rendering truncated words under inherited global FreeCAD styles.
+
+
+## 2026-11-09 — Design-first command and workspace policy
+
+Owner approved the visible name **Design** (or Modeling when context warrants). Keep the internal `AzDesignWorkbench`, `Az_*` IDs, package paths and document compatibility until a separately validated migration exists. Native FreeCAD geometry, Sketcher solver, document IO, and undo remain the engine; do not allow exposed Design feature commands to silently launch raw PartDesign task dialogs. Legacy advanced native features not yet wrapped must remain available through an explicitly selected Native CAD workspace, with truthful capability labels. Preserve the Home screen, default ordinary new models to Design, respect native saved workbench per reopened FCStd document, and do not hijack CAM/specialized contexts.
