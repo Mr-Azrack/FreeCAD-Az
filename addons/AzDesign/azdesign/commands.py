@@ -96,7 +96,25 @@ _update_running = False
 
 
 def update_az_design():
-    """One-click check, explicit approval and verified local replacement."""
+    """Launch the native Windows updater for installed Design; otherwise add-on updater."""
+    from pathlib import Path
+    import subprocess
+    from . import modeling
+    # Full native install root: <root>/Mod/AzDesign/azdesign/commands.py.
+    root = Path(__file__).resolve().parents[3]
+    native_updater = root / "AzUpdater.exe"
+    native_marker = root / "AZ Native Version.json"
+    native_binary = root / "bin" / "FreeCAD.exe"
+    if native_updater.is_file() and native_marker.is_file() and native_binary.is_file():
+        if Gui.Control.activeDialog() or modeling.in_sketch():
+            notify("Finish or cancel the current task before checking for native updates.", True)
+            return
+        try:
+            subprocess.Popen([str(native_updater)], cwd=str(root))
+            notify("Windows updater opened. Save your model and close Design before applying a patch.")
+        except OSError as exc:
+            notify("Could not launch Windows updater: " + str(exc), True)
+        return
     global _update_running
     if _update_running:
         notify("Az Design update already running.")
