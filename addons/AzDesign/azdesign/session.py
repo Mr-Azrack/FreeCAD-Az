@@ -246,7 +246,7 @@ class Session:
                 self.model_dock = dock
             if dock.objectName() == "Tasks":
                 self.tasks_dock = dock
-        self.toolbar = QtWidgets.QToolBar("Az Design", self.main)
+        self.toolbar = QtWidgets.QToolBar("Design", self.main)
         self.toolbar.setObjectName("AzDesignRibbonBar")
         self.toolbar.setMovable(False)
         self.toolbar.setFloatable(False)
@@ -367,7 +367,7 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
         self.timer.start()
         QtWidgets.QApplication.instance().aboutToQuit.connect(self.appearance.deactivate)
         self.tick()
-        commands.notify("Az Design ready. Create Sketch to start, or S to find a tool.")
+        commands.notify("Design ready. Create Sketch to start, or S to find a tool.")
 
     def configure_view(self):
         if not Gui.activeDocument():
