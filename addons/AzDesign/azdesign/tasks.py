@@ -593,6 +593,35 @@ def show_extrude(source=None, cut=False, editing=None):
     if not modeling.current_document():
         raise DesignError("Create a sketch to start a design.")
     doc = modeling.document()
+    if cut:
+        # 'Cut' against a first sketch silently opened a task with no valid
+        # solid to remove material from. Explain the prerequisite instead.
+        has_solid = any(
+            o.isDerivedFrom("PartDesign::Body")
+            and hasattr(o, "Shape") and not o.Shape.isNull()
+            and len(o.Shape.Solids) > 0
+            for o in doc.Objects
+        )
+        if not has_solid:
+            raise DesignError("Cut needs an existing solid. Extrude your first sketch, then select a face or sketch to Cut.")
+    if source is None:
+        source = selected_source()
+    if source is None:
+        # Design defaults to the sole closed, unused sketch just as the user
+        # expects after Finish Sketch. Never guess among multiple sketches.
+        candidates = []
+        for obj in doc.Objects:
+            if not obj.isDerivedFrom("Sketcher::SketchObject"):
+                continue
+            if any(getattr(parent, "Profile", None) == obj for parent in obj.InList):
+                continue
+            try:
+                if profiles.regions(obj):
+                    candidates.append(obj)
+            except (RuntimeError, ValueError):
+                pass
+        if len(candidates) == 1:
+            source = (candidates[0], [])
     task = ExtrudeTask.__new__(ExtrudeTask)
     try:
         task.__init__(doc, source or selected_source(), cut, editing)
