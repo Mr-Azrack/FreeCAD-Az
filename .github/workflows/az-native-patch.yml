@@ -2,21 +2,15 @@ name: Az Native Windows Patch
 
 # Routine modeling/UI changes take this path. Do not rebuild or publish the
 # 1.8 GB installer for every source change.
+# Deliberate batch gate. Daily modeling commits run the fast az-design.yml
+# suite; the full installed-baseline patch/rollback test runs only when
+# .github/validation-requests/native-0.5.6.txt changes on the trusted branch.
+# Never run this expensive job automatically for every PR/feature commit.
 on:
-  # Test current trusted development branch directly; PR checks alone can
-  # remain absent for a long-lived draft PR and do not represent every SHA.
   push:
     branches: [codex/az-design-workbench]
     paths:
-      - 'addons/AzDesign/**'
-      - 'native-core/windows/**'
-      - '.github/workflows/az-native-patch.yml'
-      - '.github/workflows/az-design.yml'
-  pull_request:
-    paths:
-      - '.github/workflows/az-native-patch.yml'
-      - 'addons/AzDesign/**'
-      - 'native-core/windows/**'
+      - '.github/validation-requests/native-0.5.6.txt'
   workflow_dispatch:
 
 permissions:
@@ -40,6 +34,24 @@ jobs:
         run: |
           python -m compileall -q addons/AzDesign/azdesign
           if ($LASTEXITCODE -ne 0) { throw 'Design UI or Sketcher Python syntax failed' }
+      - name: Batch gate — headless add-on tests before downloading native baseline
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tests = @(
+            'test_install.py', 'test_startup.py', 'test_document_context.py',
+            'test_appearance.py', 'test_compat.py', 'test_qt_buttons.py',
+            'test_extrude_preview_ui.py', 'test_hole_spec.py',
+            'test_hole_operation.py', 'test_hole_diagnostics.py',
+            'test_hole_ui_policy.py', 'test_hole_panel.py', 'test_updater.py',
+            'test_workspace_route.py', 'test_command_boundary.py',
+            'test_interaction.py', 'test_native_transform_contracts.py',
+            'test_sketch_palette.py', 'test_snap_hover.py',
+            'test_snap_overlay.py'
+          )
+          foreach ($test in $tests) {
+            python "addons/AzDesign/tests/$test"
+            if ($LASTEXITCODE -ne 0) { throw "Batch gate failed at $test. Native baseline download skipped." }
+          }
       - name: Verify release metadata and patch safety contracts
         run: |
           $ErrorActionPreference = 'Stop'
