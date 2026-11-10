@@ -473,6 +473,70 @@ class HoleTask:
         return False
 
 
+# An explicit selected-face Hole creates a hidden parametric center sketch,
+# then continues into the native Hole editor after Finish Sketch.
+_pending_face_hole = None
+
+
+def finish_face_hole(sketch):
+    global _pending_face_hole
+    if not sketch or _pending_face_hole != (sketch.Document.Name, sketch.Name):
+        return False
+    _pending_face_hole = None
+    if not sketch.GeometryCount:
+        raise features.DesignError(
+            "Place at least one circle center before finishing Hole placement."
+        )
+    Gui.Selection.clearSelection()
+    Gui.Selection.addSelection(sketch)
+    from .qt import QtCore
+    QtCore.QTimer.singleShot(0, lambda: show_hole())
+    return True
+
+
+def start_on_face():
+    """One-click entry from a selected planar solid face; no manual sketch step."""
+    global _pending_face_hole
+    if _pending_face_hole is not None:
+        _pending_face_hole = None
+    if Gui.Control.activeDialog() or modeling.in_sketch():
+        raise features.DesignError("Finish or cancel the current edit first.")
+    selections = Gui.Selection.getSelectionEx()
+    if len(selections) != 1:
+        return False
+    selection = selections[0]
+    feature = selection.Object
+    if feature.isDerivedFrom("PartDesign::Body"):
+        feature = features.body_tip(feature)
+    if feature is None or not hasattr(feature, "Shape"):
+        return False
+    from .features import owner_body
+    if owner_body(feature) is None:
+        return False
+    from . import modeling
+    import Part
+    for name in selection.SubElementNames:
+        if not name.startswith("Face"):
+            continue
+        face = feature.Shape.getElement(name)
+        if not isinstance(face.Surface, Part.Plane):
+            raise features.DesignError("Select a flat face to place a Hole.")
+        if not feature.Shape.Solids:
+            raise features.DesignError("Create a solid before placing a Hole.")
+        sketch = modeling.create_sketch(support=(feature, [name]))
+        if sketch is None:
+            return False
+        sketch.Label = "Hole Centers"
+        _pending_face_hole = (sketch.Document.Name, sketch.Name)
+        from . import commands
+        commands.notify(
+            "Hole placement: draw a circle at each hole center, then click Finish Sketch."
+        )
+        Gui.runCommand("Sketcher_CreateCircle", 0)
+        return True
+    return False
+
+
 def show_hole(editing=None):
     from .tasks import track
     if modeling.in_sketch():
@@ -481,7 +545,9 @@ def show_hole(editing=None):
         raise features.DesignError("Finish or cancel the current operation first.")
     doc = modeling.current_document()
     if not doc:
-        raise features.DesignError("Create a solid and hole-center sketch first.")
+        raise features.DesignError("Create a solid before placing a Hole.")
+    if not editing and start_on_face():
+        return None
     task = HoleTask.__new__(HoleTask)
     try:
         task.__init__(doc, selected_sketch(doc), editing)
