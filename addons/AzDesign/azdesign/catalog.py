@@ -165,7 +165,7 @@ TOOLS = {
 SOLID = [
     (
         "CREATE",
-        ["sketch", "extrude", "cut", "revolve", ("More", ["loft", "sweep", "hole", "body"])],
+        ["sketch", "extrude", "cut", ("More", ["hole", "body"])],
     ),
     (
         "MODIFY",
