@@ -91,6 +91,68 @@ class StartupTest(unittest.TestCase):
         self.execute("InitGui.py", {"__name__": "FreeCADStartup"}, {})
         self.assert_workbench()
 
+    def test_native_home_callback_survives_discarded_initgui_namespace(self):
+        """Reproduce the actual 0.5.6 Windows first-launch NameError.
+
+        FreeCAD's exec loader doesn't retain InitGui.py's globals. QTimer
+        calls the function later; it must retain its FreeCAD/Gui references.
+        """
+        import os
+        callbacks = []
+        qt = types.ModuleType("azdesign.qt")
+        qt.QtCore = types.SimpleNamespace(
+            QTimer=types.SimpleNamespace(
+                singleShot=lambda delay, callback: callbacks.append((delay, callback))
+            )
+        )
+        app = types.ModuleType("FreeCAD")
+        app.ActiveDocument = None
+        app.Console = types.SimpleNamespace(PrintError=Mock())
+        self.gui.Control = types.SimpleNamespace(activeDialog=Mock(return_value=False))
+        self.gui.activeWorkbench = Mock(
+            return_value=types.SimpleNamespace(name=lambda: "PartDesignWorkbench")
+        )
+        self.gui.activateWorkbench = Mock()
+        with patch.dict(os.environ, {"AZ_DESIGN_NATIVE_HOME": "1"}), patch.dict(
+            sys.modules, {"azdesign.qt": qt, "FreeCAD": app}
+        ):
+            ephemeral_globals = {"__name__": "FreeCADStartup"}
+            ephemeral_locals = {}
+            self.execute("InitGui.py", ephemeral_globals, ephemeral_locals)
+            self.assertEqual(len(callbacks), 1)
+            self.assertEqual(callbacks[0][0], 1200)
+            # The real FreeCAD loader may discard either/both dictionaries.
+            ephemeral_globals.clear()
+            ephemeral_locals.clear()
+            callbacks[0][1]()
+            self.gui.activateWorkbench.assert_called_once_with("AzDesignWorkbench")
+            app.Console.PrintError.assert_not_called()
+
+    def test_native_home_keeps_existing_document_workspace(self):
+        import os
+        callbacks = []
+        qt = types.ModuleType("azdesign.qt")
+        qt.QtCore = types.SimpleNamespace(
+            QTimer=types.SimpleNamespace(
+                singleShot=lambda delay, callback: callbacks.append(callback)
+            )
+        )
+        app = types.ModuleType("FreeCAD")
+        app.ActiveDocument = object()
+        app.Console = types.SimpleNamespace(PrintError=Mock())
+        self.gui.Control = types.SimpleNamespace(activeDialog=Mock(return_value=False))
+        self.gui.activeWorkbench = Mock(
+            return_value=types.SimpleNamespace(name=lambda: "PartDesignWorkbench")
+        )
+        self.gui.activateWorkbench = Mock()
+        with patch.dict(os.environ, {"AZ_DESIGN_NATIVE_HOME": "1"}), patch.dict(
+            sys.modules, {"azdesign.qt": qt, "FreeCAD": app}
+        ):
+            self.execute("InitGui.py")
+            self.assertEqual(len(callbacks), 1)
+            callbacks[0]()
+            self.gui.activateWorkbench.assert_not_called()
+
     def test_hooks_keep_module_scope_after_loader_namespace_is_gone(self):
         namespace = self.execute("InitGui.py")
         workbench = self.assert_workbench()
