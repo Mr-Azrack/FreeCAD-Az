@@ -416,3 +416,8 @@ Patch a real first-successful 0.5.3 installed baseline from workflow run 4275285
 ## 2026-11-10 — Separate routine patch CI from full installer
 
 Routine Python workspace/UI/updater edits must produce only a hash-verified 0.5.3→0.5.4 native patch, testing actual old-version apply, Qt startup, rollback and uninstall. Old baseline must be the pinned successful original Windows 0.5.3 installer and checksum; do not silently rebuild a pseudo-baseline. Construct old/new **allowlisted file overlays** from the installed baseline and current source, so the patch cannot include unrelated FreeCAD runtime/C++ core files. Run the expensive full native core/Inno 1.8GB installer workflow only manually for major releases; preserve manual GitHub Release approval. The pinned baseline setup still must be downloaded for safety until a separately validated content-addressed baseline cache exists.
+
+
+## 2026-11-10 — Default native startup is Design Home, not native Part Design Start
+
+The native Start Menu launcher without a file argument should open the independent Design welcome UI in the Design workbench, without creating an empty FreeCAD document. Keep both New Design and Open File, with new ordinary models handled by Design and existing FCStd/CAM files preserving their existing workspace routing. Set a native-only launcher environment flag rather than hijacking standalone FreeCAD or other installed workbenches. Use a Qt overlay without altering FreeCAD's global Start page or document file compatibility. Package native launcher changes in a versioned patch, not just the Python add-on.
