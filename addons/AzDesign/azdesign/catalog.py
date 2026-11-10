@@ -106,7 +106,7 @@ TOOLS = {
     "slot": Tool("Slot", "Sketcher_CreateSlot", "Draw a straight slot."),
     "trim": Tool("Trim", "Sketcher_Trimming", "T · Trim unwanted sketch segments."),
     "offset": Tool("Offset", "Sketcher_Offset", "Offset selected sketch geometry."),
-    "project": Tool("Project", "Sketcher_External", "P · Reference edges from existing geometry."),
+    "project": Tool("Project", "Sketcher_Projection", "P · Project existing solid edges into the active sketch as references."),
     "construction": Tool(
         "Construction",
         "Sketcher_ToggleConstruction",
