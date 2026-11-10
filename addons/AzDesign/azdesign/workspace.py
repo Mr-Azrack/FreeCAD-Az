@@ -13,11 +13,11 @@ from .catalog import TOOLS
 
 PANEL_STYLE = """
 QWidget#AzBrowser, QWidget#AzNavigation, QWidget#AzRadial { background: #f8f9fa; color: #37434e; }
-QWidget#AzBrowser QLabel { color: #53616e; }
-QWidget#AzBrowser QLineEdit { background: white; border: 1px solid #d7dde2;
+QWidget#AzBrowser QLabel { color: #53616e; font-size: 12px; }
+QWidget#AzBrowser QLineEdit { background: white; font-size: 13px; min-height: 28px; border: 1px solid #d7dde2;
  border-radius: 3px; padding: 6px; color: #37434e; }
-QWidget#AzBrowser QTreeWidget { background: #f8f9fa; color: #37434e; border: 0; outline: 0; }
-QWidget#AzBrowser QTreeWidget::item { height: 27px; border: 0; }
+QWidget#AzBrowser QTreeWidget { font-size: 13px; background: #f8f9fa; color: #37434e; border: 0; outline: 0; }
+QWidget#AzBrowser QTreeWidget::item { height: 32px; border: 0; }
 QWidget#AzBrowser QTreeWidget::item:selected { background: #dcebf7; color: #1c5881; }
 QWidget#AzBrowser QTreeWidget::item:hover { background: #eaf0f5; }
 QWidget#AzBrowser QToolButton, QWidget#AzNavigation QToolButton { background: transparent;
@@ -72,7 +72,7 @@ def action_button(text, name, callback, parent=None):
         }.get(text, "".join(part[:1] for part in text.split()[:2]).upper())
         button.setText(abbreviation[:3])
         button.setToolButtonStyle(QtCore.Qt.ToolButtonTextOnly)
-    button.setFixedSize(36, 34)
+    button.setFixedSize(42, 40)
     button.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
     button.clicked.connect(lambda _checked=False: callback())
     return button
@@ -147,7 +147,7 @@ class Browser(QtWidgets.QWidget):
         layout.setContentsMargins(10, 8, 6, 8)
         header = QtWidgets.QHBoxLayout()
         title = QtWidgets.QLabel("BROWSER")
-        title.setStyleSheet("font-size: 10px; font-weight: 600; letter-spacing: 1px;")
+        title.setStyleSheet("font-size: 12px; font-weight: 600; letter-spacing: 1px;")
         header.addWidget(title)
         header.addStretch()
         button = action_button("Show native properties", "Std_DlgParameter", self.properties)
@@ -177,7 +177,7 @@ class Browser(QtWidgets.QWidget):
         self.tree.customContextMenuRequested.connect(self.context_menu)
         layout.addWidget(self.tree)
         self.footer = QtWidgets.QLabel("Select in the Browser or canvas")
-        self.footer.setStyleSheet("font-size: 10px; padding-top: 5px;")
+        self.footer.setStyleSheet("font-size: 12px; padding-top: 5px;")
         layout.addWidget(self.footer)
 
     def add(self, parent, label, symbol, obj=None, expanded=False):
