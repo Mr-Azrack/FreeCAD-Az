@@ -68,7 +68,7 @@ TOOLS = {
     "shell": Tool("Shell", "PartDesign_Thickness", "Hollow a solid; select the faces to remove."),
     "mirror": Tool("Mirror", "Az_Mirror", "Mirror a selected solid feature across an origin plane."),
     "pattern": Tool(
-        "Linear Pattern", "Az_LinearPattern", "Repeat a selected feature along a body origin axis."
+        "Linear Pattern", "Az_LinearPattern", "Design live preview, spacing or extent, axis and editable native feature history."
     ),
     "polar": Tool(
         "Circular Pattern", "PartDesign_PolarPattern", "Repeat selected features around an axis."
@@ -124,7 +124,7 @@ TOOLS = {
     ),
     "sketchpattern": Tool(
         "Rectangular Pattern", "Az_SketchPattern",
-        "Create a 2D array of real, constrained sketch circles for multiple holes.",
+        "In-canvas 2D array of real constrained sketch circles, for four holes and larger patterns.",
     ),
     "horizontal": Tool(
         "Horizontal", "Sketcher_ConstrainHorizontal", "Constrain selected lines horizontally."
@@ -182,7 +182,8 @@ SOLID = [
             "fillet",
             "chamfer",
             "move",
-            ("More", ["parameters", "mirror", "pattern"]),
+            "pattern",
+            ("More", ["parameters", "mirror"]),
         ],
     ),
     ("CONSTRUCT", ["plane"]),
