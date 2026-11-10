@@ -37,9 +37,20 @@ def main():
     assert module.TOOLS["hole"].command == "Az_Hole"
     assert module.TOOLS["fillet"].command == "Az_Fillet"
     assert module.TOOLS["chamfer"].command == "Az_Chamfer"
-    for key in ("revolve", "loft", "sweep", "shell",
-                "mirror", "pattern", "polar", "move", "measure"):
+    for key in ("revolve", "loft", "sweep", "shell", "polar", "measure"):
         assert module.TOOLS[key].command in module.RAW_FEATURE_COMMANDS
+    for key, command in (
+        ("move", "Az_Move"),
+        ("mirror", "Az_Mirror"),
+        ("pattern", "Az_LinearPattern"),
+        ("labels", "Az_SketchLabels"),
+    ):
+        assert module.TOOLS[key].command == command
+        assert command not in module.RAW_FEATURE_COMMANDS
+    # FreeCAD 1.1 renamed the legacy Sketcher_External tool:
+    # the old name left Project permanently grey and unusable.
+    assert module.TOOLS["project"].command == "Sketcher_Projection"
+    assert "Sketcher_Projection" in module.ALLOWED_NATIVE_COMMANDS
     print("Design command boundary: PASS")
 
 
