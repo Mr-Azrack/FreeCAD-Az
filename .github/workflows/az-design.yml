@@ -61,6 +61,8 @@ jobs:
           python addons/AzDesign/tests/test_hole_panel.py
       - name: Test in-app updater and backups without live GitHub downloads
         run: python addons/AzDesign/tests/test_updater.py
+      - name: Verify Home, new-model and saved-workspace routing
+        run: python addons/AzDesign/tests/test_workspace_route.py
       - name: Reject raw FreeCAD modeling tasks in Design ribbon
         run: python addons/AzDesign/tests/test_command_boundary.py
       - name: Test unified edit routes and canvas selection policy
