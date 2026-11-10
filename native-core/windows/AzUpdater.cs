@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -22,7 +23,7 @@ static class AzNativeUpdater
         root = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
         window = new Form();
         window.Text = "Az Design Native – Update";
-        window.ClientSize = new Size(470, 230);
+        window.ClientSize = new Size(470, 275);
         window.FormBorderStyle = FormBorderStyle.FixedDialog;
         window.StartPosition = FormStartPosition.CenterScreen;
         window.MaximizeBox = false;
@@ -42,28 +43,35 @@ static class AzNativeUpdater
         window.Controls.Add(versionLabel);
 
         Label help = new Label();
-        help.Text = "Install a small .azpatch ZIP from our GitHub builds, or roll back the last update. Close Az Design before updating.";
+        help.Text = "Check approved GitHub releases for a small verified patch. Save and close Design before installing. Manual patch and rollback remain available.";
         help.Location = new Point(20, 85);
         help.Size = new Size(420, 54);
         window.Controls.Add(help);
 
+        Button check = new Button();
+        check.Text = "Check for Updates";
+        check.Location = new Point(20, 145);
+        check.Size = new Size(430, 42);
+        check.Click += (sender, e) => CheckOnline(check);
+        window.Controls.Add(check);
+
         Button apply = new Button();
         apply.Text = "Install patch ZIP...";
-        apply.Location = new Point(20, 153);
+        apply.Location = new Point(20, 207);
         apply.Size = new Size(145, 37);
         apply.Click += (s, e) => ChoosePatch();
         window.Controls.Add(apply);
 
         Button rollback = new Button();
         rollback.Text = "Roll back update";
-        rollback.Location = new Point(179, 153);
+        rollback.Location = new Point(179, 207);
         rollback.Size = new Size(145, 37);
         rollback.Click += (s, e) => Rollback();
         window.Controls.Add(rollback);
 
         Button close = new Button();
         close.Text = "Close";
-        close.Location = new Point(338, 153);
+        close.Location = new Point(338, 207);
         close.Size = new Size(112, 37);
         close.Click += (s, e) => window.Close();
         window.Controls.Add(close);
@@ -85,6 +93,60 @@ static class AzNativeUpdater
         return MessageBox.Show(window, "Close all Az Design Native windows and save your documents before applying an update. Continue?",
             "Az Design Native", MessageBoxButtons.YesNo,
             MessageBoxIcon.Warning) == DialogResult.Yes;
+    }
+
+    static void CheckOnline(Button button)
+    {
+        button.Enabled = false;
+        button.Text = "Checking GitHub...";
+        var worker = new BackgroundWorker();
+        worker.DoWork += (s, e) =>
+        {
+            string installed = AzOnlineUpdates.InstalledVersion(root);
+            var available = AzOnlineUpdates.Find(installed);
+            if (available == null) { e.Result = null; return; }
+            e.Result = available;
+        };
+        worker.RunWorkerCompleted += (s, e) =>
+        {
+            button.Enabled = true;
+            button.Text = "Check for Updates";
+            if (e.Error != null) {
+                MessageBox.Show(window, "Unable to check for a verified release: " + e.Error.Message,
+                    "Design Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            var patch = e.Result as AzAvailablePatch;
+            if (patch == null) {
+                MessageBox.Show(window, "No compatible verified patch is published for this installed version.",
+                    "Design Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            if (MessageBox.Show(window,
+                "Verified patch: " + patch.From + " to " + patch.To +
+                "\\nSize: " + (patch.Bytes / 1024) + " KB" +
+                "\\n\\nDownload this GitHub release patch? Your documents will not be modified. " +
+                "You must save and close Design before applying it.",
+                "Design Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                return;
+            button.Enabled = false;
+            button.Text = "Downloading...";
+            var download = new BackgroundWorker();
+            download.DoWork += (sender, args) => args.Result = AzOnlineUpdates.DownloadVerified(patch);
+            download.RunWorkerCompleted += (sender, args) =>
+            {
+                button.Enabled = true;
+                button.Text = "Check for Updates";
+                if (args.Error != null) {
+                    MessageBox.Show(window, "Update download was refused: " + args.Error.Message,
+                        "Design Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                if (Confirm()) LaunchInstaller(args.Result as string, false);
+            };
+            download.RunWorkerAsync();
+        };
+        worker.RunWorkerAsync();
     }
 
     static void ChoosePatch()
