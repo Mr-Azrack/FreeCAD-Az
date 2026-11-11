@@ -37,7 +37,7 @@ def check():
     patch = loaded["az-native-patch.yml"]
     on = patch.get("on", patch.get(True, {}))
     marker = on["push"]["paths"]
-    assert marker == [".github/validation-requests/native-0.5.8.txt"], (
+    assert marker == [".github/validation-requests/native-0.5.9.txt"], (
         "Expensive Windows pipeline must be batch-marker-triggered only"
     )
     assert on["workflow_dispatch"]["inputs"]["cold_validation"]["type"] == "boolean"
@@ -58,13 +58,15 @@ def check():
         "Cache immutable 0.5.6 installed baseline for the next candidate",
         "Download original installed 0.5.7 Build 36 patch",
         "Verify and reconstruct original 0.5.7 Build 36",
+        "Download original published 0.5.8 Build 39 patch",
+        "Verify and reconstruct original 0.5.8 Build 39",
         "Build changed-only overlay (no native core re-download)",
         "Apply to real installed baseline, Qt smoke, rollback, uninstall",
         "Upload tested incremental patch (not a public release)",
     )
     order = [step.get("name") for step in jobs["patch"]["steps"]]
     assert all(item in steps for item in stages), "Missing critical patch validation step"
-    assert order.index(stages[9]) < order.index(stages[10]) < order.index(stages[12]), (
+    assert order.index(stages[9]) < order.index(stages[10]) < order.index(stages[12]) < order.index(stages[14]), (
         "Cache must be saved before changing the installed baseline"
     )
     for name in stages[2:8]:
@@ -78,17 +80,23 @@ def check():
     assert ".az-baseline-hashes.json" in steps[stages[1]].get("run", "")
     assert "SHA256" in steps[stages[1]].get("run", "")
     assert "cold_validation" in steps[stages[0]].get("if", "")
-    assert "unins000.exe" in steps[stages[13]].get("run", "")
+    assert "unins000.exe" in steps[stages[15]].get("run", "")
     assert steps[stages[10]].get("with", {}).get("run-id") == 42899554668, (
         "0.5.8 baseline must be pinned to the original user-installed 0.5.7 Build 36"
     )
     assert "0.5.7" in steps[stages[11]].get("run", "")
     assert "SHA256" in steps[stages[11]].get("run", "")
-    build = steps[stages[12]].get("run", "")
-    assert "--from-version 0.5.7 --to-version 0.5.8" in build
-    assert "AzDesignNative-0.5.7-to-0.5.8.azpatch" in build
-    assert "Patched version is not 0.5.8" in steps[stages[13]].get("run", "")
-    assert steps[stages[14]].get("with", {}).get("name") == "AzDesignNative-0.5.7-to-0.5.8-PATCH"
+    assert steps[stages[12]].get("with", {}).get("run-id") == 42949194221, (
+        "0.5.9 baseline must be built from published 0.5.8 Build 39"
+    )
+    assert "0.5.8" in steps[stages[13]].get("run", "")
+    assert "SHA256" in steps[stages[13]].get("run", "")
+    build = steps[stages[14]].get("run", "")
+    assert "--from-version 0.5.8 --to-version 0.5.9" in build
+    assert "AzDesignNative-0.5.8-to-0.5.9.azpatch" in build
+    assert "Patched version is not 0.5.9" in steps[stages[15]].get("run", "")
+    assert "Original version was not restored" in steps[stages[15]].get("run", "")
+    assert steps[stages[16]].get("with", {}).get("name") == "AzDesignNative-0.5.8-to-0.5.9-PATCH"
     fast = loaded["az-design.yml"]
     assert fast.get("concurrency", {}).get("cancel-in-progress") is True, (
         "Superseded fast CI must be cancellable"
