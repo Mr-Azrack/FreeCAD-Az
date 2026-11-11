@@ -1,23 +1,18 @@
-Design Native v0.5.7 — Corrective candidate 3 (repairs rejected workflow; supersedes candidates 1–2)
-Source revision: 27569ea33f04685077d88b08d095d9883bb2e803
+Design Native v0.5.7 — Fusion workflow UX batch candidate 4
+Source revision: 6656d14aa90af8c97b1ccf19dc1830fc3ff381a7
 Installed owner baseline: 0.5.6
-Target: 0.5.7
-Release gate:
-- Debian native FreeCAD geometry: 2x2 sketch-circle array feeds one actual 4-hole Hole feature
-- All headless add-on, startup and packaging test contracts
-- Windows native launcher profile test: disable splash BEFORE first application launch,
-  preserve unrelated preferences and avoid data loss from malformed config
-- Reconstruct pinned 0.5.6 baseline (verified 0.5.4 setup, 0.5.5 patch,
-  checksum-verified 0.5.6 #20 patch), build 0.5.6-to-0.5.7 changed-files patch
-- Test patched GUI Qt startup, patch application, rollback and uninstall
-Source scope:
-- Fix _az_App disappearing from deferred FreeCAD InitGui native Home callback
-- Activate Design Home sooner instead of stock FreeCAD Start
-- Suppress FreeCAD splash for Design native launcher, including first patched launch
-- Sketch Modify > Rectangular Pattern (one circle -> four real constrained hole centers)
-- Source circle diameter and grid pitches remain editable; reject invalid arrays
-Do not publish or advise owner to install until all gates green AND actual native
-Design GUI is smoke-tested on owner's machine. Candidate 1 omitted C# splash
-launcher correction and MUST NOT be mistaken for current source.
-
-CI workflow structural repair: restored single contiguous 0.5.6 baseline reconstruction, removed duplicated/truncated content, corrected explicit candidate marker trigger to v0.5.7, and restored System.Xml compilation reference.
+Target: 0.5.7 (supersedes earlier unreleased 0.5.7 artifacts)
+Scope:
+- Sketch Rectangular Pattern: Design in-canvas 2D pattern, live real Sketcher geometry,
+  reversible Apply/Cancel/Esc, exact pitch/count and drag handles.
+- Solid Linear Pattern: Design MODIFY toolbar, source selection from Browser/canvas,
+  optional native 2-axis grid, spacing/extent, live native PartDesign preview and edit.
+- FreeCAD-version-safe feature and extent enum handling.
+- Feature history: original SVG-only icons for geometry and compact edit controls,
+  no clipped text-abbreviation timeline.
+- Prior 0.5.7 native Design Home startup and first-launch no-splash corrections.
+CI safety gate:
+- Native FreeCAD geometry tests and all add-on/headless UI contracts must pass.
+- Verify pinned 0.5.4 setup → tested 0.5.5 → checksum-checked v0.5.6 #20 baseline.
+- Test actual Windows 0.5.6→0.5.7 patch apply, native Qt startup, rollback and uninstall.
+- Artifact remains a candidate, not a public release. User GUI acceptance required.
