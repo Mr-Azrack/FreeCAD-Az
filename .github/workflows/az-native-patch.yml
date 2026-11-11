@@ -108,6 +108,7 @@ jobs:
       - name: Restore pinned installed 0.5.6 baseline cache
         id: baseline_cache
         if: github.event_name != 'workflow_dispatch' || !inputs.cold_validation
+        continue-on-error: true
         uses: actions/cache/restore@v4
         with:
           path: ${{ runner.temp }}/DesignInstalled054
@@ -146,6 +147,14 @@ jobs:
           }
           $baseline | Set-Content 'baseline-path.txt'
           Write-Host 'Pinned 0.5.6 baseline cache restored; skipped original installer and patch reconstruction.'
+
+      - name: Clear incomplete baseline staging on cache miss
+        if: steps.baseline_cache.outputs.cache-hit != 'true'
+        run: |
+          $path = Join-Path $env:RUNNER_TEMP 'DesignInstalled054'
+          if (Test-Path -LiteralPath $path) {
+            Remove-Item -LiteralPath $path -Recurse -Force
+          }
 
       - name: Download original, tested 0.5.4 installer
         if: steps.baseline_cache.outputs.cache-hit != 'true'
@@ -242,6 +251,8 @@ jobs:
 
       - name: Cache immutable 0.5.6 installed baseline for the next candidate
         if: steps.baseline_cache.outputs.cache-hit != 'true' && (github.event_name != 'workflow_dispatch' || !inputs.cold_validation)
+        # Storage quota/eviction must not turn an otherwise validated patch red.
+        continue-on-error: true
         uses: actions/cache/save@v4
         with:
           path: ${{ runner.temp }}/DesignInstalled054
