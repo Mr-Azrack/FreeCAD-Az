@@ -148,6 +148,21 @@ def show():
     if picker is None:
         picker = SketchPlanePicker(session)
         session.sketch_plane_picker = picker
+    # Honor a preselected planar face without making the user click twice.
+    selected = list(Gui.Selection.getSelectionEx())
+    if len(selected) == 1 and App.ActiveDocument is not None:
+        hit = selected[0]
+        faces = [name for name in hit.SubElementNames if name.startswith("Face")]
+        if len(faces) == 1 and hit.Object.Document == App.ActiveDocument:
+            try:
+                import Part
+                face = hit.Object.Shape.getElement(faces[0])
+                if isinstance(face.Surface, Part.Plane):
+                    from .modeling import create_sketch
+                    create_sketch(support=(hit.Object, [faces[0]]))
+                    return None
+            except (AttributeError, ValueError, RuntimeError):
+                pass
     picker.show_picker()
     return picker
 
