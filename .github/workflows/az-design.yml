@@ -18,6 +18,14 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+
+# Source edits can arrive as several commits in a single batch. Keep the
+# most recent branch/PR revision only; obsolete check runs should not
+# monopolize the runner or flood the user's Actions list.
+concurrency:
+  group: az-design-fast-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   modeling:
     runs-on: ubuntu-latest
