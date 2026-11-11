@@ -92,26 +92,36 @@ def pattern_circles(sketch, source, columns=2, rows=2, pitch_x=40, pitch_y=30,
                 )
                 created.append(index)
                 # All patterned hole diameters stay linked to the source.
-                sketch.addConstraint(Sketcher.Constraint("Equal", source, index))
+                added_constraints = []
+                added_constraints.append(sketch.addConstraint(
+                    Sketcher.Constraint("Equal", source, index)))
                 # Circle center uses point-position 3 in Sketcher.
                 # Zero-length DistanceX/DistanceY dimensions are invalid;
                 # substitute exact geometric alignment constraints instead.
                 if abs(dx) >= 0.001:
-                    sketch.addConstraint(
+                    added_constraints.append(sketch.addConstraint(
                         Sketcher.Constraint("DistanceX", source, 3, index, 3, dx)
-                    )
+                    ))
                 else:
-                    sketch.addConstraint(
+                    added_constraints.append(sketch.addConstraint(
                         Sketcher.Constraint("Vertical", source, 3, index, 3)
-                    )
+                    ))
                 if abs(dy) >= 0.001:
-                    sketch.addConstraint(
+                    added_constraints.append(sketch.addConstraint(
                         Sketcher.Constraint("DistanceY", source, 3, index, 3, dy)
-                    )
+                    ))
                 else:
-                    sketch.addConstraint(
+                    added_constraints.append(sketch.addConstraint(
                         Sketcher.Constraint("Horizontal", source, 3, index, 3)
-                    )
+                    ))
+                # FreeCAD Sketcher virtual space hides generated constraint
+                # glyphs/dimensions without disabling the solver constraints.
+                # Do not modify source/user-authored constraint visibility.
+                hide = getattr(sketch, "setVirtualSpace", None)
+                if callable(hide):
+                    for constraint_id in added_constraints:
+                        if isinstance(constraint_id, int) and constraint_id >= 0:
+                            hide(constraint_id, True)
         doc.recompute()
         state = tuple(str(x) for x in getattr(sketch, "State", ()))
         if "Invalid" in state or sketch.Shape.isNull():
