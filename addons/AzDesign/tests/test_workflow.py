@@ -148,6 +148,28 @@ class WorkflowTest(unittest.TestCase):
         self.assertTrue(chamfer.Shape.isValid())
         self.assertEqual(body.Tip, chamfer)
 
+    def test_fusion_style_timeline_fillet_size_edit_is_undoable(self):
+        """An existing native Fillet stays parametric under Design editing."""
+        body, _source, original = self.base(height=6)
+        vertical = next(
+            "Edge" + str(i + 1) for i, edge in enumerate(original.Shape.Edges)
+            if edge.BoundBox.ZLength > 5.999
+        )
+        fillet = edge_treatments.create(original, [vertical], 0.5, "Fillet")
+        before = fillet.Shape.Volume
+        self.doc.openTransaction("Design: Edit Fillet")
+        fillet.Radius = 0.25
+        self.doc.recompute()
+        self.assertTrue(fillet.Shape.isValid())
+        self.assertEqual(len(fillet.Shape.Solids), 1)
+        self.doc.commitTransaction()
+        self.assertNotAlmostEqual(fillet.Shape.Volume, before, places=3)
+        self.doc.undo()
+        self.doc.recompute()
+        restored = self.doc.getObject(fillet.Name)
+        self.assertAlmostEqual(restored.Radius.Value, 0.5, places=5)
+        self.assertAlmostEqual(restored.Shape.Volume, before, places=3)
+
     def test_edge_treatment_invalid_is_non_destructive(self):
         body = self.doc.addObject("PartDesign::Body", "ThinBody")
         source = body.newObject("PartDesign::Feature", "ThinBlock")
