@@ -457,3 +457,16 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [x] Gate Windows patch on real FreeCAD geometry job before downloading installed baseline
 - [ ] Obtain green Linux geometry, headless packaging, Windows native install/Qt/rollback for 0.5.7 candidate and exercise native GUI on owner's machine
 - [ ] Confirm no stock FreeCAD launcher/profile regressions; promote public update only after owner acceptance
+
+## 2026-11-10 — Fusion Pattern + SVG history delivery
+
+- [x] Move Solid Linear Pattern from More to direct MODIFY toolbar
+- [x] Design-owned in-canvas Solid Pattern with source selection, count, pitch/extent, axis, optional 2D grid and transactional preview
+- [x] Route timeline double-click Pattern edit into Design, not raw native FreeCAD task
+- [x] Design-owned live Sketch 2D circle pattern preview, Apply/Cancel/Esc and drag handles
+- [x] Original SVG images for all common timeline features, Edit/Delete/Resume/Settings controls
+- [x] Native engine tests for hole pattern preview/cancel/edit, package contracts for icons/ownership
+- [x] Fast package + geometry CI passed in run #407 on b1b602c
+- [ ] Revalidate latest candidate SHA with Windows 0.5.6-to-0.5.7 patch/Qt/rollback job
+- [ ] Owner FreeCAD 1.1 acceptance: two-axis 2x2 solid Hole pattern, live edit, timeline DPI and Cancel/Esc, save/reopen
+- [ ] Publish through updater only after hands-on acceptance
