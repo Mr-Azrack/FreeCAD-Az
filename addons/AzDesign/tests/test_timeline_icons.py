@@ -54,6 +54,8 @@ class Icons(unittest.TestCase):
         source = (ADDON / "azdesign" / "ui.py").read_text(encoding="utf-8")
         part = source.split("class FeatureButton", 1)[1].split("class History", 1)[0]
         self.assertIn("QtGui.QIcon(icon_path(obj))", part)
+        self.assertIn("icon.pixmap(25, 25).isNull()", part)
+        self.assertIn("icon = design_icon(icon_key(obj))", part)
         self.assertIn("self.setText(\"\")", part)
         self.assertIn("QtCore.Qt.ToolButtonIconOnly", part)
         self.assertNotIn("self.setText(obj.Label)", part)
