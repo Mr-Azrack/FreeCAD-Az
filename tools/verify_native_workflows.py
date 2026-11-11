@@ -52,7 +52,7 @@ def check():
         "Verify baseline SHA256 and install real 0.5.4",
         "Download verified 0.5.5 patch used by installed owner",
         "Reconstruct actual 0.5.5 installed baseline",
-        "Download pinned, tested 0.5.6 patch from batch #20",
+        "Download pinned tested 0.5.6 patch from run 42871091253",
         "Reconstruct actual 0.5.6 installed baseline",
         "Record exact installed baseline hashes for future cache restores",
         "Cache immutable 0.5.6 installed baseline for the next candidate",
