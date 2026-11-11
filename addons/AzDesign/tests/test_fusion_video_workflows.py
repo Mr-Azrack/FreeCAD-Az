@@ -69,6 +69,8 @@ class FusionVideoContracts(unittest.TestCase):
         self.assertIn("Click a flat model face", picker)
         self.assertIn("create_sketch(support=(obj, [face_name]))", picker)
         self.assertIn("if not self.listening", picker)
+        self.assertIn("Gui.Selection.getSelectionEx()", picker)
+        self.assertIn("create_sketch(support=(hit.Object, [faces[0]]))", picker)
 
     def test_sketch_pattern_lets_source_circle_be_selected_on_canvas(self):
         source = (ADDON / "azdesign" / "sketch_pattern_ui.py").read_text(
