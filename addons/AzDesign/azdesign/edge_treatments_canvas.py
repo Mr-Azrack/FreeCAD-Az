@@ -35,7 +35,7 @@ class _SelectionObserver:
 
 class EdgeTreatmentPanel(QtWidgets.QFrame):
     def __init__(self, session, kind, editing=None):
-        super().__init__(session.mdi.viewport())
+        super().__init__()
         self.editing = editing
         self.session = session
         self.kind = kind
@@ -62,7 +62,7 @@ class EdgeTreatmentPanel(QtWidgets.QFrame):
                 background: #21749f; color: white; font-weight: 600;
             }
         """)
-        self.setFixedWidth(328)
+        self.setMinimumWidth(270)
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(12, 11, 12, 11)
         layout.setSpacing(8)
@@ -119,10 +119,16 @@ class EdgeTreatmentPanel(QtWidgets.QFrame):
     def show_panel(self):
         if self.editing is None:
             Gui.Selection.addObserver(self.observer)
-        parent = self.parentWidget()
-        self.move(max(8, parent.width() - self.width() - 15), 15)
-        self.show()
-        self.raise_()
+        self.dock = QtWidgets.QDockWidget(self.kind + " Tasks", self.session.main)
+        self.dock.setObjectName("AzEdgeTreatmentDock")
+        self.dock.setAllowedAreas(QtCore.Qt.RightDockWidgetArea)
+        self.dock.setFeatures(QtWidgets.QDockWidget.NoDockWidgetFeatures)
+        self.dock.setWidget(self)
+        self.session.main.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dock)
+        if self.session.tasks_dock:
+            self.session.main.tabifyDockWidget(self.session.tasks_dock, self.dock)
+        self.dock.show()
+        self.dock.raise_()
         self.refresh_selection()
 
     def _message(self, value, valid=False):
@@ -265,7 +271,11 @@ class EdgeTreatmentPanel(QtWidgets.QFrame):
             except (RuntimeError, ReferenceError):
                 pass
         self.hide()
-        self.deleteLater()
+        if getattr(self, "dock", None):
+            self.dock.hide()
+            self.dock.deleteLater()
+        else:
+            self.deleteLater()
         if _active is self:
             _active = None
 
