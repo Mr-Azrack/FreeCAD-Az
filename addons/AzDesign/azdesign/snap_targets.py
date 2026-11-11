@@ -141,3 +141,51 @@ def link_body_edge(sketch, source, edge_name):
         doc.abortTransaction()
         doc.recompute()
         raise
+
+
+def link_selected_body_edges(sketch):
+    """Link uniquely selected model edges into the active sketch.
+
+    Selection is explicit and ambiguity-safe: sketch-owned edges, faces,
+    whole-object selections and cross-document geometry are ignored. Native
+    Sketcher external references remain associative with their source.
+    """
+    import FreeCADGui as Gui
+    if sketch is None or not sketch.isDerivedFrom("Sketcher::SketchObject"):
+        raise DesignError("Start editing a sketch to reference model edges.")
+    hits = []
+    for selection in Gui.Selection.getSelectionEx():
+        source = selection.Object
+        if source is None or source == sketch:
+            continue
+        if source.Document != sketch.Document:
+            continue
+        for edge_name in selection.SubElementNames:
+            if edge_name.startswith("Edge") and edge_name[4:].isdigit():
+                pair = (source, edge_name)
+                if pair not in hits:
+                    hits.append(pair)
+    if not hits:
+        raise DesignError("Select one or more body edges to reference.")
+    doc = sketch.Document
+    doc.openTransaction("Design: Reference selected body edges")
+    try:
+        linked = []
+        for source, edge_name in hits:
+            if sketch in getattr(source, "OutListRecursive", ()):
+                raise DesignError("A selected edge would create a circular dependency.")
+            index = int(edge_name[4:])
+            if not hasattr(source, "Shape") or source.Shape.isNull() or not (
+                1 <= index <= len(source.Shape.Edges)
+            ):
+                raise DesignError("Selected source edge no longer exists.")
+            linked.append(sketch.addExternal(source.Name, edge_name))
+        doc.recompute()
+        if "Invalid" in tuple(str(state) for state in sketch.State):
+            raise DesignError("Sketcher rejected the selected external edges.")
+        doc.commitTransaction()
+        return tuple(linked)
+    except Exception:
+        doc.abortTransaction()
+        doc.recompute()
+        raise
