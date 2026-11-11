@@ -1,0 +1,17 @@
+Design Native v0.5.9 — Fusion video behavior correction batch 1
+Source candidate: 5a8c0380ccb62fe8c8bc26fc0eb55d6f95381d9f
+Installed baseline: public v0.5.8, verified CI Build #39 run 42949194221
+Target: 0.5.8 → 0.5.9 (never reuse destination 0.5.8)
+Scope:
+- Fusion-like dominant perforated plate profile auto-selection, preserving hole cutouts.
+- Face-first Create Sketch on an existing solid without a covering plane chooser.
+- Direct in-canvas source circle choice for Sketch Rectangular Pattern.
+- Design-owned nonmodal Fillet/Chamfer, edge pick after command, automatic true
+  kernel validation, Apply/Cancel/Esc, native parametric feature edit from history.
+- Owner Fusion-versus-FreeCAD video acceptance contract and regression tests.
+Preflight: fast UI tests + native FreeCAD plate/Fillet geometry tests green in #433
+and workflow validation/modeling green in #435.
+Windows gate: checksum-verify original 0.5.7 Build #36 and published 0.5.8
+Build #39, build source-based 0.5.8→0.5.9 incremental patch, apply to actual
+baseline, Qt startup, rollback exactly to 0.5.8, clean uninstall when cold.
+This artifact is a candidate only. GUI interaction acceptance is still required.
