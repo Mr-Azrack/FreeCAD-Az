@@ -106,3 +106,38 @@ def create_sketch_reference(sketch, target):
         doc.abortTransaction()
         doc.recompute()
         raise
+
+
+def link_body_edge(sketch, source, edge_name):
+    """Create an associative Sketcher external edge without modifying the solid.
+
+    Unlike create_sketch_reference, this uses FreeCAD's native external
+    geometry dependency: moving the source edge updates the sketch reference.
+    The operation is transactional and refuses circular dependencies.
+    """
+    if sketch is None or not sketch.isDerivedFrom("Sketcher::SketchObject"):
+        raise DesignError("Edit a sketch before referencing a body edge.")
+    if source is None or source.Document != sketch.Document or source == sketch:
+        raise DesignError("Select an edge from another object in the same document.")
+    if not edge_name.startswith("Edge") or not edge_name[4:].isdigit():
+        raise DesignError("Select a model edge, not a face or whole body.")
+    number = int(edge_name[4:])
+    if not hasattr(source, "Shape") or source.Shape.isNull() or not (
+        1 <= number <= len(source.Shape.Edges)
+    ):
+        raise DesignError("The selected source edge no longer exists.")
+    if sketch in getattr(source, "OutListRecursive", ()):
+        raise DesignError("That reference would create a circular dependency.")
+    doc = sketch.Document
+    doc.openTransaction("Design: Link body edge to sketch")
+    try:
+        result = sketch.addExternal(source.Name, edge_name)
+        doc.recompute()
+        if "Invalid" in tuple(str(state) for state in sketch.State):
+            raise DesignError("Sketcher rejected the external body edge.")
+        doc.commitTransaction()
+        return result
+    except Exception:
+        doc.abortTransaction()
+        doc.recompute()
+        raise
