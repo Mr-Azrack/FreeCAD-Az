@@ -487,11 +487,17 @@ class FeatureButton(QtWidgets.QToolButton):
         # resources or the tiny, truncated text that appeared in the timeline.
         from .timeline_icons import icon_path
         self.setText("")
-        self.setIcon(QtGui.QIcon(icon_path(obj)))
-        self.setIconSize(QtCore.QSize(25, 25))
+        icon = QtGui.QIcon(icon_path(obj))
+        # Windows Qt installations can lack an SVG image handler.
+        # A valid path alone does not guarantee a rendered icon.
+        if icon.pixmap(25, 25).isNull():
+            from .timeline_icons import icon_key
+            icon = design_icon(icon_key(obj))
+        self.setIcon(icon)
+        self.setIconSize(QtCore.QSize(23, 23))
         self.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
         self.setCheckable(True)
-        self.setFixedSize(38, 40)
+        self.setFixedSize(34, 34)
         self.setAccessibleName(obj.Label)
         self.setToolTip(
             obj.Label + " · " + obj.TypeId
@@ -715,7 +721,7 @@ class History(QtWidgets.QWidget):
         self.scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.scroll.setMinimumHeight(45)
+        self.scroll.setMinimumHeight(35)
         self.scroll.setStyleSheet(
             "QScrollArea, QScrollArea > QWidget > QWidget {background: transparent; border: 0;}"
         )
@@ -740,7 +746,7 @@ class History(QtWidgets.QWidget):
         self.edit_selected_button.setObjectName("AzTimelineEdit")
         self.edit_selected_button.setIcon(command_icon("timeline-edit"))
         self.edit_selected_button.setIconSize(QtCore.QSize(22, 22))
-        self.edit_selected_button.setFixedSize(35, 35)
+        self.edit_selected_button.setFixedSize(32, 32)
         self.edit_selected_button.setToolTip("Edit selected timeline feature")
         self.edit_selected_button.clicked.connect(self.edit_selected)
         layout.addWidget(self.edit_selected_button)
@@ -748,7 +754,7 @@ class History(QtWidgets.QWidget):
         self.delete_selected_button.setObjectName("AzTimelineDelete")
         self.delete_selected_button.setIcon(command_icon("timeline-delete"))
         self.delete_selected_button.setIconSize(QtCore.QSize(22, 22))
-        self.delete_selected_button.setFixedSize(35, 35)
+        self.delete_selected_button.setFixedSize(32, 32)
         self.delete_selected_button.setToolTip("Delete selected feature safely")
         self.delete_selected_button.clicked.connect(self.delete_selected)
         layout.addWidget(self.delete_selected_button)
@@ -756,7 +762,7 @@ class History(QtWidgets.QWidget):
         self.resume.setObjectName("AzResumeHistory")
         self.resume.setIcon(command_icon("timeline-resume"))
         self.resume.setIconSize(QtCore.QSize(22, 22))
-        self.resume.setFixedSize(35, 35)
+        self.resume.setFixedSize(32, 32)
         self.resume.setToolTip("Resume latest history")
         self.resume.clicked.connect(lambda *_: commands.invoke("Az_ResumeHistory"))
         layout.addWidget(self.resume)
@@ -764,7 +770,7 @@ class History(QtWidgets.QWidget):
         settings.setObjectName("AzTimelineSettings")
         settings.setIcon(command_icon("timeline-settings"))
         settings.setIconSize(QtCore.QSize(21, 21))
-        settings.setFixedSize(35, 35)
+        settings.setFixedSize(32, 32)
         settings.setToolTip("Timeline settings")
         settings.setPopupMode(QtWidgets.QToolButton.InstantPopup)
         menu = QtWidgets.QMenu(settings)
