@@ -22,26 +22,9 @@ class _CircleSelectionObserver:
             return
         if object_name != panel.sketch.Name or not str(sub_name).startswith("Edge"):
             return
-        suffix = str(sub_name)[4:]
-        if not suffix.isdigit():
-            return
-        # Sketcher edge subelements are not guaranteed to map 1:1 to
-        # geometry indices (construction/external geometry can intervene).
-        # Resolve through the actual selected edge shape where possible.
-        index = None
-        try:
-            edge = panel.sketch.Shape.getElement(sub_name)
-            curve = edge.Curve
-            # A selected edge is matched to its actual circle geometry, not
-            # the subelement ordinal (which may include external geometry).
-            for candidate in panel.candidates:
-                circle = panel.sketch.Geometry[candidate]
-                if abs(curve.Radius - circle.Radius) < 1e-5 and \
-                   (curve.Center - circle.Center).Length < 1e-5:
-                    index = candidate
-                    break
-        except (AttributeError, ValueError, RuntimeError, IndexError):
-            return
+        index = sketch_pattern.circle_for_edge(
+            panel.sketch, str(sub_name), panel.candidates
+        )
         if index in panel.candidates:
             QtCore.QTimer.singleShot(0, lambda: panel.choose_circle(index))
 
