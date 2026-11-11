@@ -1246,3 +1246,15 @@ Implemented on codex/az-design-workbench: Sketch Rectangular Pattern is now an i
 The bottom Feature History now uses locally owned SVG image icons rather than text abbreviations for Sketch, Pad, Pocket, Hole, Fillet, Chamfer, Pattern, Mirror and other features, plus compact icon-only Edit, Delete, Resume and Settings. Feature names remain in tooltips and accessible labels.
 
 CI: Az Design add-on run 42928162310 (#407) on b1b602ccc2884de83df6bcafc6e5646938e71fda: package SUCCESS, modeling SUCCESS. New tests test_timeline_icons.py, test_pattern_ui_contracts.py and native Hole-to-Pattern regression are wired to CI. Optional 2-axis Solid Pattern is available only where native FreeCAD exposes Direction2/Occurrences2/Length2; older Debian build does not, so real owner Windows 1.1 two-axis verification remains mandatory. This is not yet a released Windows update.
+
+## 2026-11-10 — CI cycle optimization
+
+Windows candidate #37 (run 42928685669) completed SUCCESS with two jobs, real FreeCAD geometry and Windows patch/install/Qt/rollback, and produced the AzDesignNative-0.5.6-to-0.5.7-PATCH artifact. Detailed times: patch job ~8m09, 0.5.4 artifact download ~3m55, real installer ~3m12; these repeated old-baseline steps dominate.
+
+Implemented on branch codex/az-design-workbench:
+- Fast source CI concurrency cancel-in-progress true, so intermediate commits no longer pile up redundant jobs.
+- Windows patch workflow exact-key installed 0.5.6 snapshot cache, source pinned to immutable #0.5.4 setup/0.5.5 patch/0.5.6 patch runs, with required file and SHA256 manifest validation, cache-miss fallback and fail-open *only for cache transport/save* (not model validation); cache saved before modifying baseline.
+- Cached baseline cannot prove uninstaller registry behavior, so full cold verification via workflow_dispatch cold_validation=true still checks real installation and uninstall. Cache hit continues real patch/Qt/rollback verification.
+- Cheap structural YAML workflow validator in tools/verify_native_workflows.py added to package CI, catching prior malformed workflow errors (including unquoted # in step name); fast CI triggers on validator and release workflow edits.
+
+Not yet measured: whether restoring the multi-GB Windows baseline is faster than re-downloading/reinstalling on an actual cache hit. Cache is not primed just by committing these changes; the next batch candidate must populate it. No local Windows installation or published release changed.
