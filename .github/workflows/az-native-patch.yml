@@ -12,6 +12,12 @@ on:
     paths:
       - '.github/validation-requests/native-0.5.7.txt'
   workflow_dispatch:
+    inputs:
+      cold_validation:
+        description: 'Force fresh pinned installer download, all older patches and real uninstall'
+        type: boolean
+        default: false
+        required: false
 
 permissions:
   contents: read
@@ -95,7 +101,54 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Delta manifest tests failed' }
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File native-core/windows/test_apply_patch.ps1
           if ($LASTEXITCODE -ne 0) { throw 'Windows patch/rollback tests failed' }
+      # Restore the pinned installed 0.5.6 base instead of repeating the
+      # multi-gigabyte installer download and installation for each candidate.
+      # This exact key contains all three pinned CI run IDs.
+      # Only trusted development branch/manual builds use this cache.
+      - name: Restore pinned installed 0.5.6 baseline cache
+        id: baseline_cache
+        if: github.event_name != 'workflow_dispatch' || !inputs.cold_validation
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/DesignInstalled054
+          key: az-native-056-win2022-42809599278-42819472920-42871091253-v1
+
+      - name: Validate cached 0.5.6 baseline before use
+        if: steps.baseline_cache.outputs.cache-hit == 'true'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $baseline = Join-Path $env:RUNNER_TEMP 'DesignInstalled054'
+          $hashManifest = Join-Path $baseline '.az-baseline-hashes.json'
+          if (!(Test-Path $hashManifest)) { throw 'Cached baseline missing integrity manifest; run cold validation.' }
+          $expected = Get-Content $hashManifest -Raw | ConvertFrom-Json
+          $required = @(
+            'bin\FreeCAD.exe', 'bin\python.exe', 'AzUpdater.exe',
+            'AzDesign.exe', 'ApplyAzPatch.ps1', 'AZ Native Version.json',
+            'Mod\AzDesign\InitGui.py', 'unins000.exe'
+          )
+          foreach ($relative in $required) {
+            $absolute = Join-Path $baseline $relative
+            if (!(Test-Path -LiteralPath $absolute -PathType Leaf)) {
+              throw "Cached baseline incomplete: $relative"
+            }
+          }
+          $marker = Get-Content (Join-Path $baseline 'AZ Native Version.json') -Raw | ConvertFrom-Json
+          if ($marker.product -ne 'AzDesignNative' -or $marker.version -ne '0.5.6') {
+            throw 'Cached baseline is not pinned installed 0.5.6'
+          }
+          foreach ($entry in $expected.PSObject.Properties) {
+            $file = Join-Path $baseline $entry.Name
+            if (!(Test-Path -LiteralPath $file -PathType Leaf)) { throw "Missing cached file: $($entry.Name)" }
+            $actual = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($actual -ne [string]$entry.Value) {
+              throw "Cached baseline integrity failure: $($entry.Name)"
+            }
+          }
+          $baseline | Set-Content 'baseline-path.txt'
+          Write-Host 'Pinned 0.5.6 baseline cache restored; skipped original installer and patch reconstruction.'
+
       - name: Download original, tested 0.5.4 installer
+        if: steps.baseline_cache.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v4
         with:
           name: AzDesign-Native-Windows-Installer-0.5.4
@@ -104,6 +157,7 @@ jobs:
           github-token: ${{ github.token }}
           path: baseline-installer
       - name: Verify baseline SHA256 and install real 0.5.4
+        if: steps.baseline_cache.outputs.cache-hit != 'true'
         run: |
           $ErrorActionPreference = 'Stop'
           $setup = Get-ChildItem 'baseline-installer' -Recurse -File -Filter 'AzDesign-Native-Setup-0.5.4-x64.exe' | Select-Object -First 1
@@ -123,6 +177,7 @@ jobs:
           if ($marker.product -ne 'AzDesignNative' -or $marker.version -ne '0.5.4') { throw 'Wrong baseline product/version' }
           $baseline | Set-Content 'baseline-path.txt'
       - name: Download verified 0.5.5 patch used by installed owner
+        if: steps.baseline_cache.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v4
         with:
           name: AzDesignNative-0.5.4-to-0.5.5-PATCH
@@ -131,6 +186,7 @@ jobs:
           github-token: ${{ github.token }}
           path: installed-055-patch
       - name: Reconstruct actual 0.5.5 installed baseline
+        if: steps.baseline_cache.outputs.cache-hit != 'true'
         run: |
           $ErrorActionPreference = 'Stop'
           $baseline = (Get-Content 'baseline-path.txt' -Raw).Trim()
@@ -145,6 +201,7 @@ jobs:
           $marker = Get-Content (Join-Path $baseline 'AZ Native Version.json') -Raw | ConvertFrom-Json
           if ($marker.product -ne 'AzDesignNative' -or $marker.version -ne '0.5.5') { throw 'Wrong reconstructed 0.5.5 baseline' }
       - name: Download pinned, tested 0.5.6 patch from batch #20
+        if: steps.baseline_cache.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v4
         with:
           name: AzDesignNative-0.5.5-to-0.5.6-PATCH
@@ -153,6 +210,7 @@ jobs:
           github-token: ${{ github.token }}
           path: installed-056-patch
       - name: Reconstruct actual 0.5.6 installed baseline
+        if: steps.baseline_cache.outputs.cache-hit != 'true'
         run: |
           $ErrorActionPreference = 'Stop'
           $baseline = (Get-Content 'baseline-path.txt' -Raw).Trim()
@@ -166,6 +224,29 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Cannot reconstruct installed 0.5.6 baseline' }
           $marker = Get-Content (Join-Path $baseline 'AZ Native Version.json') -Raw | ConvertFrom-Json
           if ($marker.version -ne '0.5.6') { throw 'Incorrect 0.5.6 reconstructed baseline' }
+      - name: Record exact installed baseline hashes for future cache restores
+        if: steps.baseline_cache.outputs.cache-hit != 'true' && (github.event_name != 'workflow_dispatch' || !inputs.cold_validation)
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $baseline = (Get-Content 'baseline-path.txt' -Raw).Trim()
+          $files = @(
+            'bin\FreeCAD.exe', 'bin\python.exe', 'AzDesign.exe',
+            'AzUpdater.exe', 'ApplyAzPatch.ps1', 'AZ Native Version.json',
+            'Mod\AzDesign\InitGui.py', 'unins000.exe'
+          )
+          $hashes = [ordered]@{}
+          foreach ($file in $files) {
+            $hashes[$file] = (Get-FileHash -LiteralPath (Join-Path $baseline $file) -Algorithm SHA256).Hash.ToLowerInvariant()
+          }
+          $hashes | ConvertTo-Json -Depth 3 | Set-Content (Join-Path $baseline '.az-baseline-hashes.json') -Encoding UTF8
+
+      - name: Cache immutable 0.5.6 installed baseline for the next candidate
+        if: steps.baseline_cache.outputs.cache-hit != 'true' && (github.event_name != 'workflow_dispatch' || !inputs.cold_validation)
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/DesignInstalled054
+          key: az-native-056-win2022-42809599278-42819472920-42871091253-v1
+
       - name: Build changed-only overlay (no native core re-download)
         run: |
           $ErrorActionPreference = 'Stop'
@@ -221,9 +302,15 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Rollback failed' }
           $marker = Get-Content (Join-Path $baseline 'AZ Native Version.json') -Raw | ConvertFrom-Json
           if ($marker.version -ne '0.5.6') { throw 'Original version was not restored' }
-          $uninstaller = Join-Path $baseline 'unins000.exe'
-          $uninstall = Start-Process $uninstaller -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART') -PassThru -Wait
-          if ($uninstall.ExitCode -ne 0) { throw 'Baseline uninstall failed' }
+          if ('${{ steps.baseline_cache.outputs.cache-hit }}' -ne 'true') {
+            # Only a fresh installer run has the OS registry registration
+            # needed for a meaningful Inno Setup uninstall test.
+            $uninstaller = Join-Path $baseline 'unins000.exe'
+            $uninstall = Start-Process $uninstaller -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART') -PassThru -Wait
+            if ($uninstall.ExitCode -ne 0) { throw 'Baseline uninstall failed' }
+          } else {
+            Write-Host 'Cached baseline patch/Qt/rollback verified; cold run checks native uninstaller.'
+          }
           $hash = (Get-FileHash $patch -Algorithm SHA256).Hash.ToLowerInvariant()
           "$hash  $(Split-Path $patch -Leaf)" | Set-Content "$patch.sha256"
       - name: Upload tested incremental patch (not a public release)
