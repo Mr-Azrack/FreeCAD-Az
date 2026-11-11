@@ -1280,3 +1280,12 @@ Full owner source recordings are the benchmark, not screenshots alone. See FUSIO
 - commands/session/feature_edit route these interactions through Design and cleanup.
 - Tests: test_fusion_video_workflows.py on fast/package and Windows preflight; test_workflow.py native 65x100 perforated plate region-to-extrude with 8 holes, ambiguous region guard, finished Fillet radius edit/undo. Az Design add-on run #433, 42958378856, package+modeling SUCCESS on source 709e5dfe2c7c598494e9f02283bef384228bc962.
 - .github/workflows/az-native-patch.yml and tools/verify_native_workflows.py retargeted to build 0.5.8-to-0.5.9 from exact public 0.5.8 Build #39 run 42949194221, verifying SHA256 after reconstructing original 0.5.7 Build #36. Existing user install and public 0.5.8 remain unchanged. No Windows 0.5.9 verification yet.
+
+
+## 2026-11-10 — v0.5.9 published for Fusion-video workflow acceptance
+
+Verified evidence: guarded Windows candidate Build #40 (run 42959009956) completed both geometry SUCCESS and patch SUCCESS, with AzDesignNative-0.5.8-to-0.5.9-PATCH. Baseline reconstructed from hash-verified original 0.5.7 Build #36 and PUBLIC 0.5.8 Build #39. Native Windows patch install, Qt startup and rollback to 0.5.8 passed. Candidate source SHA 89cd91ba4e15381950db1543873320e90a0b80f0.
+
+On main, v0.5.9 publishing marker committed at e72130698043e88f46717fc7416ea25439228164. Release run 42959518279 SUCCESS. Public GitHub releases/latest independently confirmed tag v0.5.9, draft=false, prerelease=false. Assets contain exact prior 0.5.7-to-0.5.8 patch plus new AzDesignNative-0.5.8-to-0.5.9.azpatch (GitHub SHA256 digest 0d87c754c04dc65f530613e3cdbc71e9d60e2926c9990770345f866adfee5cdc), with both checksum files. Release: https://github.com/Mr-Azrack/FreeCAD-Az/releases/tag/v0.5.9. Existing updater reads latest release and selects patch from current installed version: 0.5.7 can update to 0.5.8 and repeat; 0.5.8 to 0.5.9 directly.
+
+Owner GUI still unverified: source circle picking while Sketch Pattern open; auto-selecting perforated plate region with holes; hiding large face chooser over existing body; nonmodal edge selection and Fillet edit/undo. Automated native geometry/Qt startup is not Windows UI acceptance. Fillet auto-validates the actual OCCT result but does NOT show a shaded ghost-result preview. Do not claim full Fusion behavior parity; retain rollback and unique versioning.
