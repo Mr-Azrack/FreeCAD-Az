@@ -7,17 +7,21 @@ on:
   push:
     branches: [main]
     paths:
-      - '.github/release-requests/native-0.5.5.txt'
+      - '.github/release-requests/native-0.5.8.txt'
   workflow_dispatch:
     inputs:
       verified_run:
         description: 'Successful Az Native Windows Patch run ID containing the patch artifact'
         required: true
         type: string
+      source_sha:
+        description: 'Exact reviewed candidate source SHA'
+        required: true
+        type: string
       version:
         description: 'Destination version'
         required: true
-        default: '0.5.5'
+        default: '0.5.8'
         type: string
 
 permissions:
@@ -36,20 +40,25 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f .github/release-requests/native-0.5.5.txt
-          test "$(cat .github/release-requests/native-0.5.5.txt)" = "publish v0.5.5 from verified patch CI run 42819472920"
+          test -f .github/release-requests/native-0.5.8.txt
+          test "$(cat .github/release-requests/native-0.5.8.txt)" = "publish v0.5.8 from verified patch CI run 42949194221 source 56bfacadf8a197b49fda8e510ccc55c9fd65b3ec"
       - name: Validate requested release and upstream CI success
         env:
           GH_TOKEN: ${{ github.token }}
-          RUN_ID: ${{ inputs.verified_run || '42819472920' }}
-          VERSION: ${{ inputs.version || '0.5.5' }}
+          RUN_ID: ${{ inputs.verified_run || '42949194221' }}
+          VERSION: ${{ inputs.version || '0.5.8' }}
+          APPROVED_SHA: ${{ inputs.source_sha || '56bfacadf8a197b49fda8e510ccc55c9fd65b3ec' }}
         shell: bash
         run: |
           set -euo pipefail
           [[ "$RUN_ID" =~ ^[0-9]+$ ]] || { echo 'Invalid run ID'; exit 1; }
-          [[ "$VERSION" == '0.5.5' ]] || { echo 'This promotion currently supports only 0.5.5'; exit 1; }
-          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/$RUN_ID" --jq '{status,conclusion,name,head_branch,event}' > /tmp/source.json
-          jq -e '.status=="completed" and .conclusion=="success" and .name=="Az Native Windows Patch" and .head_branch=="codex/az-design-workbench"' /tmp/source.json
+          [[ "$VERSION" == '0.5.8' ]] || { echo 'This promotion is pinned to the 0.5.7-to-0.5.8 candidate'; exit 1; }
+          if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
+            [[ "$RUN_ID" == '42949194221' && "$APPROVED_SHA" == '56bfacadf8a197b49fda8e510ccc55c9fd65b3ec' ]] || { echo 'Push publication must use reviewed 0.5.8 candidate'; exit 1; }
+          fi
+          [[ "$APPROVED_SHA" =~ ^[a-f0-9]{40}$ ]] || { echo 'Reviewed source SHA must be 40 lowercase hex characters'; exit 1; }
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/$RUN_ID" --jq '{status,conclusion,name,head_branch,event,head_sha}' > /tmp/source.json
+          jq -e --arg sha "$APPROVED_SHA" '.status=="completed" and .conclusion=="success" and .name=="Az Native Windows Patch" and .head_branch=="codex/az-design-workbench" and .head_sha==$sha' /tmp/source.json
           if gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo 'Release tag already published: refusing overwrite.'
             exit 1
@@ -57,9 +66,9 @@ jobs:
       - name: Download the verified CI patch artifact
         uses: actions/download-artifact@v4
         with:
-          name: AzDesignNative-0.5.4-to-0.5.5-PATCH
+          name: AzDesignNative-0.5.7-to-0.5.8-PATCH
           repository: Mr-Azrack/FreeCAD-Az
-          run-id: ${{ inputs.verified_run || '42819472920' }}
+          run-id: ${{ inputs.verified_run || '42949194221' }}
           github-token: ${{ github.token }}
           path: approved
       - name: Revalidate patch SHA256
@@ -67,19 +76,19 @@ jobs:
         run: |
           set -euo pipefail
           cd approved
-          test -f AzDesignNative-0.5.4-to-0.5.5.azpatch
-          test -f AzDesignNative-0.5.4-to-0.5.5.azpatch.sha256
-          sha256sum -c AzDesignNative-0.5.4-to-0.5.5.azpatch.sha256
+          test -f AzDesignNative-0.5.7-to-0.5.8.azpatch
+          test -f AzDesignNative-0.5.7-to-0.5.8.azpatch.sha256
+          sha256sum -c AzDesignNative-0.5.7-to-0.5.8.azpatch.sha256
       - name: Publish versioned GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          gh release create v0.5.5 \
-            approved/AzDesignNative-0.5.4-to-0.5.5.azpatch \
-            approved/AzDesignNative-0.5.4-to-0.5.5.azpatch.sha256 \
+          gh release create v0.5.8 \
+            approved/AzDesignNative-0.5.7-to-0.5.8.azpatch \
+            approved/AzDesignNative-0.5.7-to-0.5.8.azpatch.sha256 \
             --repo "$GITHUB_REPOSITORY" \
-            --title "Design Native 0.5.5" \
-            --notes "Verified incremental patch from 0.5.4. Includes Design-first workflows and one-click future updates. Save and close the application before installing. Source, test evidence and licenses remain in this repository." \
+            --title "Design Native 0.5.8" \
+            --notes "Verified incremental patch for original Design Native 0.5.7 Build 36 to 0.5.8. Includes Design-owned live Pattern tools and original SVG feature history. Source candidate run 42949194221, sha 56bfacadf8a197b49fda8e510ccc55c9fd65b3ec. Save and close Design before updating. The updater enforces exact source-file SHA256 and keeps a rollback backup." \
             --latest
