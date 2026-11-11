@@ -55,6 +55,57 @@ class WorkflowTest(unittest.TestCase):
         self.doc.recompute()
         return body, source, obj
 
+    def test_fusion_style_plate_profile_preselects_outer_region_with_holes(self):
+        """The plate is one region with holes, not 10 manually ticked profiles."""
+        body = self.doc.addObject("PartDesign::Body", "PlateProfileBody")
+        outline = [
+            (0, 0, 65, 0), (65, 0, 65, 100),
+            (65, 100, 0, 100), (0, 100, 0, 0),
+        ]
+        source = sketch(self.doc, outline, body=body, name="PerforatedPlate")
+        for x in (12, 53):
+            for y in (15, 28, 70, 85):
+                source.addGeometry(
+                    Part.Circle(App.Vector(x, y, 0), App.Vector(0, 0, 1), 2.5)
+                )
+        self.doc.recompute()
+        regions = profiles.regions(source)
+        self.assertGreaterEqual(len(regions), 9)
+        index = profiles.preferred_plate_region(regions)
+        self.assertIsNotNone(index)
+        plate = regions[index]
+        self.assertEqual(len(plate.face.Wires) - 1, 8)
+        self.assertAlmostEqual(
+            plate.face.Area, 65 * 100 - 8 * math.pi * 2.5**2,
+            delta=0.5,
+        )
+        feature = features.create_extrude(
+            body, (source, []), operation="New body",
+            region_descriptors=[plate.descriptor()],
+        )
+        feature.Length = 8
+        self.doc.recompute()
+        self.assertTrue(feature.Shape.isValid())
+        self.assertEqual(len(feature.Shape.Solids), 1)
+        self.assertAlmostEqual(
+            feature.Shape.Volume, plate.face.Area * 8, delta=1.0,
+        )
+
+    def test_ambiguous_sketch_profiles_still_require_explicit_selection(self):
+        class FakeRegion:
+            def __init__(self, area, wires):
+                self.face = type("FaceStub", (), {
+                    "Area": area, "Wires": [object()] * wires
+                })()
+        self.assertIsNone(profiles.preferred_plate_region([]))
+        self.assertEqual(profiles.preferred_plate_region([FakeRegion(20, 1)]), 0)
+        self.assertIsNone(profiles.preferred_plate_region([
+            FakeRegion(100, 4), FakeRegion(60, 1)
+        ]))
+        self.assertIsNone(profiles.preferred_plate_region([
+            FakeRegion(1000, 1), FakeRegion(10, 1)
+        ]))
+
     def test_small_scale_fillet_chamfer_validation_and_native_history(self):
         """Sub-millimetre design: never scale source to make a bevel work."""
         body = self.doc.addObject("PartDesign::Body", "MicroBody")
