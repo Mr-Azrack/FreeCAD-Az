@@ -93,6 +93,8 @@ class FusionVideoContracts(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("class EdgeTreatmentPanel", source)
+        self.assertIn("QtWidgets.QDockWidget(self.kind + \" Tasks\"", source)
+        self.assertNotIn("session.mdi.viewport()", source)
         self.assertIn("Gui.Selection.addObserver(self.observer)", source)
         self.assertIn("edge_treatments.preflight(", source)
         self.assertIn("edge_treatments.create(", source)
