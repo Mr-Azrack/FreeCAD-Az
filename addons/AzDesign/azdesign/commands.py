@@ -251,10 +251,10 @@ def dispatch(key):
         "presspull": presspull.start,
         "hole": hole.show_hole,
         "fillet": lambda: __import__(
-            "azdesign.edge_treatments_ui", fromlist=["show"]
+            "azdesign.edge_treatments_canvas", fromlist=["show"]
         ).show("Fillet"),
         "chamfer": lambda: __import__(
-            "azdesign.edge_treatments_ui", fromlist=["show"]
+            "azdesign.edge_treatments_canvas", fromlist=["show"]
         ).show("Chamfer"),
         "snaps": lambda: __import__(
             "azdesign.snap_finder_ui", fromlist=["show"]
