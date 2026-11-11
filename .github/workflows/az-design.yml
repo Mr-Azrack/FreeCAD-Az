@@ -102,6 +102,8 @@ jobs:
         run: python addons/AzDesign/tests/test_fusion_video_workflows.py
       - name: Test compact native Sketch Palette controls and theme-safe layout
         run: python addons/AzDesign/tests/test_sketch_palette.py
+      - name: Test transactional associative sketch references
+        run: python addons/AzDesign/tests/test_snap_targets_contracts.py
       - name: Test automatic Sketcher hover midpoint and circle-center inference
         run: python addons/AzDesign/tests/test_snap_hover.py
       - name: Test passive native-Sketcher viewport hover overlay positioning
