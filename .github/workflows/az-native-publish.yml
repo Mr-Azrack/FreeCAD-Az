@@ -15,7 +15,7 @@ on:
       version:
         description: 'Destination version'
         required: true
-        default: '0.5.7'
+        default: '0.5.8'
         type: string
 
 permissions:
@@ -38,7 +38,7 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$RUN_ID" =~ ^[0-9]+$ ]] || { echo 'Invalid run ID'; exit 1; }
-          [[ "$VERSION" == '0.5.7' ]] || { echo 'This publisher is pinned to the 0.5.6-to-0.5.7 release'; exit 1; }
+          [[ "$VERSION" == '0.5.8' ]] || { echo 'This publisher is pinned to the 0.5.7-to-0.5.8 release'; exit 1; }
           [[ "$APPROVED_SHA" =~ ^[a-f0-9]{40}$ ]] || { echo 'Expected a full 40-character reviewed source SHA'; exit 1; }
           gh api "repos/${GITHUB_REPOSITORY}/actions/runs/$RUN_ID" --jq '{status,conclusion,name,head_branch,event,head_sha}' > /tmp/source.json
           jq -e --arg sha "$APPROVED_SHA" '.status=="completed" and .conclusion=="success" and .name=="Az Native Windows Patch" and .head_branch=="codex/az-design-workbench" and .head_sha==$sha' /tmp/source.json
@@ -49,7 +49,7 @@ jobs:
       - name: Download the verified CI patch artifact
         uses: actions/download-artifact@v4
         with:
-          name: AzDesignNative-0.5.6-to-0.5.7-PATCH
+          name: AzDesignNative-0.5.7-to-0.5.8-PATCH
           repository: Mr-Azrack/FreeCAD-Az
           run-id: ${{ inputs.verified_run }}
           github-token: ${{ github.token }}
@@ -59,19 +59,19 @@ jobs:
         run: |
           set -euo pipefail
           cd approved
-          test -f AzDesignNative-0.5.6-to-0.5.7.azpatch
-          test -f AzDesignNative-0.5.6-to-0.5.7.azpatch.sha256
-          sha256sum -c AzDesignNative-0.5.6-to-0.5.7.azpatch.sha256
+          test -f AzDesignNative-0.5.7-to-0.5.8.azpatch
+          test -f AzDesignNative-0.5.7-to-0.5.8.azpatch.sha256
+          sha256sum -c AzDesignNative-0.5.7-to-0.5.8.azpatch.sha256
       - name: Publish versioned GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          gh release create v0.5.7 \
-            approved/AzDesignNative-0.5.6-to-0.5.7.azpatch \
-            approved/AzDesignNative-0.5.6-to-0.5.7.azpatch.sha256 \
+          gh release create v0.5.8 \
+            approved/AzDesignNative-0.5.7-to-0.5.8.azpatch \
+            approved/AzDesignNative-0.5.7-to-0.5.8.azpatch.sha256 \
             --repo "$GITHUB_REPOSITORY" \
-            --title "Design Native 0.5.7" \
-            --notes "Verified incremental patch from 0.5.6. Includes Design-owned live Sketch/Solid Pattern tools, editable native feature history and original SVG icon timeline. Save and close Design before updating. Approval and test evidence are in this repository." \
+            --title "Design Native 0.5.8" \
+            --notes "Verified incremental patch from original 0.5.7 Build 36. Includes Design-owned live Sketch/Solid Pattern tools, editable native feature history and original SVG icon timeline. Save and close Design before updating. Approval and test evidence are in this repository." \
             --latest
