@@ -1323,3 +1323,30 @@ Owner GUI still unverified: source circle picking while Sketch Pattern open; aut
 ## 2026-11-11 — 0.5.11 Fusion workflow parity (in progress)
 
 User authorized proceeding without routine approvals. Compare supplied Fusion 360 (3m43s) and FreeCAD (10m) recordings. Fix: body-edge reference snapping during sketch without P, streamlined sketch plane/face selection, hide incidental constraint glyphs while retaining solver, reliable pattern canvas picking, and a persistent editable pattern feature with timeline icon and double-click editing. Commits 52e1480 (selection fallback) and 506293d (generated constraint virtual space) are unvalidated. Validate native Sketcher API behavior and undo/redo; do not release until real installed baseline and Qt smoke pass. Next: implement persistent editable pattern architecture and automatic edge reference workflow; add tests. Do not confuse a geometry-copy operation with a parametric timeline feature.
+
+
+## 2026-11-11 — 0.5.11 development automation checkpoint
+
+Branch: `codex/az-design-workbench`. Source commits:
+`6233bc2` (shared ambiguity-safe sketch edge resolver),
+`401497f` (canvas observer uses resolver),
+`30b2ee3` (regression contract).
+The helper maps displayed sketch edges to underlying circle geometry by
+radius/center and refuses ambiguous coincident circles. Both preselection and
+live canvas selection now share the helper. No installer was published.
+
+Tests: Added `test_sketch_circle_selection_uses_shared_geometry_resolver`
+to `addons/AzDesign/tests/test_pattern_ui_contracts.py`. CI results for
+the latest commit must be inspected; do not infer Windows acceptance from
+a source contract. This run used GitHub file-edit tools, without a local
+FreeCAD GUI or Windows installation.
+
+**Next exact actions:** (1) inspect Actions for commit `30b2ee3`;
+fix any failing job; (2) implement actual automatically projected/reference
+body-edge geometry while sketch editing, ensuring read-only references do
+not modify source solids; (3) design persistent editable sketch-pattern
+parameters with robust undo/reopen semantics and timeline edit routing,
+rather than relying on one-off generated circles; (4) add real FreeCAD
+modeling tests for these features and test save/reopen and cancellation;
+(5) build and validate 0.5.10 → 0.5.11 Windows patch only after all gates pass.
+Do not claim 0.5.11 released yet.
