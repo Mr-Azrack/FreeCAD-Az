@@ -254,13 +254,25 @@ class ExtrudeTask:
         try:
             if source and source[0].isDerivedFrom("Sketcher::SketchObject"):
                 self.region_data = profiles.regions(source[0])
+                # Fusion-style sensible starting point: when a sketch clearly
+                # contains one large outer plate surrounding many little holes,
+                # preview the plate directly, leaving its cut-outs empty.
+                # Ambiguous multi-profile sketches still require a click.
+                recommended = profiles.preferred_plate_region(self.region_data)
                 for index, region in enumerate(self.region_data):
-                    item = QtWidgets.QListWidgetItem(
+                    is_plate = index == recommended and len(region.face.Wires) > 1
+                    label = (
+                        "Plate · {} cutout{} · {:.3f} mm²".format(
+                            len(region.face.Wires) - 1,
+                            "" if len(region.face.Wires) == 2 else "s",
+                            region.face.Area,
+                        ) if is_plate else
                         "Profile {} · {:.3f} mm²".format(index + 1, region.face.Area)
                     )
+                    item = QtWidgets.QListWidgetItem(label)
                     item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
                     item.setCheckState(
-                        QtCore.Qt.Checked if len(self.region_data) == 1 else QtCore.Qt.Unchecked
+                        QtCore.Qt.Checked if index == recommended else QtCore.Qt.Unchecked
                     )
                     self.profile_list.addItem(item)
                     overlay = self.doc.addObject("Part::Feature", "AzProfilePick")
