@@ -1258,3 +1258,7 @@ Implemented on branch codex/az-design-workbench:
 - Cheap structural YAML workflow validator in tools/verify_native_workflows.py added to package CI, catching prior malformed workflow errors (including unquoted # in step name); fast CI triggers on validator and release workflow edits.
 
 Not yet measured: whether restoring the multi-GB Windows baseline is faster than re-downloading/reinstalling on an actual cache hit. Cache is not primed just by committing these changes; the next batch candidate must populate it. No local Windows installation or published release changed.
+
+## 2026-11-10 — v0.5.8 baseline correction
+
+Discovered user already has v0.5.7, so old 0.5.6→0.5.7 patch rejected correctly. Retargeted Windows patch workflow to v0.5.7→v0.5.8 from checksum-verified original build #36 baseline; all old file checksum protections remain. Changed batch marker path to v0.5.8 and manual release workflow to v0.5.8, and updated fast YAML gate to reject incorrect version/source. Source implementation carries forward the Fusion-style sketch/solid Pattern improvements and vector timeline. Important same-version fork: #36 and #37 are different 0.5.7 test packages, so build lineage must be verified on user's PC. No 0.5.8 installed or publicly published.
