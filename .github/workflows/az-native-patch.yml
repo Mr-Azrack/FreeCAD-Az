@@ -317,8 +317,8 @@ jobs:
           & $csc /nologo /codepage:65001 /target:winexe "/out:$(Join-Path $new 'AzUpdater.exe')" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll @iconArgs "$updaterSource" "$onlineSource"
           if ($LASTEXITCODE -ne 0) { throw 'Native updater compile failed' }
           New-Item -ItemType Directory 'dist' -Force | Out-Null
-          $patch = Join-Path (Resolve-Path 'dist').Path 'AzDesignNative-0.5.6-to-0.5.7.azpatch'
-          python native-core/windows/create_patch.py --old "$old" --new "$new" --output "$patch" --from-version 0.5.6 --to-version 0.5.7
+          $patch = Join-Path (Resolve-Path 'dist').Path 'AzDesignNative-0.5.7-to-0.5.8.azpatch'
+          python native-core/windows/create_patch.py --old "$old" --new "$new" --output "$patch" --from-version 0.5.7 --to-version 0.5.8
           if ($LASTEXITCODE -ne 0) { throw 'Patch creation failed' }
           $patch | Set-Content 'patch-path.txt'
       - name: Apply to real installed baseline, Qt smoke, rollback, uninstall
@@ -327,16 +327,16 @@ jobs:
           $baseline = (Get-Content 'baseline-path.txt' -Raw).Trim()
           $patch = (Get-Content 'patch-path.txt' -Raw).Trim()
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File native-core/windows/ApplyAzPatch.ps1 -InstallDir "$baseline" -PatchZip "$patch" -NoUI
-          if ($LASTEXITCODE -ne 0) { throw 'Real installed 0.5.6 rejected patch' }
+          if ($LASTEXITCODE -ne 0) { throw 'Real installed 0.5.7 Build 36 rejected 0.5.8 patch' }
           $marker = Get-Content (Join-Path $baseline 'AZ Native Version.json') -Raw | ConvertFrom-Json
-          if ($marker.version -ne '0.5.7') { throw 'Patched version is not 0.5.7' }
+          if ($marker.version -ne '0.5.8') { throw 'Patched version is not 0.5.8' }
           $env:PYTHONNOUSERSITE = '1'
           & (Join-Path $baseline 'bin\python.exe') native-core/windows/smoke_qt.py --bundle "$baseline"
           if ($LASTEXITCODE -ne 0) { throw 'Qt startup failed after patch' }
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File native-core/windows/ApplyAzPatch.ps1 -InstallDir "$baseline" -RollbackLatest -NoUI
           if ($LASTEXITCODE -ne 0) { throw 'Rollback failed' }
           $marker = Get-Content (Join-Path $baseline 'AZ Native Version.json') -Raw | ConvertFrom-Json
-          if ($marker.version -ne '0.5.6') { throw 'Original version was not restored' }
+          if ($marker.version -ne '0.5.7') { throw 'Original version was not restored' }
           if ('${{ steps.baseline_cache.outputs.cache-hit }}' -ne 'true') {
             # Only a fresh installer run has the OS registry registration
             # needed for a meaningful Inno Setup uninstall test.
@@ -351,10 +351,10 @@ jobs:
       - name: Upload tested incremental patch (not a public release)
         uses: actions/upload-artifact@v4
         with:
-          name: AzDesignNative-0.5.6-to-0.5.7-PATCH
+          name: AzDesignNative-0.5.7-to-0.5.8-PATCH
           path: |
-            dist/AzDesignNative-0.5.6-to-0.5.7.azpatch
-            dist/AzDesignNative-0.5.6-to-0.5.7.azpatch.sha256
+            dist/AzDesignNative-0.5.7-to-0.5.8.azpatch
+            dist/AzDesignNative-0.5.7-to-0.5.8.azpatch.sha256
           compression-level: 0
           retention-days: 14
           if-no-files-found: error
