@@ -99,6 +99,7 @@ class SketchPatternPanel(QtWidgets.QFrame):
         self.draft = SketchPatternDraft(sketch)
         self._done = False
         self.observer = _CircleSelectionObserver(self)
+        self._selection_observer_attached = False
         self.setObjectName("AzSketchPatternPanel")
         self.setStyleSheet("""
         QFrame#AzSketchPatternPanel {
@@ -198,6 +199,7 @@ class SketchPatternPanel(QtWidgets.QFrame):
 
     def show_panel(self):
         Gui.Selection.addObserver(self.observer)
+        self._selection_observer_attached = True
         parent = self.parentWidget()
         self.move(max(8, parent.width() - self.width() - 15), 14)
         self.handles.move(max(8, self.x() - 190), 20)
@@ -252,10 +254,12 @@ class SketchPatternPanel(QtWidgets.QFrame):
         global _active
         self._done = True
         self.timer.stop()
-        try:
-            Gui.Selection.removeObserver(self.observer)
-        except (RuntimeError, ReferenceError):
-            pass
+        if self._selection_observer_attached:
+            try:
+                Gui.Selection.removeObserver(self.observer)
+            except (RuntimeError, ReferenceError):
+                pass
+            self._selection_observer_attached = False
         self.handles.hide()
         self.handles.deleteLater()
         self.hide()
