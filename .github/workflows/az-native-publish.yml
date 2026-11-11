@@ -103,6 +103,6 @@ jobs:
             approved-prior/AzDesignNative-0.5.7-to-0.5.8.azpatch \
             approved-prior/AzDesignNative-0.5.7-to-0.5.8.azpatch.sha256 \
             --repo "$GITHUB_REPOSITORY" \
-            --title "Design Native 0.5.8" \
+            --title "Design Native 0.5.9" \
             --notes "Verified incremental patch from public 0.5.8 Build #39 to 0.5.9. Owner video driven upgrades: sensible plate-with-cutouts Extrude region, face-first Create Sketch, canvas-selected Sketch Pattern source and nonmodal Design Fillet/Chamfer with parametric history edit. Full CI source run 42959009956, SHA 89cd91ba4e15381950db1543873320e90a0b80f0. The earlier 0.5.7-to-0.5.8 patch remains attached for one-version-behind updates. Keep documents saved; patch installer preserves rollback. Real Windows user interaction acceptance is still requested." \
             --latest
