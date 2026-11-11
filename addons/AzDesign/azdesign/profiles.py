@@ -204,6 +204,34 @@ def regions(sketch):
     )
 
 
+
+def preferred_plate_region(region_list):
+    """Return the obvious plate-with-cutouts region or None.
+
+    Fusion usually presents the area under the pointer, not a numbered list
+    of dozens of closed loops. For an unambiguously dominant outer plate
+    surrounding holes we can safely preselect its face (holes are retained).
+    Never guess between similarly sized / separate features.
+    """
+    if not region_list:
+        return None
+    if len(region_list) == 1:
+        return 0
+    ranked = sorted(
+        enumerate(region_list),
+        key=lambda item: item[1].face.Area,
+        reverse=True,
+    )
+    index, winner = ranked[0]
+    runner_up = ranked[1][1]
+    if (
+        len(winner.face.Wires) > 1
+        and winner.face.Area >= 4.0 * runner_up.face.Area
+    ):
+        return index
+    return None
+
+
 def resolve(sketch, descriptors):
     available = regions(sketch)
     bounds = Part.makeCompound(local_edges(sketch)).BoundBox
