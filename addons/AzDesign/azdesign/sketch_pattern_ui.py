@@ -10,6 +10,27 @@ from . import modeling, sketch_pattern
 _active = None
 
 
+class _CircleSelectionObserver:
+    """Follow the circle selected directly on the Sketcher canvas."""
+
+    def __init__(self, panel):
+        self.panel = panel
+
+    def addSelection(self, doc_name, object_name, sub_name, _point):
+        panel = self.panel
+        if panel._done or doc_name != panel.sketch.Document.Name:
+            return
+        if object_name != panel.sketch.Name or not str(sub_name).startswith("Edge"):
+            return
+        suffix = str(sub_name)[4:]
+        if not suffix.isdigit():
+            return
+        index = int(suffix) - 1
+        if index not in panel.candidates:
+            return
+        QtCore.QTimer.singleShot(0, lambda: panel.choose_circle(index))
+
+
 class SketchPatternDraft:
     """Native Sketcher geometry preview within one cancelable transaction."""
 
@@ -64,6 +85,7 @@ class SketchPatternPanel(QtWidgets.QFrame):
         self.sketch = sketch
         self.draft = SketchPatternDraft(sketch)
         self._done = False
+        self.observer = _CircleSelectionObserver(self)
         self.setObjectName("AzSketchPatternPanel")
         self.setStyleSheet("""
         QFrame#AzSketchPatternPanel {
@@ -87,8 +109,8 @@ class SketchPatternPanel(QtWidgets.QFrame):
         title.setStyleSheet("font-size: 14px; font-weight: 700;")
         vertical.addWidget(title)
         description = QtWidgets.QLabel(
-            "Repeat a source circle in two directions. Preview updates the "
-            "actual sketch; Cancel restores the original sketch."
+            "Click a circle on the canvas or choose it below. Set rows and "
+            "columns; copies stay the same diameter. Cancel restores the sketch."
         )
         description.setWordWrap(True)
         vertical.addWidget(description)
@@ -157,7 +179,12 @@ class SketchPatternPanel(QtWidgets.QFrame):
         self.handles.hide()
         self.adjustSize()
 
+    def choose_circle(self, index):
+        if not self._done and index in self.candidates:
+            self.source.setCurrentIndex(self.candidates.index(index))
+
     def show_panel(self):
+        Gui.Selection.addObserver(self.observer)
         parent = self.parentWidget()
         self.move(max(8, parent.width() - self.width() - 15), 14)
         self.handles.move(max(8, self.x() - 190), 20)
@@ -212,6 +239,10 @@ class SketchPatternPanel(QtWidgets.QFrame):
         global _active
         self._done = True
         self.timer.stop()
+        try:
+            Gui.Selection.removeObserver(self.observer)
+        except (RuntimeError, ReferenceError):
+            pass
         self.handles.hide()
         self.handles.deleteLater()
         self.hide()
