@@ -8,7 +8,9 @@ on:
       - 'addons/AzDesign/**'
       - 'native-core/windows/**'
       - '.github/workflows/az-native-patch.yml'
+      - '.github/workflows/az-native-publish.yml'
       - '.github/workflows/az-design.yml'
+      - 'tools/verify_native_workflows.py'
   pull_request:
     paths:
       - 'addons/AzDesign/**'
