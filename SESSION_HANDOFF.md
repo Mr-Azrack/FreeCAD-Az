@@ -1368,3 +1368,29 @@ edit updates external geometry, save/reopen and undo. Then implement persistent
 sketch-pattern editing with timeline icon and double-click edit, including
 save/reopen and Undo/Redo tests. Inspect fast CI for 014cddade; batch Windows
 0.5.10→0.5.11 patch only after full feature/tests pass.
+
+
+## 2026-11-11 — Hourly development pass: native external-reference tests
+
+Read PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and this handoff before changes.
+Verified Az Design CI run 43117400436 for ce6a2c2 was SUCCESS.
+Committed d147fec1 (new executable tests/test_snap_targets_contracts.py)
+and 08fe43f (register the tests in az-design.yml package job).
+Tests exercise native Sketcher addExternal call contract with mocked FreeCAD:
+single commit, multi-edge deduplication, all-or-nothing rollback on second
+edge failure, circular dependency rejection and stale-edge rejection.
+No actual GUI hover behavior, save/reopen or Windows installer validation
+is claimed. The new test CI outcome still needs verification.
+
+NEXT EXACT STEPS:
+1. Inspect fast CI on 08fe43f; repair failures before extending features.
+2. Add real FreeCAD modeling test for native addExternal, source movement,
+   persistence across FCStd save/reopen, and Undo/Redo; check actual FreeCAD
+   1.1 external-reference API and dependency direction.
+3. Integrate passive automatic hover/selection references while sketching
+   without unintended geometry mutation or requiring P.
+4. Implement persistent independently editable sketch-pattern feature and
+   timeline icon/edit dispatch, retaining constrained real circle geometry,
+   and test edits/cancel/reopen.
+5. Only after fast and native tests pass, construct and validate the unique
+   0.5.10-to-0.5.11 Windows patch, Qt startup and rollback. No release yet.
