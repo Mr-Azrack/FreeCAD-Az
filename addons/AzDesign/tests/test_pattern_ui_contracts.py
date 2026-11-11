@@ -135,6 +135,15 @@ class PatternContracts(unittest.TestCase):
             draft.preview(3, 0, "X_Axis")
         self.assertFalse(self.doc.actions)
 
+    def test_sketch_circle_selection_uses_shared_geometry_resolver(self):
+        source = (ADDON / "azdesign" / "sketch_pattern.py").read_text()
+        panel = (ADDON / "azdesign" / "sketch_pattern_ui.py").read_text()
+        self.assertIn("def circle_for_edge(", source)
+        self.assertIn("len(matches) == 1", source)
+        self.assertIn("circle_for_edge(sketch, name)", source)
+        self.assertIn("sketch_pattern.circle_for_edge(", panel)
+        self.assertNotIn("index = int(suffix) - 1", panel)
+
     def test_edit_routes_and_esc_are_not_native(self):
         commands = (ADDON / "azdesign" / "commands.py").read_text()
         edit = (ADDON / "azdesign" / "feature_edit.py").read_text()
