@@ -72,6 +72,18 @@ class FusionVideoContracts(unittest.TestCase):
         self.assertIn("Gui.Selection.getSelectionEx()", picker)
         self.assertIn("create_sketch(support=(hit.Object, [faces[0]]))", picker)
 
+    def test_associative_body_edge_reference_is_transactional(self):
+        source = (ADDON / "azdesign" / "snap_targets.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("def link_body_edge(sketch, source, edge_name):", source)
+        self.assertIn("sketch.addExternal(source.Name, edge_name)", source)
+        self.assertIn("doc.openTransaction(", source)
+        self.assertIn("doc.commitTransaction()", source)
+        self.assertIn("doc.abortTransaction()", source)
+        self.assertIn("OutListRecursive", source)
+        self.assertIn("source.Document != sketch.Document", source)
+
     def test_sketch_pattern_lets_source_circle_be_selected_on_canvas(self):
         source = (ADDON / "azdesign" / "sketch_pattern_ui.py").read_text(
             encoding="utf-8"
