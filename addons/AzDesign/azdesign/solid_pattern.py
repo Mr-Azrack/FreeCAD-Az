@@ -15,6 +15,19 @@ from .solid_pattern_engine import AXES, PatternDraft, eligible_in_body
 _active = None
 
 
+class _PatternSelectionObserver:
+    def __init__(self, panel):
+        self.panel = panel
+
+    def addSelection(self, doc_name, object_name, _sub_name, _point):
+        panel = self.panel
+        if panel is None or panel._done:
+            return
+        QtCore.QTimer.singleShot(
+            0, lambda: panel.pick_canvas_feature(doc_name, object_name)
+        )
+
+
 def _body():
     selection = Gui.Selection.getSelection()
     for obj in selection:
@@ -63,8 +76,8 @@ class SolidPatternPanel(QtWidgets.QFrame):
         title.setStyleSheet("font-size: 15px; font-weight: 700;")
         box.addWidget(title)
         description = QtWidgets.QLabel(
-            "Select a solid feature, set a direction and repetitions. "
-            "The preview is the real FreeCAD solid, but is not saved until Apply."
+            "Pick a feature on the model or in the Browser, set directions "
+            "and counts, then preview. Nothing is saved until Apply."
         )
         description.setWordWrap(True)
         box.addWidget(description)
@@ -81,6 +94,12 @@ class SolidPatternPanel(QtWidgets.QFrame):
         if chosen is None:
             selected = Gui.Selection.getSelection()
             chosen = next((obj for obj in selected if obj in self.items), None)
+        if chosen is None and self.items:
+            chosen = next(
+                (obj for obj in reversed(self.items)
+                 if obj.TypeId in ("PartDesign::Hole", "PartDesign::Pocket")),
+                self.items[-1],
+            )
         if chosen in self.items:
             self.source.setCurrentIndex(self.items.index(chosen))
         self.source.setEnabled(editing is None)
@@ -193,12 +212,24 @@ class SolidPatternPanel(QtWidgets.QFrame):
             ),
         )
         self.handles.hide()
+        self.selection_observer = _PatternSelectionObserver(self)
         self.adjustSize()
 
     def second_changed(self, enabled):
         for field in (self.axis2, self.count2, self.spacing2):
             field.setEnabled(enabled)
         self.queue_preview()
+
+    def pick_canvas_feature(self, document, object_name):
+        if self._done or self.editing is not None:
+            return
+        if document != self.body.Document.Name:
+            return
+        feature = self.body.Document.getObject(object_name)
+        if feature in self.items:
+            index = self.items.index(feature)
+            if self.source.currentIndex() != index:
+                self.source.setCurrentIndex(index)
 
     def selected_source(self):
         name = self.source.currentData()
@@ -214,6 +245,7 @@ class SolidPatternPanel(QtWidgets.QFrame):
         self.timer.start()
 
     def show_panel(self):
+        Gui.Selection.addObserver(self.selection_observer)
         parent = self.parentWidget()
         self.move(max(8, parent.width() - self.width() - 18), 18)
         self.handles.move(max(8, self.x() - 193), 20)
@@ -275,6 +307,10 @@ class SolidPatternPanel(QtWidgets.QFrame):
         global _active
         self._done = True
         self.timer.stop()
+        try:
+            Gui.Selection.removeObserver(self.selection_observer)
+        except (RuntimeError, ReferenceError):
+            pass
         self.handles.hide()
         self.handles.deleteLater()
         self.hide()
