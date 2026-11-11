@@ -123,6 +123,10 @@ class InteractionFilter(QtCore.QObject):
             if cancel_sketch_pattern():
                 event.accept()
                 return True
+            from .edge_treatments_canvas import cancel_active as cancel_edge_tool
+            if cancel_edge_tool():
+                event.accept()
+                return True
             from .hole import cancel_face_picker
             if cancel_face_picker():
                 event.accept()
@@ -550,6 +554,8 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
 
         cancel_solid_pattern()
         cancel_sketch_pattern()
+        from .edge_treatments_canvas import cancel_active as cancel_edge_tool
+        cancel_edge_tool()
         cancel_active()
         self.active = False
         self.timer.stop()
