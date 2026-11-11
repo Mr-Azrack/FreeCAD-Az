@@ -34,8 +34,9 @@ class _SelectionObserver:
 
 
 class EdgeTreatmentPanel(QtWidgets.QFrame):
-    def __init__(self, session, kind):
+    def __init__(self, session, kind, editing=None):
         super().__init__(session.mdi.viewport())
+        self.editing = editing
         self.session = session
         self.kind = kind
         self.finished = False
@@ -65,12 +66,16 @@ class EdgeTreatmentPanel(QtWidgets.QFrame):
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(12, 11, 12, 11)
         layout.setSpacing(8)
-        title = QtWidgets.QLabel("SOLID · " + kind.upper())
+        title = QtWidgets.QLabel(
+            ("EDIT " if editing else "SOLID · ") + kind.upper()
+        )
         title.setStyleSheet("font-size: 14px; font-weight: 700;")
         layout.addWidget(title)
         hint = QtWidgets.QLabel(
-            "Click edges on the model (Ctrl+click for several). "
-            "Change the size below, then Apply. Esc cancels."
+            ("Edit the original feature's size. The model history remains parametric."
+             if editing else
+             "Click edges on the model (Ctrl+click for several). "
+             "Change the size below, then Apply. Esc cancels.")
         )
         hint.setWordWrap(True)
         layout.addWidget(hint)
@@ -84,7 +89,11 @@ class EdgeTreatmentPanel(QtWidgets.QFrame):
         self.size.setRange(0.0001, 100000)
         self.size.setSingleStep(0.1)
         self.size.setSuffix(" mm")
-        self.size.setValue(0.5)
+        initial = (
+            getattr(editing, "Radius" if kind == "Fillet" else "Size", 0.5)
+            if editing is not None else 0.5
+        )
+        self.size.setValue(float(getattr(initial, "Value", initial)))
         form.addRow("Radius" if kind == "Fillet" else "Distance", self.size)
         layout.addLayout(form)
         self.status = QtWidgets.QLabel("Select solid edges to check with the geometry engine.")
@@ -108,7 +117,8 @@ class EdgeTreatmentPanel(QtWidgets.QFrame):
         self.adjustSize()
 
     def show_panel(self):
-        Gui.Selection.addObserver(self.observer)
+        if self.editing is None:
+            Gui.Selection.addObserver(self.observer)
         parent = self.parentWidget()
         self.move(max(8, parent.width() - self.width() - 15), 15)
         self.show()
@@ -125,6 +135,24 @@ class EdgeTreatmentPanel(QtWidgets.QFrame):
 
     def refresh_selection(self):
         if self.finished:
+            return
+        if self.editing is not None:
+            base = getattr(self.editing, "Base", ())
+            self.obj = base[0] if isinstance(base, (tuple, list)) and base else None
+            self.names = (
+                tuple(base[1]) if len(base) > 1
+                else ()
+            )
+            if self.obj is None or not self.names:
+                self._message("Cannot recover the original feature edge selection.")
+                return
+            self.edge_label.setText(
+                "{} · {} original edge{}".format(
+                    self.obj.Label, len(self.names),
+                    "" if len(self.names) == 1 else "s",
+                )
+            )
+            self.queue_preflight()
             return
         self.obj, self.names = None, ()
         selected = Gui.Selection.getSelectionEx()
@@ -171,7 +199,7 @@ class EdgeTreatmentPanel(QtWidgets.QFrame):
             return
         try:
             body = owner_body(self.obj)
-            if body is None or body.Tip != self.obj:
+            if body is None or (self.editing is None and body.Tip != self.obj):
                 raise DesignError("Select edges on the current final Body feature.")
             edge_treatments.preflight(
                 self.obj, self.names, self.size.value(), self.kind
@@ -192,9 +220,30 @@ class EdgeTreatmentPanel(QtWidgets.QFrame):
         if not self.valid:
             return
         try:
-            result = edge_treatments.create(
-                self.obj, self.names, self.size.value(), self.kind
-            )
+            if self.editing is not None:
+                doc = self.editing.Document
+                doc.openTransaction("Design: Edit " + self.kind)
+                try:
+                    field = "Radius" if self.kind == "Fillet" else "Size"
+                    setattr(self.editing, field, self.size.value())
+                    doc.recompute()
+                    shape = self.editing.Shape
+                    if (
+                        shape.isNull() or not shape.isValid()
+                        or len(shape.Solids) != 1
+                        or "Invalid" in getattr(self.editing, "State", ())
+                    ):
+                        raise DesignError("The edited feature would invalidate the solid.")
+                    doc.commitTransaction()
+                except Exception:
+                    doc.abortTransaction()
+                    doc.recompute()
+                    raise
+                result = self.editing
+            else:
+                result = edge_treatments.create(
+                    self.obj, self.names, self.size.value(), self.kind
+                )
             self._cleanup()
             Gui.Selection.clearSelection()
             Gui.Selection.addSelection(result)
@@ -210,10 +259,11 @@ class EdgeTreatmentPanel(QtWidgets.QFrame):
         global _active
         self.finished = True
         self.timer.stop()
-        try:
-            Gui.Selection.removeObserver(self.observer)
-        except (RuntimeError, ReferenceError):
-            pass
+        if self.editing is None:
+            try:
+                Gui.Selection.removeObserver(self.observer)
+            except (RuntimeError, ReferenceError):
+                pass
         self.hide()
         self.deleteLater()
         if _active is self:
@@ -231,7 +281,7 @@ class EdgeTreatmentPanel(QtWidgets.QFrame):
             super().keyPressEvent(event)
 
 
-def show(kind):
+def show(kind, editing=None):
     global _active
     if kind not in ("Fillet", "Chamfer"):
         raise DesignError("Choose Fillet or Chamfer.")
@@ -243,7 +293,7 @@ def show(kind):
         raise DesignError("Activate Design to use the in-canvas edge controls.")
     if _active is not None:
         _active.cancel()
-    panel = EdgeTreatmentPanel(session, kind)
+    panel = EdgeTreatmentPanel(session, kind, editing)
     _active = panel
     panel.show_panel()
     return panel
