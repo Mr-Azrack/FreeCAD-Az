@@ -1350,3 +1350,21 @@ rather than relying on one-off generated circles; (4) add real FreeCAD
 modeling tests for these features and test save/reopen and cancellation;
 (5) build and validate 0.5.10 → 0.5.11 Windows patch only after all gates pass.
 Do not claim 0.5.11 released yet.
+
+
+## 2026-11-11 — Associative sketch edge reference implementation checkpoint
+
+Commit 014cddade introduces `snap_targets.link_body_edge(sketch, source, edge_name)`.
+This wraps native Sketcher `addExternal` in a reversible document transaction,
+validates the source edge, rejects cross-document and circular dependencies,
+and recomputes the sketch. It provides *associative* reference geometry rather
+than the existing static projected Part.Point. **This is a backend primitive,
+not yet Fusion-style automatic hover/selection integration.** No Windows GUI
+validation or installer release was performed.
+
+NEXT: wire model-edge selection while sketch editing to this backend without
+disrupting native Sketcher drawing; add native geometry test verifying source
+edit updates external geometry, save/reopen and undo. Then implement persistent
+sketch-pattern editing with timeline icon and double-click edit, including
+save/reopen and Undo/Redo tests. Inspect fast CI for 014cddade; batch Windows
+0.5.10→0.5.11 patch only after full feature/tests pass.
