@@ -19,7 +19,7 @@ class _FaceObserver:
         if not str(sub_name).startswith("Face"):
             return
         picker = self.picker
-        if picker is None or not picker.isVisible():
+        if picker is None or not picker.listening:
             return
         QtCore.QTimer.singleShot(
             0, lambda: picker.select_face(doc_name, object_name, sub_name)
@@ -32,6 +32,7 @@ class SketchPlanePicker(QtWidgets.QFrame):
         self.setObjectName("AzSketchPlanePicker")
         self.session = session
         self.observer = _FaceObserver(self)
+        self.listening = False
         self.setStyleSheet("""
         QFrame#AzSketchPlanePicker { background: #ffffff;
             border: 1px solid #9ebdce; border-radius: 9px; }
@@ -72,13 +73,32 @@ class SketchPlanePicker(QtWidgets.QFrame):
         if _active is not None and _active is not self:
             _active.cancel()
         _active = self
+        self.listening = True
         Gui.Selection.addObserver(self.observer)
-        self.move(max(8, (self.parentWidget().width()-self.width())//2), 16)
-        self.show()
-        self.raise_()
+        # Fusion workflow: with an existing model, do not obscure the canvas
+        # with a large plane chooser. The next click on a planar face directly
+        # opens its sketch. Origin plane shortcuts remain for empty documents.
+        doc = App.ActiveDocument
+        has_model = bool(doc and any(
+            obj.isDerivedFrom("PartDesign::Body")
+            and getattr(obj, "Tip", None) is not None
+            and hasattr(obj.Tip, "Shape")
+            and not obj.Tip.Shape.isNull()
+            for obj in doc.Objects
+        ))
+        if has_model:
+            self.hide()
+            self.session.ribbon.hint.setText(
+                "CREATE SKETCH · Click a flat model face · Esc cancels"
+            )
+        else:
+            self.move(max(8, (self.parentWidget().width()-self.width())//2), 16)
+            self.show()
+            self.raise_()
 
     def release(self):
         global _active
+        self.listening = False
         try:
             Gui.Selection.removeObserver(self.observer)
         except (RuntimeError, ReferenceError):
@@ -96,7 +116,7 @@ class SketchPlanePicker(QtWidgets.QFrame):
         create_sketch(plane=plane)
 
     def select_face(self, doc_name, obj_name, face_name):
-        if not self.isVisible():
+        if not self.listening:
             return
         doc = App.ActiveDocument
         if doc is None or doc.Name != doc_name:
