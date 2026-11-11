@@ -1,0 +1,9 @@
+Az Design Native v0.5.10 candidate 1
+Baseline: exact published v0.5.9 Build #40 (run 42959009956).
+Scope:
+- Transparent compact midpoint/center/endpoint hover cues.
+- Visible timeline icon raster fallback when Qt SVG resources fail.
+- Compact 40-48px history dock and 34px feature controls.
+- Docked Fillet/Chamfer controls, preserving nonmodal edge picking and rollback.
+- Set native Sketcher LeaveSketchWithEscape false on Design activation, keeping Finish Sketch explicit.
+Acceptance: fast headless regression, native geometry, Windows installed-patch/Qt smoke and 0.5.9 rollback. Owner interactive GUI test remains required.
