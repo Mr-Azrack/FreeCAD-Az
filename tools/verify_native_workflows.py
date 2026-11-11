@@ -100,7 +100,7 @@ def check():
     assert "--from-version 0.5.9 --to-version 0.5.10" in build
     assert "AzDesignNative-0.5.9-to-0.5.10.azpatch" in build
     assert "Patched version is not 0.5.10" in steps[stages[17]].get("run", "")
-    assert "Original version was not restored" in steps[stages[15]].get("run", "")
+    assert "Original version was not restored" in steps[stages[17]].get("run", "")
     assert steps[stages[18]].get("with", {}).get("name") == "AzDesignNative-0.5.9-to-0.5.10-PATCH"
     fast = loaded["az-design.yml"]
     assert fast.get("concurrency", {}).get("cancel-in-progress") is True, (
