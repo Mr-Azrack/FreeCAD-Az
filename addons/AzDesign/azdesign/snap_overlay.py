@@ -13,7 +13,7 @@ from .qt import QtCore, QtWidgets
 
 
 class HoverGuides:
-    SYMBOLS = {"Midpoint": "▲", "Center": "⊕", "Endpoint": "■"}
+    SYMBOLS = {"Midpoint": "△", "Center": "⊙", "Endpoint": "□"}
 
     def __init__(self):
         self.label = None
@@ -43,13 +43,12 @@ class HoverGuides:
         self.label.setObjectName("AzSketchHoverSnap")
         self.label.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
         self.label.setAttribute(QtCore.Qt.WA_StyledBackground, True)
-        self.label.setFixedSize(23, 23)
+        self.label.setFixedSize(16, 16)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setStyleSheet("""
         QLabel#AzSketchHoverSnap {
-            background: rgba(255,255,255,230);
-            border: 1px solid #1b7fa4; border-radius: 9px;
-            color: #0e648b; font: bold 15px Arial;
+            background: transparent; border: none;
+            color: #008fa9; font: bold 13px Arial;
         }
         """)
         self.label.hide()
@@ -98,8 +97,8 @@ class HoverGuides:
                 + " · native Sketcher snapping controls the actual constraint."
             )
             self.label.move(
-                max(0, min(widget.width() - 23, round(center[0] - 11))),
-                max(0, min(widget.height() - 23, round(center[1] - 11))),
+                max(0, min(widget.width() - 16, round(center[0] - 8))),
+                max(0, min(widget.height() - 16, round(center[1] - 8))),
             )
             self.label.show()
             self.label.raise_()
