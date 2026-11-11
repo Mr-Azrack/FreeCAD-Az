@@ -276,17 +276,13 @@ class WorkflowTest(unittest.TestCase):
 
         # A draft must show a real native patterned solid before Apply.
         draft = PatternDraft(hole)
-        patterned = draft.preview(
-            2, 32, "X_Axis", count2=2, spacing2=25, direction2="Y_Axis"
-        )
+        patterned = draft.preview(2, 32, "X_Axis")
         self.assertEqual(patterned.TypeId, "PartDesign::LinearPattern")
-        self.assertEqual(patterned.Occurrences2, 2)
-        self.assertEqual(patterned.Length2.Value, 25)
         self.assertTrue(patterned.Shape.isValid())
         self.assertEqual(patterned.Occurrences, 2)
         self.assertLess(patterned.Shape.Volume, one_hole_volume)
         self.assertAlmostEqual(
-            patterned.Shape.Volume, initial_volume - 4 * math.pi * 2.5**2 * 8,
+            patterned.Shape.Volume, initial_volume - 2 * math.pi * 2.5**2 * 8,
             delta=1,
         )
         self.assertEqual(body.Tip, patterned)
@@ -297,9 +293,7 @@ class WorkflowTest(unittest.TestCase):
         self.assertAlmostEqual(body.Shape.Volume, one_hole_volume, places=4)
 
         draft = PatternDraft(hole)
-        saved = draft.preview(
-            2, 32, "X_Axis", count2=2, spacing2=25, direction2="Y_Axis"
-        )
+        saved = draft.preview(2, 32, "X_Axis")
         draft.accept()
         self.doc.recompute()
         self.assertTrue(saved.Shape.isValid())
@@ -314,6 +308,25 @@ class WorkflowTest(unittest.TestCase):
         restored = self.doc.getObject(saved.Name)
         self.assertEqual(restored.Occurrences, 2)
         self.assertEqual(body.Tip, restored)
+
+        # FreeCAD 1.1 provides a second native pattern direction. Earlier
+        # FreeCAD runtimes used by Linux CI do not always have that property.
+        # Keep the single-direction acceptance mandatory in both versions,
+        # and prove the four-hole 2D grid wherever native properties exist.
+        if {"Direction2", "Occurrences2", "Length2"}.issubset(
+            set(restored.PropertiesList)
+        ):
+            two_axis = PatternDraft(hole, existing=restored)
+            grid = two_axis.preview(
+                2, 32, "X_Axis", count2=2, spacing2=25, direction2="Y_Axis"
+            )
+            self.assertEqual(grid.Occurrences2, 2)
+            self.assertAlmostEqual(
+                grid.Shape.Volume, initial_volume - 4 * math.pi * 2.5**2 * 8,
+                delta=1,
+            )
+            two_axis.accept()
+            self.assertTrue(body.Shape.isValid())
 
     def test_fixture_full_history_dimension_edit_hole_fillet_undo_and_save(self):
         """Release gate: one real machining fixture survives normal CAD edits."""
