@@ -371,6 +371,12 @@ class Session:
     def activate(self):
         self.active = True
         self.appearance.activate()
+        # Fusion-style Esc: cancel Sketcher tools without leaving sketch edit.
+        # FreeCAD TaskDlgEditSketch reads this flag when the task is created.
+        # Finish Sketch remains the explicit way out of edit mode.
+        App.ParamGet("User parameter:BaseApp/Preferences/Mod/Sketcher").SetBool(
+            "LeaveSketchWithEscape", False
+        )
         self.main.setStyleSheet(self.original_style + """
 QToolBar#AzDesignRibbonBar { border: 0; padding: 0; spacing: 0; background: #f7f8f9; }
 QDockWidget#AzDesignBrowserDock { background: #f8f9fa; border-right: 1px solid #d3dae0; }
