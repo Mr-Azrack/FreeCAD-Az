@@ -139,27 +139,40 @@ def pattern_circles(sketch, source, columns=2, rows=2, pitch_x=40, pitch_y=30,
         raise
 
 
+def circle_for_edge(sketch, edge_name, candidates=None):
+    """Map a displayed sketch edge to its native circle geometry.
+
+    Edge numbers are topological subelement indices, not Sketcher geometry
+    indices. A coincident pair of circles is ambiguous and must not silently
+    select either one.
+    """
+    if not (isinstance(edge_name, str) and edge_name.startswith("Edge")
+            and edge_name[4:].isdigit()):
+        return None
+    try:
+        curve = sketch.Shape.getElement(edge_name).Curve
+        indices = circle_indices(sketch) if candidates is None else candidates
+        matches = [
+            index for index in indices
+            if abs(curve.Radius - sketch.Geometry[index].Radius) < 1e-5
+            and (curve.Center - sketch.Geometry[index].Center).Length < 1e-5
+        ]
+        return matches[0] if len(matches) == 1 else None
+    except (AttributeError, ValueError, RuntimeError, IndexError, TypeError):
+        return None
+
+
 def selected_source(sketch):
     """Resolve canvas selection by curve identity, not Sketcher edge ordinal."""
     import FreeCADGui as Gui
-    eligible = circle_indices(sketch)
     hits = []
     for item in Gui.Selection.getSelectionEx():
         if item.Object != sketch:
             continue
         for name in item.SubElementNames:
-            if not (name.startswith("Edge") and name[4:].isdigit()):
-                continue
-            try:
-                curve = sketch.Shape.getElement(name).Curve
-                for index in eligible:
-                    circle = sketch.Geometry[index]
-                    if (abs(curve.Radius - circle.Radius) < 1e-5
-                            and (curve.Center - circle.Center).Length < 1e-5):
-                        hits.append(index)
-                        break
-            except (AttributeError, ValueError, RuntimeError, IndexError):
-                continue
+            index = circle_for_edge(sketch, name)
+            if index is not None:
+                hits.append(index)
     return hits[0] if len(set(hits)) == 1 and hits else None
 
 
