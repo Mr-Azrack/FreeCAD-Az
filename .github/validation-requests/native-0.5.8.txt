@@ -1,0 +1,11 @@
+Design Native v0.5.8 — correct version increment after owner installed 0.5.7
+Target source: 1ba1291f2c2b8e27f1a39275b3e41dfd4791f0dd
+Required installed base: v0.5.7 original CI Build 36 run 42899554668
+Do NOT apply any 0.5.6-to-0.5.7 patch to this base.
+Candidate includes Design-owned Sketch/Solid Pattern, image-only history timeline, native Home/splash fixes and tooling improvements.
+Preflight: verify Linux FreeCAD geometry, all headless package/startup and pattern tests.
+Build: reconstruct pinned v0.5.6 via archived verified chain or cache; verify SHA256 of Build 36 0.5.7 artifact and apply to produce exact v0.5.7 baseline.
+Create patch AzDesignNative-0.5.7-to-0.5.8.azpatch with pre-file hashes from that exact base.
+Validate Windows patch application, Qt startup, rollback exactly to 0.5.7, cold uninstall, artifact SHA256.
+Artifact is a test candidate only. Do not publish without GUI acceptance and installed-build provenance check.
+Note: alternate same-version 0.5.7 CI Build 37 may have different file hashes; never bypass or suppress patch baseline checks.
