@@ -140,18 +140,27 @@ def pattern_circles(sketch, source, columns=2, rows=2, pitch_x=40, pitch_y=30,
 
 
 def selected_source(sketch):
+    """Resolve canvas selection by curve identity, not Sketcher edge ordinal."""
     import FreeCADGui as Gui
-    eligible = set(circle_indices(sketch))
+    eligible = circle_indices(sketch)
     hits = []
     for item in Gui.Selection.getSelectionEx():
         if item.Object != sketch:
             continue
         for name in item.SubElementNames:
-            if name.startswith("Edge") and name[4:].isdigit():
-                index = int(name[4:]) - 1
-                if index in eligible:
-                    hits.append(index)
-    return hits[0] if len(set(hits)) == 1 else None
+            if not (name.startswith("Edge") and name[4:].isdigit()):
+                continue
+            try:
+                curve = sketch.Shape.getElement(name).Curve
+                for index in eligible:
+                    circle = sketch.Geometry[index]
+                    if (abs(curve.Radius - circle.Radius) < 1e-5
+                            and (curve.Center - circle.Center).Length < 1e-5):
+                        hits.append(index)
+                        break
+            except (AttributeError, ValueError, RuntimeError, IndexError):
+                continue
+    return hits[0] if len(set(hits)) == 1 and hits else None
 
 
 def show():
