@@ -4,13 +4,13 @@ name: Az Native Windows Patch
 # 1.8 GB installer for every source change.
 # Deliberate batch gate. Daily modeling commits run the fast az-design.yml
 # suite; the full installed-baseline patch/rollback test runs only when
-# .github/validation-requests/native-0.5.8.txt changes on the trusted branch.
+# .github/validation-requests/native-0.5.9.txt changes on the trusted branch.
 # Never run this expensive job automatically for every PR/feature commit.
 on:
   push:
     branches: [codex/az-design-workbench]
     paths:
-      - '.github/validation-requests/native-0.5.8.txt'
+      - '.github/validation-requests/native-0.5.9.txt'
   workflow_dispatch:
     inputs:
       cold_validation:
@@ -283,6 +283,30 @@ jobs:
           $marker = Get-Content (Join-Path $baseline 'AZ Native Version.json') -Raw | ConvertFrom-Json
           if ($marker.product -ne 'AzDesignNative' -or $marker.version -ne '0.5.7') { throw 'Incorrect 0.5.7 baseline' }
 
+      - name: Download original published 0.5.8 Build 39 patch
+        uses: actions/download-artifact@v4
+        with:
+          name: AzDesignNative-0.5.7-to-0.5.8-PATCH
+          repository: Mr-Azrack/FreeCAD-Az
+          run-id: 42949194221
+          github-token: ${{ github.token }}
+          path: installed-058-build39
+
+      - name: Verify and reconstruct original 0.5.8 Build 39
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $baseline = (Get-Content 'baseline-path.txt' -Raw).Trim()
+          $previous = Get-ChildItem 'installed-058-build39' -Recurse -File -Filter 'AzDesignNative-0.5.7-to-0.5.8.azpatch' | Select-Object -First 1
+          $checksum = Get-ChildItem 'installed-058-build39' -Recurse -File -Filter 'AzDesignNative-0.5.7-to-0.5.8.azpatch.sha256' | Select-Object -First 1
+          if (!$previous -or !$checksum) { throw 'Pinned published 0.5.8 Build 39 patch/checksum required' }
+          $expected = ((Get-Content $checksum.FullName -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+          $actual = (Get-FileHash $previous.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($expected -notmatch '^[a-f0-9]{64}$' -or $actual -ne $expected) { throw 'Published 0.5.8 source patch SHA256 mismatch' }
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File native-core/windows/ApplyAzPatch.ps1 -InstallDir "$baseline" -PatchZip "$($previous.FullName)" -NoUI
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot reconstruct published 0.5.8 Build 39 baseline' }
+          $marker = Get-Content (Join-Path $baseline 'AZ Native Version.json') -Raw | ConvertFrom-Json
+          if ($marker.product -ne 'AzDesignNative' -or $marker.version -ne '0.5.8') { throw 'Incorrect installed 0.5.8 baseline' }
+
       - name: Build changed-only overlay (no native core re-download)
         run: |
           $ErrorActionPreference = 'Stop'
@@ -318,8 +342,8 @@ jobs:
           & $csc /nologo /codepage:65001 /target:winexe "/out:$(Join-Path $new 'AzUpdater.exe')" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll @iconArgs "$updaterSource" "$onlineSource"
           if ($LASTEXITCODE -ne 0) { throw 'Native updater compile failed' }
           New-Item -ItemType Directory 'dist' -Force | Out-Null
-          $patch = Join-Path (Resolve-Path 'dist').Path 'AzDesignNative-0.5.7-to-0.5.8.azpatch'
-          python native-core/windows/create_patch.py --old "$old" --new "$new" --output "$patch" --from-version 0.5.7 --to-version 0.5.8
+          $patch = Join-Path (Resolve-Path 'dist').Path 'AzDesignNative-0.5.8-to-0.5.9.azpatch'
+          python native-core/windows/create_patch.py --old "$old" --new "$new" --output "$patch" --from-version 0.5.8 --to-version 0.5.9
           if ($LASTEXITCODE -ne 0) { throw 'Patch creation failed' }
           $patch | Set-Content 'patch-path.txt'
       - name: Apply to real installed baseline, Qt smoke, rollback, uninstall
@@ -328,16 +352,16 @@ jobs:
           $baseline = (Get-Content 'baseline-path.txt' -Raw).Trim()
           $patch = (Get-Content 'patch-path.txt' -Raw).Trim()
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File native-core/windows/ApplyAzPatch.ps1 -InstallDir "$baseline" -PatchZip "$patch" -NoUI
-          if ($LASTEXITCODE -ne 0) { throw 'Real installed 0.5.7 Build 36 rejected 0.5.8 patch' }
+          if ($LASTEXITCODE -ne 0) { throw 'Real installed 0.5.8 Build 39 rejected 0.5.9 patch' }
           $marker = Get-Content (Join-Path $baseline 'AZ Native Version.json') -Raw | ConvertFrom-Json
-          if ($marker.version -ne '0.5.8') { throw 'Patched version is not 0.5.8' }
+          if ($marker.version -ne '0.5.9') { throw 'Patched version is not 0.5.9' }
           $env:PYTHONNOUSERSITE = '1'
           & (Join-Path $baseline 'bin\python.exe') native-core/windows/smoke_qt.py --bundle "$baseline"
           if ($LASTEXITCODE -ne 0) { throw 'Qt startup failed after patch' }
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File native-core/windows/ApplyAzPatch.ps1 -InstallDir "$baseline" -RollbackLatest -NoUI
           if ($LASTEXITCODE -ne 0) { throw 'Rollback failed' }
           $marker = Get-Content (Join-Path $baseline 'AZ Native Version.json') -Raw | ConvertFrom-Json
-          if ($marker.version -ne '0.5.7') { throw 'Original version was not restored' }
+          if ($marker.version -ne '0.5.8') { throw 'Original version was not restored' }
           if ('${{ steps.baseline_cache.outputs.cache-hit }}' -ne 'true') {
             # Only a fresh installer run has the OS registry registration
             # needed for a meaningful Inno Setup uninstall test.
@@ -352,10 +376,10 @@ jobs:
       - name: Upload tested incremental patch (not a public release)
         uses: actions/upload-artifact@v4
         with:
-          name: AzDesignNative-0.5.7-to-0.5.8-PATCH
+          name: AzDesignNative-0.5.8-to-0.5.9-PATCH
           path: |
-            dist/AzDesignNative-0.5.7-to-0.5.8.azpatch
-            dist/AzDesignNative-0.5.7-to-0.5.8.azpatch.sha256
+            dist/AzDesignNative-0.5.8-to-0.5.9.azpatch
+            dist/AzDesignNative-0.5.8-to-0.5.9.azpatch.sha256
           compression-level: 0
           retention-days: 14
           if-no-files-found: error
