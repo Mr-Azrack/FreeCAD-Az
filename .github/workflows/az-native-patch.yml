@@ -11,6 +11,7 @@ on:
     branches: [codex/az-design-workbench]
     paths:
       - '.github/validation-requests/native-0.5.10.txt'
+      - '.github/workflows/az-native-patch.yml'
   workflow_dispatch:
     inputs:
       cold_validation:
@@ -20,7 +21,7 @@ on:
         required: false
 
 permissions:
-  contents: read
+  contents: write
   actions: read
 
 concurrency:
@@ -407,3 +408,26 @@ jobs:
           compression-level: 0
           retention-days: 14
           if-no-files-found: error
+
+      - name: Publish verified 0.5.10 patch to online updater release channel
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $patch = 'dist/AzDesignNative-0.5.9-to-0.5.10.azpatch'
+          $checksum = "$patch.sha256"
+          if (!(Test-Path $patch) -or !(Test-Path $checksum)) { throw 'Verified patch files missing' }
+          $expected = ((Get-Content $checksum -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+          $actual = (Get-FileHash $patch -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($expected -ne $actual) { throw 'Release asset hash mismatch' }
+          $tag = 'v0.5.10'
+          $existing = gh release view $tag --repo ${{ github.repository }} --json tagName 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            throw "Release $tag already exists; refusing to overwrite immutable update assets"
+          }
+          gh release create $tag $patch $checksum --repo ${{ github.repository }} --target ${{ github.sha }} --title 'Design Native 0.5.10' --notes 'Verified 0.5.9 to 0.5.10 incremental patch. Validated on the installed 0.5.9 baseline with Qt startup and rollback.'
+          if ($LASTEXITCODE -ne 0) { throw 'GitHub Release publication failed' }
+          $release = gh api repos/${{ github.repository }}/releases/tags/$tag | ConvertFrom-Json
+          $asset = $release.assets | Where-Object { $_.name -eq 'AzDesignNative-0.5.9-to-0.5.10.azpatch' } | Select-Object -First 1
+          if (!$asset -or $asset.digest -ne "sha256:$actual") { throw 'Published release asset digest not verified' }
+          Write-Host "Published online updater release $tag with verified patch digest."
