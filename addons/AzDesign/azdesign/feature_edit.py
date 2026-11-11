@@ -31,6 +31,12 @@ def edit(obj):
         # Editing a Design pattern never opens the native FreeCAD task pane.
         from .solid_pattern import show
         return show(editing=obj)
+    if obj.isDerivedFrom("PartDesign::Fillet"):
+        from .edge_treatments_canvas import show
+        return show("Fillet", editing=obj)
+    if obj.isDerivedFrom("PartDesign::Chamfer"):
+        from .edge_treatments_canvas import show
+        return show("Chamfer", editing=obj)
     if obj.isDerivedFrom("PartDesign::Body"):
         view = gui_doc.activeView()
         if view is not None:
