@@ -51,10 +51,16 @@ jobs:
             addons/AzDesign
             addons/Install_AzDesign.FCMacro
             tools/package_azdesign.py
+            tools/verify_native_workflows.py
+            .github/workflows
           sparse-checkout-cone-mode: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Reject malformed GitHub workflows and unsafe patch gates
+        run: |
+          python -m pip install --disable-pip-version-check PyYAML==6.0.2
+          python tools/verify_native_workflows.py
       - name: Test installer backup and recovery
         run: python addons/AzDesign/tests/test_install.py
       - name: Test FreeCAD startup without __file__
