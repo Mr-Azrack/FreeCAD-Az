@@ -470,3 +470,20 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [ ] Revalidate latest candidate SHA with Windows 0.5.6-to-0.5.7 patch/Qt/rollback job
 - [ ] Owner FreeCAD 1.1 acceptance: two-axis 2x2 solid Hole pattern, live edit, timeline DPI and Cancel/Esc, save/reopen
 - [ ] Publish through updater only after hands-on acceptance
+
+
+## 2026-11-10 — Video-driven Fusion behavior gap batch
+
+- [x] Record specific Fusion-vs-Design plate workflow gaps by timestamp in FUSION_FREECAD_VIDEO_GAP_REVIEW.md
+- [x] Auto-suggest one dominant perforated plate region for Extrude, with holes left open
+- [x] Keep ambiguous multi-profile Extrude selection explicit and editable
+- [x] Hide large Sketch plane chooser when a solid is present; next click on planar face opens the actual sketch
+- [x] Allow Sketch Rectangular Pattern to choose its source circle directly from canvas while Design panel is open
+- [x] Replace modal preselected-edge Fillet/Chamfer with a nonmodal Design panel and live OCCT shape validation
+- [x] Route Fillet/Chamfer history edits to Design rather than raw PartDesign task UI; Undo-safe parameter changes
+- [x] Add headless fast-video workflow contracts and native plate-hole extrusion / Fillet edit-Undo geometry tests
+- [x] Verify fast package and geometry CI #433 on commit 709e5df; full source checks passed
+- [ ] Verify new source's Windows 0.5.8-to-0.5.9 candidate and actual FreeCAD 1.1 GUI interaction
+- [ ] Add Fusion-style ghosted fillet visual preview and direct in-canvas radius handle, if GUI acceptance finds it needed
+- [ ] Complete advanced sketch snapping/dimensions and profile-click in viewport to match Fusion more closely
+- [ ] Publish unique 0.5.9 update only after accepted release gates; no same-version rewrite
