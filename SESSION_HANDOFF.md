@@ -1707,3 +1707,16 @@ NEXT EXACT STEPS:
 2. Recover Windows dev shell, check checkout branch/HEAD/status/diff, run test_workflow.py and fix disconnected Join wording and cancelled Source regression. Preserve the independent 0.5.11 installation.
 3. Verify real FreeCAD 1.1 Qt timeline double-click, passive edge/midpoint/center hover and DPI/teardown/click-through. Rerun two-pattern Undo/Redo/save/reopen and ownership rejection.
 4. Only after these gates, test unique 0.5.11→0.5.12 patch on disposable Windows baseline, startup, rollback and SHA256; no release before evidence. GitHub connector cannot inspect local uncommitted Windows changes.
+
+
+## 2026-11-12 — 0.5.12 CI verifier and publication safety correction (11:49 EST)
+
+Inspected branch HEAD 4ab62d24 and current push Actions run 43257440813: modeling passed; package failed at the native workflow verifier. Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and handoff, plus actual az-native-patch.yml and verifier. The previous single-marker correction was insufficient: verifier still expected a 0.5.9→0.5.10 candidate and omitted the published 0.5.10 baseline reconstruction, while the actual Windows workflow builds a 0.5.10→0.5.11 patch. This mismatch prevented fast CI from passing.
+
+Commits cd58e169 and 2929d2f5: added an explicit main-only condition to the native patch publication step (feature branch must never release), and updated verifier stage ordering, pinned historical artifact IDs, checksums, cache integrity, 0.5.10 reconstruction, candidate 0.5.11 patch, Qt smoke, rollback and publication guard. These are safety/CI repairs; NOT a 0.5.12 package or native geometry implementation. No tests executed locally; new push Actions must be inspected for results. No Windows baseline was modified. NOTE: the existing native patch workflow is still a historical 0.5.10→0.5.11 pipeline, NOT the requested 0.5.11→0.5.12 pipeline; do not trigger it as a 0.5.12 test or publish.
+
+NEXT EXACT STEPS:
+1. Check Actions for 2929d2f5 and this handoff. If verifier fails, inspect failed step and correct actual structure without removing checksum, cache, rollback, Qt, or main-only publication checks. Verify both fast jobs green.
+2. Recover Windows dev shell; inspect checkout HEAD/status and run full test_workflow.py. Fix the disconnected Join wording and cancelled Source property failures with regression tests.
+3. Exercise native FreeCAD 1.1 Qt timeline double-click and passive body-edge/midpoint/center hover, DPI, teardown, drawing click-through; rerun two-pattern ownership/Undo/Redo/FCStd save/reopen.
+4. Design a NEW guarded 0.5.11→0.5.12 candidate patch workflow using immutable published 0.5.11 baseline and isolated test copy. Validate geometry, Qt startup, rollback, SHA256, and package identity before any release; keep 0.5.11 untouched. Do not enable automatic feature-branch publication.
