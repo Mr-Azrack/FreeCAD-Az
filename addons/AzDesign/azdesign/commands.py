@@ -98,8 +98,9 @@ def home():
         try:
             Gui.Selection.clearSelection()
             Gui.Selection.addSelection(body)
-            if not Gui.SendMsgToActiveView("ViewSelection"):
-                raise RuntimeError("FreeCAD could not frame the active Body")
+            # The Python binding returns None even after a successful view
+            # message; do not interpret that as a failed fit.
+            Gui.SendMsgToActiveView("ViewSelection")
         finally:
             Gui.Selection.clearSelection()
             for obj, names in selected:
