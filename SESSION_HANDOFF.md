@@ -1627,3 +1627,16 @@ NEXT EXACT ACTIONS:
 3. Native two-pattern pitch edit with transaction/Undo/Redo, save/reopen and timeline double-click; verify constraint ownership and rejected legacy records.
 4. Extend history editor to safe row/column count edits only after proving index/constraint dependency safety, otherwise keep disabled.
 5. Build and validate unique 0.5.11-to-0.5.12 Windows patch after native tests, Qt startup, rollback, hashes and CI pass. Do not publish or modify 0.5.11.
+
+
+## 2026-11-12 — 0.5.12 autonomous pass: fail-safe passive hover
+
+Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and this handoff on explicit codex/az-design-workbench. GitHub search_commits returned default-branch history, not development HEAD. Branch-specific file fetches verified snap_targets.py and its test contract before editing.
+
+Commits 52e9ec5 and ba65913: passive_sketch_cues now ignores stale/unsupported hover topology instead of raising DesignError during native Sketcher drawing, and drops nonfinite/unprojectable points; nearest_passive_cue ignores transient projection failures instead of interrupting Sketcher. New tests cover invalid Edge99/Face1 hover and a viewport projection callback that raises. Both are fail-safe groundwork for live viewport integration; no native Sketcher event interception, geometry mutation, or automatic linking was introduced. GitHub commit-workflow lookup for ba65913 returned [] (PR-trigger-only API); CI is UNVERIFIED. No local FreeCAD runtime or Windows patch testing in this execution.
+
+NEXT EXACT STEPS:
+1. Run focused test_snap_targets_contracts.py plus native geometry tests in an actual Python/FreeCAD environment; fix failures. Inspect push Actions through a workflow-runs API/UI, not the PR-only commit-workflow endpoint.
+2. Integrate the passive candidate provider and nearest resolver with actual Qt6 FreeCAD 1.1 Sketcher viewport hover/projection, nonintercepting native drawing; show small visible endpoint/midpoint/center indicators. Test enter/leave/edit mode cleanup and high-DPI scaling.
+3. Run native two-pattern editing, constraint ownership, timeline double-click, Undo/Redo, save/reopen and stale-ownership rejection; fix errors. Keep unsupported count editing disabled.
+4. Only after fast/native checks pass, validate 0.5.11→0.5.12 Windows incremental patch, Qt startup, rollback and hashes. Preserve immutable v0.5.11 and do not publish prematurely.
