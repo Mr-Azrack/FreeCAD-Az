@@ -87,6 +87,27 @@ class EdgeReferenceTests(unittest.TestCase):
         cues = self.api.passive_sketch_cues(self.sketch, self.source, ("Edge1",))
         self.assertNotIn("Start", [item[0] for item in cues])
 
+    def test_passive_hover_ignores_stale_and_unsupported_topology(self):
+        self.sketch.Placement = types.SimpleNamespace(
+            inverse=lambda: types.SimpleNamespace(multVec=lambda p: p))
+        self.assertEqual(self.api.passive_sketch_cues(
+            self.sketch, self.source, ("Edge99",)), ())
+        self.assertEqual(self.api.passive_sketch_cues(
+            self.sketch, self.source, ("Face1",)), ())
+        self.assertEqual(self.doc.calls, [])
+        self.assertEqual(self.sketch.added, [])
+
+    def test_nearest_hover_skips_failed_projection(self):
+        cues = (("Start", "Edge1", 1.0, 2.0),
+                ("End", "Edge2", 3.0, 4.0))
+        def projection(x, y):
+            if x == 1.0:
+                raise RuntimeError("viewport changing")
+            return (x * 10, y * 10)
+        self.assertEqual(self.api.nearest_passive_cue(
+            cues, projection, (30, 40)), cues[1])
+        self.assertEqual(self.doc.calls, [])
+
     def test_nearest_passive_cue_rejects_ambiguous_screen_ties(self):
         cues = (("Midpoint", "Edge1", 5.0, 0.0),
                 ("Center", "Edge2", 5.0, 0.0),
