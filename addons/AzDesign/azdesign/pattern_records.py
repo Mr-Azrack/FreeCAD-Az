@@ -5,6 +5,7 @@ Records describe native geometry; they never replace Sketcher constraints.
 Index validation is mandatory before an editor removes any owned geometry.
 """
 import json
+import uuid
 
 PROPERTY = "AzSketchPatternRecords"
 VERSION = 1
@@ -17,7 +18,13 @@ def read_records(sketch):
     payload = json.loads(raw)
     if not isinstance(payload, list):
         raise ValueError("Invalid sketch pattern record list")
+    ids = []
     for record in payload:
+        record_id = record.get("id")
+        if record_id is not None:
+            if not isinstance(record_id, str) or not record_id.strip():
+                raise ValueError("Invalid sketch pattern identity")
+            ids.append(record_id)
         if not isinstance(record, dict) or record.get("version") != VERSION:
             raise ValueError("Unsupported sketch pattern record")
         indices = record.get("created")
@@ -28,6 +35,8 @@ def read_records(sketch):
         constraints = record.get("constraints", [])
         if not isinstance(constraints, list) or any(type(i) is not int or i < 0 for i in constraints) or len(set(constraints)) != len(constraints):
             raise ValueError("Invalid sketch pattern constraint ownership")
+    if len(ids) != len(set(ids)):
+        raise ValueError("Duplicate sketch pattern identity")
     all_geometry = [i for record in payload for i in record["created"]]
     all_constraints = [i for record in payload for i in record.get("constraints", [])]
     if len(all_geometry) != len(set(all_geometry)) or len(all_constraints) != len(set(all_constraints)):
@@ -62,6 +71,7 @@ def append_record(sketch, parameters, created, constraints=()):
                            "Versioned Sketch Pattern geometry ownership")
     record = {
         "version": VERSION,
+        "id": uuid.uuid4().hex,
         "source": int(source),
         "columns": int(columns),
         "rows": int(rows),
@@ -82,3 +92,35 @@ def validate_ownership(sketch, record):
             and all(index < sketch.GeometryCount for index in indices)
             and len(set(indices)) == len(indices)
             and all(i < sketch.ConstraintCount for i in record.get("constraints", [])))
+
+
+def find_record(sketch, record_id):
+    """Resolve a single persistent pattern by identity, never by list position."""
+    if not isinstance(record_id, str) or not record_id:
+        raise ValueError("Missing sketch pattern identity")
+    matches = [r for r in read_records(sketch) if r.get("id") == record_id]
+    if len(matches) != 1:
+        raise ValueError("Sketch pattern no longer exists or has ambiguous identity")
+    record = matches[0]
+    if not validate_ownership(sketch, record):
+        raise ValueError("Sketch pattern ownership is stale")
+    return record
+
+
+def timeline_records(sketch):
+    """Return stable identities and labels for Design's independent history items.
+
+    Legacy records without an identity remain visible but cannot be edited
+    until explicitly migrated after native geometry validation.
+    """
+    result = []
+    for index, record in enumerate(read_records(sketch), 1):
+        identity = record.get("id")
+        result.append({
+            "id": identity,
+            "label": "Sketch Pattern {} ({} × {})".format(
+                index, record["columns"], record["rows"]),
+            "editable": bool(identity and record.get("constraints") and
+                             validate_ownership(sketch, record)),
+        })
+    return result
