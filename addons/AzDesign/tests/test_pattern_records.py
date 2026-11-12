@@ -118,6 +118,20 @@ class PatternRecordsTests(unittest.TestCase):
         sketch.AzSketchPatternRecords = json.dumps([dict(record, source=10)])
         self.assertFalse(validate_ownership(sketch, read_records(sketch)[0]))
 
+    def test_append_rejects_invalid_or_cross_owned_source_without_mutation(self):
+        sketch = FakeSketch()
+        first = append_record(sketch, (0, 2, 2, 10, 20), (1, 2, 3))
+        before = sketch.AzSketchPatternRecords
+        for source in (-1, True, 10, 1, 2, 3, 0.0, "0"):
+            with self.subTest(source=source), self.assertRaises(ValueError):
+                append_record(sketch, (source, 2, 2, 10, 20), (5, 6, 7))
+            self.assertEqual(sketch.AzSketchPatternRecords, before)
+        for indices in ((5.0, 6, 7), (True, 6, 7)):
+            with self.subTest(indices=indices), self.assertRaises(ValueError):
+                append_record(sketch, (4, 2, 2, 10, 20), indices)
+            self.assertEqual(sketch.AzSketchPatternRecords, before)
+        self.assertEqual(find_record(sketch, first["id"])["source"], 0)
+
     def test_corrupt_record_fails_closed(self):
         sketch = FakeSketch()
         sketch.AzSketchPatternRecords = '[{"version": 1, "created": [2, 2]}]'
