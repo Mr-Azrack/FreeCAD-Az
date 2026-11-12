@@ -106,6 +106,10 @@ jobs:
         run: python addons/AzDesign/tests/test_sketch_palette.py
       - name: Test transactional associative sketch references
         run: python addons/AzDesign/tests/test_snap_targets_contracts.py
+      - name: Test nonmutating body-edge hover integration
+        run: python addons/AzDesign/tests/test_snap_overlay_body_contract.py
+      - name: Test native sketch-pattern history timeline routing
+        run: python addons/AzDesign/tests/test_pattern_timeline_contracts.py
       - name: Test automatic Sketcher hover midpoint and circle-center inference
         run: python addons/AzDesign/tests/test_snap_hover.py
       - name: Test passive native-Sketcher viewport hover overlay positioning
