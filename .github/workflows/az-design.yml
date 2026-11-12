@@ -44,6 +44,10 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: /usr/bin/python3 addons/AzDesign/tests/run_workflow.py
+      - name: Verify independent native sketch patterns, persistence and undo
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: /usr/bin/python3 addons/AzDesign/tests/native_0512_two_patterns.py
   package:
     runs-on: ubuntu-latest
     steps:
