@@ -41,6 +41,12 @@ class SketchPatternDraft:
         self.created = ()
 
     def _drop_preview(self):
+        expected = self.original_geometry_count + len(self.created)
+        if self.sketch.GeometryCount != expected:
+            raise DesignError(
+                "Sketch geometry changed outside Pattern. Cancel and retry; "
+                "the preview will not delete unrelated geometry."
+            )
         for index in range(self.sketch.GeometryCount - 1,
                            self.original_geometry_count - 1, -1):
             self.sketch.delGeometry(index)
