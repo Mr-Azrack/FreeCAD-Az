@@ -154,6 +154,19 @@ class PatternContracts(unittest.TestCase):
             ui.index("self.sketch.delGeometry(index)"),
         )
 
+    def test_failed_sketch_preview_aborts_owned_transaction(self):
+        ui = (ADDON / "azdesign" / "sketch_pattern_ui.py").read_text()
+        start = ui.index("    def preview(self, source, columns, rows, pitch_x, pitch_y):")
+        end = ui.index("    def accept(self):", start)
+        preview = ui[start:end]
+        self.assertIn("except Exception:", preview)
+        self.assertIn("self.doc.abortTransaction()", preview)
+        self.assertIn("self.started = False", preview)
+        self.assertIn("self.valid = False", preview)
+        self.assertIn("self.created = ()", preview)
+        self.assertLess(preview.index("self.doc.abortTransaction()"),
+                        preview.index("self.started = False"))
+
     def test_edit_routes_and_esc_are_not_native(self):
         commands = (ADDON / "azdesign" / "commands.py").read_text()
         edit = (ADDON / "azdesign" / "feature_edit.py").read_text()
