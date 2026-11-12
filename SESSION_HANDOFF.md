@@ -1437,3 +1437,30 @@ then automatic passive edge cues without unintended document mutation.
 Validate complete native FreeCAD geometry and Windows 0.5.10→0.5.11
 installed patch, Qt startup, rollback and owner GUI acceptance before
 publishing. Preserve version-specific patch hash verification.
+
+
+## 2026-11-11 — 0.5.11 failed Sketcher preview transaction safety
+
+Read PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and this handoff.
+Commits 812d843 and a91d2cb: SketchPatternDraft.preview now aborts the
+whole open document transaction if pattern_circles raises after partially
+adding Sketcher geometry/constraints; resets draft ownership and flags.
+A fast source contract checks that abort and state reset remain present.
+This is an atomicity fix, NOT independently editable persistent pattern
+history, and NOT automatic Fusion-style body-edge projection. No Windows
+patch or release was published.
+
+NEXT EXACT STEPS:
+1. Check Az Design Actions for a91d2cb and fix any failure.
+2. Add executable FreeCAD native tests that deliberately reject the second
+   generated circle/constraint and verify rollback restores the source sketch,
+   then validate successful apply, cancel, Undo/Redo and FCStd save/reopen.
+3. Build independently persisted sketch-pattern records with stable ownership
+   of generated circles and constraints, edit/cancel without changing other
+   sketch geometry, and route a recognizable timeline entry/double-click to
+   the Design-owned edit panel. Avoid a metadata-only cosmetic timeline.
+4. Implement passive, nonmutating in-sketch hover snap cues to real body
+   edges/centers and associative projection on deliberate user action, without
+   requiring P or interfering with Sketcher drawing.
+5. After full native tests pass, validate 0.5.10→0.5.11 Windows patch install,
+   Qt startup, rollback/uninstall, artifact hash/publication before release.
