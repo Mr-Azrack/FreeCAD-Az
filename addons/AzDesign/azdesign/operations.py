@@ -78,6 +78,18 @@ class Operation:
         self.original_parents = {o.Name: features.owner_body(o).Name for o in self.editing}
         self.original_operations = {o.Name: str(o.Operation) for o in self.editing}
         self.last_spec = None
+        # FreeCAD 1.1 may not restore a removed dynamic property on abort.
+        # Remember the legacy type/value before migration to permit Cancel.
+        self._legacy_links = []
+        for obj in self.editing:
+            for name, old_type, group in (
+                ("Source", "App::PropertyLinkSub", "Profiles"),
+                ("UpToFace", "App::PropertyLinkSub", "Extrude"),
+                ("SourceFrame", "App::PropertyLink", "Az Design"),
+                ("LimitFrame", "App::PropertyLink", "Az Design"),
+            ):
+                if name in obj.PropertiesList and obj.getTypeIdOfProperty(name) == old_type:
+                    self._legacy_links.append((obj.Name, name, old_type, group, getattr(obj, name)))
         features.begin_transaction(self.doc, "Az: Edit Extrude" if self.editing else "Az: Extrude")
         # Existing 0.4.1 Extrudes used local-only LinkSub for profiles
         # belonging to other Bodies. Migrate while the editing transaction
@@ -180,20 +192,28 @@ class Operation:
             if spec.get("extent", "Distance") == "To face"
             else None
         )
-        result = features.native_extrusion(
-            shape,
-            base=base_shape,
-            operation=operation,
-            distance=distance,
-            distance2=distance2,
-            direction=spec.get("direction", "One side"),
-            reversed=reverse,
-            extent=spec.get("extent", "Distance"),
-            to_face=face,
-            taper=taper,
-            taper2=taper2,
-            start=offset,
-        )
+        try:
+            result = features.native_extrusion(
+                shape,
+                base=base_shape,
+                operation=operation,
+                distance=distance,
+                distance2=distance2,
+                direction=spec.get("direction", "One side"),
+                reversed=reverse,
+                extent=spec.get("extent", "Distance"),
+                to_face=face,
+                taper=taper,
+                taper2=taper2,
+                start=offset,
+            )
+        except DesignError as exc:
+            if operation == "Join" and "one connected solid" in str(exc):
+                raise DesignError(
+                    "Join adds no material connected to this Body. Select a profile "
+                    "that touches the solid or choose New body."
+                ) from exc
+            raise
         tolerance = max(profiles.TOL, base_shape.Volume * 1e-9)
         change = result.Volume - base_shape.Volume
         if operation == "Join" and change <= tolerance:
@@ -467,6 +487,20 @@ class Operation:
     def cancel(self):
         if not self.closed:
             self.doc.abortTransaction()
+            for obj_name, name, old_type, group, value in self._legacy_links:
+                obj = self.doc.getObject(obj_name)
+                if obj is None:
+                    continue
+                current_type = (
+                    obj.getTypeIdOfProperty(name)
+                    if name in obj.PropertiesList else None
+                )
+                if current_type != old_type:
+                    if current_type is not None:
+                        obj.removeProperty(name)
+                    obj.addProperty(old_type, name, group)
+                    if value is not None:
+                        setattr(obj, name, value)
             self._restore_visibility()
             self.doc.recompute()
             self.closed = True
