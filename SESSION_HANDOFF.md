@@ -1696,3 +1696,14 @@ NEXT EXACT ACTIONS:
 2. Locate actual timeline contract filename via repository tree; add it to package CI only after confirming existence. Run full CI and investigate failures.
 3. Exercise FreeCAD 1.1 Qt GUI timeline double-click, body-edge midpoint/center hover, high-DPI alignment, edit exit and native drawing click-through; test independent patterns, undo/redo and save/reopen.
 4. Validate guarded Windows 0.5.11-to-0.5.12 patch, Qt startup, rollback and SHA256 on disposable test copy only. Keep working 0.5.11 immutable; do not release until all gates pass.
+
+
+## 2026-11-12 — 0.5.12 CI failure triage (11:18 EST)
+
+Reviewed AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and current handoff on codex/az-design-workbench. Confirmed GitHub branch HEAD 0e3afc80 before editing. Inspected real push Actions run 43252319034: native modeling job succeeded, package job failed in tools/verify_native_workflows.py because the verifier still required the obsolete native-0.5.10.txt marker while az-native-patch.yml deliberately triggers only on native-0.5.11.txt. This is a real CI failure, not an absent PR workflow. Committed 45598e70 to align only that batch-trigger assertion, retaining the expensive Windows validation guard. No Windows/Qt test or release performed here. Package workflow may expose additional stale 0.5.10 assertions on rerun; do not claim green until checked.
+
+NEXT EXACT STEPS:
+1. Inspect new push Actions for 45598e70 and this documentation commit. If package job fails again, fetch job logs and reconcile other obsolete verifier expectations against the actual guarded az-native-patch.yml without weakening cache, rollback, or publishing gates. Confirm modeling and package both green.
+2. Recover Windows dev shell, check checkout branch/HEAD/status/diff, run test_workflow.py and fix disconnected Join wording and cancelled Source regression. Preserve the independent 0.5.11 installation.
+3. Verify real FreeCAD 1.1 Qt timeline double-click, passive edge/midpoint/center hover and DPI/teardown/click-through. Rerun two-pattern Undo/Redo/save/reopen and ownership rejection.
+4. Only after these gates, test unique 0.5.11→0.5.12 patch on disposable Windows baseline, startup, rollback and SHA256; no release before evidence. GitHub connector cannot inspect local uncommitted Windows changes.
