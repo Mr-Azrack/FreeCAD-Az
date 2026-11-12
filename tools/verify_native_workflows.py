@@ -62,46 +62,50 @@ def check():
         "Verify and reconstruct original 0.5.8 Build 39",
         "Download verified published 0.5.9 Build 40 patch",
         "Reconstruct exact installed 0.5.9 baseline",
+        "Reconstruct verified published 0.5.10 baseline",
         "Build changed-only overlay (no native core re-download)",
         "Apply to real installed baseline, Qt smoke, rollback, uninstall",
         "Upload tested incremental patch (not a public release)",
+        "Publish verified 0.5.11 patch to online updater release channel",
     )
     order = [step.get("name") for step in jobs["patch"]["steps"]]
     assert all(item in steps for item in stages), "Missing critical patch validation step"
-    assert order.index(stages[9]) < order.index(stages[10]) < order.index(stages[12]) < order.index(stages[14]), (
-        "Cache must be saved before changing the installed baseline"
+    assert [order.index(item) for item in stages] == sorted(order.index(item) for item in stages), (
+        "Pinned baseline, candidate patch, validation and upload must run in order"
     )
     for name in stages[2:8]:
         assert "cache-hit != 'true'" in steps[name].get("if", ""), (
             f"Cold baseline step must be skipped on exact cache hit: {name}"
         )
-    for name in stages[1:2]:
-        assert "cache-hit == 'true'" in steps[name].get("if", "")
-    assert "actions/cache/restore@v4" == steps[stages[0]].get("uses")
-    assert "actions/cache/save@v4" == steps[stages[9]].get("uses")
+    assert "cache-hit == 'true'" in steps[stages[1]].get("if", "")
+    assert steps[stages[0]].get("uses") == "actions/cache/restore@v4"
+    assert steps[stages[9]].get("uses") == "actions/cache/save@v4"
     assert ".az-baseline-hashes.json" in steps[stages[1]].get("run", "")
     assert "SHA256" in steps[stages[1]].get("run", "")
     assert "cold_validation" in steps[stages[0]].get("if", "")
-    assert "unins000.exe" in steps[stages[17]].get("run", "")
-    assert steps[stages[10]].get("with", {}).get("run-id") == 42899554668, (
-        "0.5.8 baseline must be pinned to the original user-installed 0.5.7 Build 36"
+    for stage, run_id in ((10, 42899554668), (12, 42949194221), (14, 42959009956)):
+        assert steps[stages[stage]].get("with", {}).get("run-id") == run_id, (
+            f"Unpinned historical patch artifact: {stages[stage]}"
+        )
+    for stage in (11, 13, 15, 16):
+        assert "SHA256" in steps[stages[stage]].get("run", ""), (
+            f"Historical patch lacks checksum validation: {stages[stage]}"
+        )
+    assert "gh release download v0.5.10" in steps[stages[16]].get("run", "")
+    build = steps[stages[17]].get("run", "")
+    assert "--from-version 0.5.10 --to-version 0.5.11" in build
+    assert "AzDesignNative-0.5.10-to-0.5.11.azpatch" in build
+    verify = steps[stages[18]].get("run", "")
+    assert "Patched version is not 0.5.11" in verify
+    assert "Original version was not restored" in verify
+    assert "smoke_qt.py" in verify and "-RollbackLatest" in verify
+    assert "unins000.exe" in verify
+    assert "SHA256" in verify
+    assert steps[stages[19]].get("with", {}).get("name") == "AzDesignNative-0.5.10-to-0.5.11-PATCH"
+    # Never let a development-branch validation job publish an update.
+    assert steps[stages[20]].get("if") == "github.ref == 'refs/heads/main'", (
+        "Release publication must be disabled on feature branches"
     )
-    assert "0.5.7" in steps[stages[11]].get("run", "")
-    assert "SHA256" in steps[stages[11]].get("run", "")
-    assert steps[stages[12]].get("with", {}).get("run-id") == 42949194221, (
-        "0.5.9 baseline must be built from published 0.5.8 Build 39"
-    )
-    assert "0.5.8" in steps[stages[13]].get("run", "")
-    assert "SHA256" in steps[stages[13]].get("run", "")
-    assert steps[stages[14]].get("with", {}).get("run-id") == 42959009956
-    assert "SHA256" in steps[stages[15]].get("run", "")
-    assert "0.5.9" in steps[stages[15]].get("run", "")
-    build = steps[stages[16]].get("run", "")
-    assert "--from-version 0.5.9 --to-version 0.5.10" in build
-    assert "AzDesignNative-0.5.9-to-0.5.10.azpatch" in build
-    assert "Patched version is not 0.5.10" in steps[stages[17]].get("run", "")
-    assert "Original version was not restored" in steps[stages[17]].get("run", "")
-    assert steps[stages[18]].get("with", {}).get("name") == "AzDesignNative-0.5.9-to-0.5.10-PATCH"
     fast = loaded["az-design.yml"]
     assert fast.get("concurrency", {}).get("cancel-in-progress") is True, (
         "Superseded fast CI must be cancellable"
