@@ -285,3 +285,27 @@ def nearest_passive_cue(cues, project_to_screen, cursor, radius_px=12.0):
         if math.hypot(other[2] - best[2], other[3] - best[3]) > 1e-7:
             return None
     return best
+
+
+def viewport_passive_cue(sketch, source, edge_names, project_world, cursor,
+                         radius_px=12.0):
+    """Resolve a hovered model edge to a sketch-plane cue in screen pixels.
+
+    project_world receives a *global* FreeCAD Vector and returns viewport
+    pixel coordinates. The sketch-local-to-global transform is essential for
+    sketches attached to rotated or offset faces. No Sketcher tool or document
+    transaction is invoked. The caller owns visual display and teardown.
+    """
+    cues = passive_sketch_cues(sketch, source, edge_names)
+    if not cues:
+        return None
+
+    def project_local(x, y):
+        try:
+            world = sketch.Placement.multVec(App.Vector(x, y, 0))
+            return project_world(world)
+        except (AttributeError, ValueError, RuntimeError, TypeError,
+                OverflowError):
+            return None
+
+    return nearest_passive_cue(cues, project_local, cursor, radius_px)
