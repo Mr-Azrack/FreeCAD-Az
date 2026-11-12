@@ -39,6 +39,7 @@ class SketchPatternDraft:
         self.started = False
         self.valid = False
         self.created = ()
+        self.parameters = None
 
     def _drop_preview(self):
         expected = self.original_geometry_count + len(self.created)
@@ -66,6 +67,7 @@ class SketchPatternDraft:
             )
             self.doc.recompute()
             self.valid = True
+            self.parameters = (source, columns, rows, pitch_x, pitch_y)
             return self.created
         except Exception:
             # Native Sketcher can reject a constraint *after* adding geometry.
@@ -76,12 +78,26 @@ class SketchPatternDraft:
             self.started = False
             self.valid = False
             self.created = ()
+            self.parameters = None
             raise
 
     def accept(self):
         if not self.started or not self.valid:
             raise DesignError("Choose valid sketch pattern dimensions before applying.")
-        self.doc.commitTransaction()
+        # Record native sketch geometry ownership inside the same transaction.
+        # A future editor can reject stale indices rather than deleting user geometry.
+        from .pattern_records import append_record
+        try:
+            append_record(self.sketch, self.parameters, self.created)
+            self.doc.commitTransaction()
+        except Exception:
+            self.doc.abortTransaction()
+            self.doc.recompute()
+            self.started = False
+            self.valid = False
+            self.created = ()
+            self.parameters = None
+            raise
         self.started = False
         return self.created
 
