@@ -1546,3 +1546,14 @@ NEXT EXACT ACTIONS:
 4. Integrate each pattern record into the Design timeline with its own icon and double-click editor.
 5. Add passive nonmutating body-edge/midpoint/circle-center hover cues and explicit associative link; do not interrupt native Sketcher drawing.
 6. Only then run native geometry, Windows 0.5.11-to-0.5.12 patch install, Qt startup, rollback and checksum gates; publish only after all pass.
+
+
+## 2026-11-12 — autonomous 0.5.12 execution: real constraint index capture
+
+Read AGENTS.md and four continuity files from development branch. Confirmed preceding 0.5.12 commits 31c7aa2, 617887b0, ea81aeb7; commit-workflow lookup for 617887b0 returned no PR-triggered runs (this API filters to PR runs, so this is NOT proof CI failed or passed). No local working tree/FreeCAD runtime is available via GitHub file tools.
+
+Committed da197370: SketchPatternDraft now snapshots Sketcher.ConstraintCount before preview, captures exact appended constraint index range after native pattern_circles creates three solver constraints per new circle, checks ownership counts before deleting previews or accepting, and writes both geometry and constraints into persistent pattern records within the same transaction. The existing failure path aborts the transaction. This does not yet implement editing or timeline presentation.
+
+Committed 310ae090: updated stale fast contract that required the previous geometry-only guard, added contract for captured real Sketcher constraint indices. Do not claim these tests ran locally. Check CI and repair any failures before release.
+
+NEXT: 1) inspect add-on Actions for 310ae090 and fix failures; 2) add executable fake/native Sketcher tests for repeated preview, generated constraints, safe cancel/accept and Undo/Redo; 3) implement independently editable per-record pattern with strict validation of generated geometry AND constraints, including protection against deletion/reindexing of other patterns; 4) route Design-owned timeline icons and double-click edit to specific pattern; 5) passive nonmutating edge/midpoint/circle cues; 6) native FCStd save/reopen and Windows 0.5.11→0.5.12 patch/Qt/rollback/checksum gates. Do not republish 0.5.11.
