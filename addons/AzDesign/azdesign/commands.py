@@ -62,11 +62,62 @@ def invoke(command):
 
 
 def home():
-    if Gui.activeDocument():
-        view = Gui.activeDocument().activeView()
-        if view:
-            view.viewAxonometric()
-            invoke("Std_ViewFitAll")
+    """Home frames the working solid, not every object in the document.
+
+    A sketch/extra Body far from the active solid can make native Fit All
+    compress the useful model into a tiny band. Fit the active visible Body
+    using FreeCAD's native selection framing, preserving the user selection.
+    """
+    if not Gui.activeDocument():
+        return
+    view = Gui.activeDocument().activeView()
+    if not view:
+        return
+    view.viewAxonometric()
+    doc = modeling.current_document()
+    body = modeling.active_body() if doc else None
+    if body and (not body.ViewObject.Visibility or
+                 not hasattr(body, "Shape") or body.Shape.isNull()):
+        body = None
+    if body is None:
+        bodies = [obj for obj in doc.Objects
+                  if obj.isDerivedFrom("PartDesign::Body")
+                  and obj.ViewObject.Visibility
+                  and not obj.Shape.isNull()] if doc else []
+        if bodies:
+            # Multiple visible solids are common after trial operations.
+            # With no active Body, frame the most substantial solid instead
+            # of letting faraway Bodies turn Home into a narrow strip.
+            body = max(bodies, key=lambda obj: obj.Shape.Volume)
+    if body is None:
+        invoke("Std_ViewFitAll")
+        return
+    selected = [(item.Object, tuple(item.SubElementNames))
+                for item in Gui.Selection.getSelectionEx()]
+    def fit_body():
+        try:
+            Gui.Selection.clearSelection()
+            Gui.Selection.addSelection(body)
+            if not Gui.SendMsgToActiveView("ViewSelection"):
+                raise RuntimeError("FreeCAD could not frame the active Body")
+        finally:
+            Gui.Selection.clearSelection()
+            for obj, names in selected:
+                if names:
+                    for name in names:
+                        Gui.Selection.addSelection(obj, name)
+                else:
+                    Gui.Selection.addSelection(obj)
+    from .session import current
+    session = current()
+    try:
+        if session:
+            session.appearance.fit(fit_body)
+        else:
+            fit_body()
+    except Exception:
+        App.Console.PrintWarning("Az Design: body framing failed; using Fit All.\n")
+        invoke("Std_ViewFitAll")
 
 
 def native():
