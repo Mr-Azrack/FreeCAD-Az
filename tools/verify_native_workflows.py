@@ -37,7 +37,7 @@ def check():
     patch = loaded["az-native-patch.yml"]
     on = patch.get("on", patch.get(True, {}))
     marker = on["push"]["paths"]
-    assert marker == [".github/validation-requests/native-0.5.10.txt"], (
+    assert marker == [".github/validation-requests/native-0.5.11.txt"], (
         "Expensive Windows pipeline must be batch-marker-triggered only"
     )
     assert on["workflow_dispatch"]["inputs"]["cold_validation"]["type"] == "boolean"
