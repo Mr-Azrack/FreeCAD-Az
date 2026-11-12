@@ -9,11 +9,12 @@ never simulate Qt click events or silently insert fixed geometry.
 import FreeCADGui as Gui
 
 from . import modeling, snap_hover
+from .snap_targets import viewport_passive_cue
 from .qt import QtCore, QtWidgets
 
 
 class HoverGuides:
-    SYMBOLS = {"Midpoint": "△", "Center": "⊙", "Endpoint": "□"}
+    SYMBOLS = {"Midpoint": "△", "Center": "⊙", "Endpoint": "□", "Start": "□", "End": "□"}
 
     def __init__(self):
         self.label = None
@@ -84,17 +85,43 @@ class HoverGuides:
 
             result = snap_hover.best_snap(sketch.Geometry, cursor, projection)
             if result is None:
+                # Read-only body-edge fallback; never consume Sketcher clicks.
+                try:
+                    pre = Gui.Selection.getPreselection()
+                    source = getattr(pre, "Object", None)
+                    names = tuple(getattr(pre, "SubElementNames", ()) or ())
+                    if not names and getattr(pre, "SubElementName", ""):
+                        names = (pre.SubElementName,)
+                    if source is not None and names:
+                        def project_world(world):
+                            pt = view.getPointOnScreen(world)
+                            x = float(pt.x) if hasattr(pt, "x") else float(pt[0])
+                            y = float(pt.y) if hasattr(pt, "y") else float(pt[1])
+                            return (x * sx, widget.height() - y * sy)
+                        cue = viewport_passive_cue(
+                            sketch, source, names, project_world, cursor)
+                        if cue is not None:
+                            import FreeCAD as App
+                            name, edge, x, y = cue
+                            screen = project_world(
+                                sketch.Placement.multVec(App.Vector(x, y, 0)))
+                            result = (name, screen, edge)
+                except (AttributeError, RuntimeError, TypeError, ValueError,
+                        ReferenceError):
+                    result = None
+            if result is None:
                 self.hide()
                 return
             kind, center, index = result
-            if kind != "Center" and kind != "Midpoint" and kind != "Endpoint":
+            if kind not in self.SYMBOLS:
                 self.hide()
                 return
             self._make_label(widget)
             self.label.setText(self.SYMBOLS[kind])
             self.label.setToolTip(
-                kind + " · Sketch geometry " + str(index + 1)
-                + " · native Sketcher snapping controls the actual constraint."
+                kind + " · " + (("Body " + index) if isinstance(index, str)
+                else ("Sketch geometry " + str(index + 1)))
+                + " · visual cue only; native Sketcher controls constraints."
             )
             self.label.move(
                 max(0, min(widget.width() - 16, round(center[0] - 8))),
