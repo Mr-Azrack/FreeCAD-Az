@@ -129,6 +129,51 @@ class EdgeReferenceTests(unittest.TestCase):
         self.assertIsNone(self.api.nearest_passive_cue(
             (("Center", "Edge1", 0, 0),), lambda x, y: None, (0, 0)))
 
+    def test_viewport_adapter_transforms_local_to_world_without_mutation(self):
+        class Vec:
+            def __init__(self, x, y, z=0):
+                self.x, self.y, self.z = x, y, z
+            def __sub__(self, other):
+                return Vec(self.x-other.x, self.y-other.y, self.z-other.z)
+            @property
+            def Length(self):
+                return (self.x*self.x+self.y*self.y+self.z*self.z)**0.5
+        class Edge:
+            FirstParameter, LastParameter = 0, 1
+            Curve = object()
+            Vertexes = [types.SimpleNamespace(Point=Vec(100, 200)),
+                        types.SimpleNamespace(Point=Vec(110, 200))]
+            def isNull(self): return False
+            def valueAt(self, t): return Vec(100+10*t, 200)
+        self.source.Shape.Edges = [Edge()]
+        placement = types.SimpleNamespace(
+            inverse=lambda: types.SimpleNamespace(
+                multVec=lambda p: Vec(p.x-100, p.y-200, p.z)),
+            multVec=lambda p: Vec(p.x+100, p.y+200, p.z))
+        self.sketch.Placement = placement
+        self.api.App.Vector = Vec
+        seen = []
+        def project(point):
+            seen.append((point.x, point.y, point.z))
+            return (point.x, point.y)
+        cue = self.api.viewport_passive_cue(
+            self.sketch, self.source, ("Edge1",), project, (105, 200), 3)
+        self.assertEqual(cue[0], "Midpoint")
+        self.assertIn((105.0, 200.0, 0.0), seen)
+        self.assertEqual(self.doc.calls, [])
+        self.assertEqual(self.sketch.added, [])
+
+    def test_viewport_adapter_fails_closed_on_projection_error(self):
+        self.sketch.Placement = types.SimpleNamespace(
+            inverse=lambda: types.SimpleNamespace(multVec=lambda p: p),
+            multVec=lambda p: p)
+        self.api.App.Vector = lambda x, y, z: (x, y, z)
+        self.assertIsNone(self.api.viewport_passive_cue(
+            self.sketch, self.source, ("Edge99",),
+            lambda p: (_ for _ in ()).throw(RuntimeError("stale view")),
+            (0, 0)))
+        self.assertEqual(self.doc.calls, [])
+
     def test_single_edge_commits(self):
         self.assertEqual(self.api.link_body_edge(self.sketch, self.source, "Edge1"), 1)
         self.assertEqual(self.doc.calls, ["begin", "recompute", "commit"])
