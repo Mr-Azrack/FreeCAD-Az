@@ -1599,3 +1599,17 @@ NEXT EXACT ACTIONS:
 3. Add safe nonmutating passive body-edge/midpoint/circle-center cues while Sketcher drawing; ensure no accidental addExternal until deliberate selection and no native event interception.
 4. Investigate reindexing-safe count changes or keep count editing explicitly unsupported.
 5. Validate native geometry, 0.5.11→0.5.12 Windows patch install, Qt startup, rollback and SHA256 before release. Keep v0.5.11 immutable and user's installed 0.5.11 untouched.
+
+
+## 2026-11-12 — 0.5.12 autonomous pass: read-only sketch snap candidates
+
+Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and this handoff on codex/az-design-workbench. The latest prior 0.5.12 handoff described timeline icon/edit routing in 066de7b2 and 28d30321. GitHub search_commits returns default-branch commits, NOT the development branch HEAD; file fetches used explicit development ref. A local working tree and native FreeCAD runtime were not available in this GitHub-connector session. CI status remains unverified; commit-workflow lookup is PR-trigger limited.
+
+Committed c87f48e7: snap_targets.passive_sketch_cues computes local-plane Start/End/Midpoint/Center candidates from analytic model edges without any Sketcher geometry, external reference or transaction mutation. It rejects off-plane cues, cross-document sources and circular dependencies. This is a pure candidate provider, NOT yet an actual mouse-hover overlay or live snap constraint. Committed 1bca5467: executable mock regression for planar cues, midpoint and zero document mutation. These tests were committed but not executed in this environment.
+
+NEXT EXACT ACTIONS:
+1. Run fast tests including tests/test_snap_targets_contracts.py and native geometry suite; repair any failure. Inspect push Actions via Actions UI/API rather than treating empty PR-run lookup as success.
+2. Wire passive_sketch_cues to a non-intercepting Sketcher viewport preselection/hover overlay, mapping actual screen-space cursor proximity and visual indicators; preserve native Sketcher drawing and only link geometry on deliberate action.
+3. Validate native FreeCAD 1.1 behavior of per-pattern pitch edit, timeline double-click and Qt refresh; test two-pattern edits, cancel, Undo/Redo and FCStd save/reopen. Correct unsafe constraint First/Second assumptions if native Sketcher uses different reference semantics.
+4. Add real native save/reopen and Undo/Redo tests and investigate safe count editing or keep count edits disabled.
+5. Only after passing geometry and fast CI, build hash-checked 0.5.11-to-0.5.12 Windows patch and verify Qt startup, rollback and checksums. Do not publish until gates pass; keep owner's working 0.5.11 intact.
