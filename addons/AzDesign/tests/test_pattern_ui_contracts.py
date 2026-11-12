@@ -147,12 +147,22 @@ class PatternContracts(unittest.TestCase):
     def test_preview_refuses_to_delete_unrelated_sketch_geometry(self):
         ui = (ADDON / "azdesign" / "sketch_pattern_ui.py").read_text()
         self.assertIn("expected = self.original_geometry_count + len(self.created)", ui)
-        self.assertIn("if self.sketch.GeometryCount != expected:", ui)
+        self.assertIn("self.sketch.GeometryCount != expected or", ui)
+        self.assertIn("self.sketch.ConstraintCount != self.original_constraint_count + len(self.created_constraints)", ui)
         self.assertIn("the preview will not delete unrelated geometry", ui)
         self.assertLess(
-            ui.index("if self.sketch.GeometryCount != expected:"),
+            ui.index("self.sketch.GeometryCount != expected or"),
             ui.index("self.sketch.delGeometry(index)"),
         )
+
+    def test_sketch_apply_persists_actual_constraint_indices(self):
+        ui = (ADDON / "azdesign" / "sketch_pattern_ui.py").read_text()
+        self.assertIn("self.original_constraint_count = sketch.ConstraintCount", ui)
+        self.assertIn("self.created_constraints = tuple(range(", ui)
+        self.assertIn("self.original_constraint_count, self.sketch.ConstraintCount", ui)
+        self.assertIn("len(self.created_constraints) != 3 * len(self.created)", ui)
+        self.assertIn("append_record(self.sketch, self.parameters, self.created,", ui)
+        self.assertIn("self.created_constraints)", ui)
 
     def test_failed_sketch_preview_aborts_owned_transaction(self):
         ui = (ADDON / "azdesign" / "sketch_pattern_ui.py").read_text()
