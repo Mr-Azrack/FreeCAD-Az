@@ -1613,3 +1613,17 @@ NEXT EXACT ACTIONS:
 3. Validate native FreeCAD 1.1 behavior of per-pattern pitch edit, timeline double-click and Qt refresh; test two-pattern edits, cancel, Undo/Redo and FCStd save/reopen. Correct unsafe constraint First/Second assumptions if native Sketcher uses different reference semantics.
 4. Add real native save/reopen and Undo/Redo tests and investigate safe count editing or keep count edits disabled.
 5. Only after passing geometry and fast CI, build hash-checked 0.5.11-to-0.5.12 Windows patch and verify Qt startup, rollback and checksums. Do not publish until gates pass; keep owner's working 0.5.11 intact.
+
+
+## 2026-11-12 — 0.5.12 autonomous pass: pixel-space snap candidate resolver
+
+Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and this handoff from the explicit development branch. Prior c87f48e7 provided read-only local-plane candidates but no screen-space proximity resolver. GitHub search_commits lists default-branch commits, not the active development branch HEAD; branch-specific fetch_file used for all changes.
+
+Commits 349db9c4 and 3e4b0562 add snap_targets.nearest_passive_cue(cues, project_to_screen, cursor, radius_px) and focused mock regression cases. The resolver filters clipped/nonfinite points, enforces pixel radius, accepts coincident cues, rejects equally near *different* positions, and never mutates Sketcher. It is a deterministic geometry-to-screen adapter, NOT a live viewport overlay or automatic constraint snap. These changes were committed via GitHub; no local Python, FreeCAD GUI or Windows test execution occurred. Push CI status remains unverified; fetch_commit_workflow_runs only reports PR-triggered runs.
+
+NEXT EXACT ACTIONS:
+1. Execute tests/test_snap_targets_contracts.py and native geometry suite; fix failures. Inspect push Actions via appropriate API/UI rather than inferring green from missing PR runs.
+2. Integrate passive_sketch_cues + nearest_passive_cue with real Sketcher viewport cursor preselection/projection using non-intercepting observer/overlay. Validate FreeCAD 1.1 Qt6 pixel-coordinate conventions, visibility, screen scaling and teardown on sketch exit. No addExternal until deliberate selection.
+3. Native two-pattern pitch edit with transaction/Undo/Redo, save/reopen and timeline double-click; verify constraint ownership and rejected legacy records.
+4. Extend history editor to safe row/column count edits only after proving index/constraint dependency safety, otherwise keep disabled.
+5. Build and validate unique 0.5.11-to-0.5.12 Windows patch after native tests, Qt startup, rollback, hashes and CI pass. Do not publish or modify 0.5.11.
