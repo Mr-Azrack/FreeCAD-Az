@@ -487,3 +487,28 @@ Fusion feature-parity promise; keep explicit scope distinction.
 - [ ] Add Fusion-style ghosted fillet visual preview and direct in-canvas radius handle, if GUI acceptance finds it needed
 - [ ] Complete advanced sketch snapping/dimensions and profile-click in viewport to match Fusion more closely
 - [ ] Publish unique 0.5.9 update only after accepted release gates; no same-version rewrite
+
+
+## 2026-11-11 — Owner-approved 0.5.11 scope freeze / 0.5.12 deferral
+
+Owner approved shipping the implemented 0.5.11 work as a smaller release and
+moving unfinished features to 0.5.12. **Do not publish without Windows release
+validation.** 0.5.11 scope: ambiguity-safe sketch circle picking, native
+associative edge references via explicit selection/right-click, transactional
+multi-edge linking, sketch-pattern preview/rollback safety, and persisted
+pattern records. Source CI passed at 91a540b (run 43146857290).
+
+0.5.12 backlog:
+- [ ] Automatic passive Fusion-style body-edge/midpoint/circle-center cues
+  during Sketcher drawing, without requiring manual reference action
+- [ ] Independently editable persistent sketch-pattern timeline entry, stable
+  generated geometry AND constraint ownership, safe double-click editing
+- [ ] Native save/reopen, undo/redo and two-pattern editing acceptance for
+  persistent sketch-pattern history
+
+0.5.11 release gate (not yet completed):
+- [ ] Retarget guarded native Windows patch from verified 0.5.10 installed
+  baseline to unique 0.5.11 destination, without bypassing hash checks
+- [ ] Verify native FreeCAD geometry and 0.5.10→0.5.11 silent patch install,
+  Qt startup, rollback/uninstall, and artifact checksums
+- [ ] Publish only the validated artifact through the existing update channel
