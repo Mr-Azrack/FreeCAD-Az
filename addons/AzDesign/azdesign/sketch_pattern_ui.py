@@ -36,14 +36,17 @@ class SketchPatternDraft:
         self.sketch = sketch
         self.doc = sketch.Document
         self.original_geometry_count = sketch.GeometryCount
+        self.original_constraint_count = sketch.ConstraintCount
         self.started = False
         self.valid = False
         self.created = ()
+        self.created_constraints = ()
         self.parameters = None
 
     def _drop_preview(self):
         expected = self.original_geometry_count + len(self.created)
-        if self.sketch.GeometryCount != expected:
+        if (self.sketch.GeometryCount != expected or
+                self.sketch.ConstraintCount != self.original_constraint_count + len(self.created_constraints)):
             raise DesignError(
                 "Sketch geometry changed outside Pattern. Cancel and retry; "
                 "the preview will not delete unrelated geometry."
@@ -52,6 +55,7 @@ class SketchPatternDraft:
                            self.original_geometry_count - 1, -1):
             self.sketch.delGeometry(index)
         self.created = ()
+        self.created_constraints = ()
         self.valid = False
         self.doc.recompute()
 
@@ -65,6 +69,10 @@ class SketchPatternDraft:
                 self.sketch, source, columns, rows, pitch_x, pitch_y,
                 manage_transaction=False,
             )
+            self.created_constraints = tuple(range(
+                self.original_constraint_count, self.sketch.ConstraintCount))
+            if len(self.created_constraints) != 3 * len(self.created):
+                raise DesignError("Pattern constraint ownership changed during preview.")
             self.doc.recompute()
             self.valid = True
             self.parameters = (source, columns, rows, pitch_x, pitch_y)
@@ -78,6 +86,7 @@ class SketchPatternDraft:
             self.started = False
             self.valid = False
             self.created = ()
+            self.created_constraints = ()
             self.parameters = None
             raise
 
@@ -88,7 +97,11 @@ class SketchPatternDraft:
         # A future editor can reject stale indices rather than deleting user geometry.
         from .pattern_records import append_record
         try:
-            append_record(self.sketch, self.parameters, self.created)
+            if (self.sketch.GeometryCount != self.original_geometry_count + len(self.created)
+                    or self.sketch.ConstraintCount != self.original_constraint_count + len(self.created_constraints)):
+                raise DesignError("Pattern ownership changed before Apply; cancel and retry.")
+            append_record(self.sketch, self.parameters, self.created,
+                          self.created_constraints)
             self.doc.commitTransaction()
         except Exception:
             self.doc.abortTransaction()
@@ -96,6 +109,7 @@ class SketchPatternDraft:
             self.started = False
             self.valid = False
             self.created = ()
+            self.created_constraints = ()
             self.parameters = None
             raise
         self.started = False
