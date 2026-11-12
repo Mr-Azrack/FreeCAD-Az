@@ -89,7 +89,35 @@ class InteractionFilter(QtCore.QObject):
             if self.session.home.isVisible():
                 self.session.home.setGeometry(self.session.mdi.viewport().rect())
         if kind == QtCore.QEvent.ContextMenu and self.is_viewport(watched):
-            if not Gui.Control.activeDialog() and not modeling.in_sketch():
+            # In sketch edit mode offer associative model-edge references
+            # without intercepting native drawing clicks or mutating on hover.
+            # The selection must be a real edge of another model object.
+            active_sketch = modeling.in_sketch()
+            if active_sketch and not Gui.Control.activeDialog():
+                selected_edges = [
+                    (hit.Object, name)
+                    for hit in Gui.Selection.getSelectionEx()
+                    if hit.Object is not None and hit.Object != active_sketch
+                    and hit.Object.Document == active_sketch.Document
+                    for name in hit.SubElementNames
+                    if name.startswith("Edge") and name[4:].isdigit()
+                ]
+                if selected_edges:
+                    menu = QtWidgets.QMenu(self.session.main)
+                    action = menu.addAction("Reference selected body edges")
+                    def link_selected():
+                        from .snap_targets import link_selected_body_edges
+                        from .commands import notify
+                        try:
+                            linked = link_selected_body_edges(active_sketch)
+                            notify("{} associative sketch edge reference(s) added.".format(len(linked)))
+                        except Exception as exc:
+                            notify("Cannot reference selected edges: " + str(exc))
+                    action.triggered.connect(link_selected)
+                    menu_exec(menu, event.globalPos())
+                    event.accept()
+                    return True
+            if not Gui.Control.activeDialog() and not active_sketch:
                 selections = Gui.Selection.getSelectionEx()
                 selected = selections[0] if len(selections) == 1 else None
                 actions = (
