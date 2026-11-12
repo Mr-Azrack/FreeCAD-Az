@@ -185,6 +185,19 @@ def finish_sketch():
         raise ModelingError("There is no sketch open to finish.")
     Gui.runCommand("Sketcher_LeaveSketch", 0)
     sketch.Document.recompute()
+    # FreeCAD may hide the edited sketch on exit. If its Body has no solid
+    # result yet, hiding the sketch leaves the design looking completely empty.
+    # Keep only such sketch-only workflows visible; don't expose consumed
+    # sketches over an existing finished solid.
+    owner = getattr(sketch, "_Body", None)
+    if owner is None:
+        from .features import owner_body
+        owner = owner_body(sketch)
+    tip = getattr(owner, "Tip", None) if owner is not None else None
+    if tip is None or tip == sketch:
+        if owner is not None:
+            owner.ViewObject.Visibility = True
+        sketch.ViewObject.Visibility = True
     Gui.Selection.clearSelection()
     Gui.Selection.addSelection(sketch)
     Gui.activeDocument().activeView().viewAxonometric()

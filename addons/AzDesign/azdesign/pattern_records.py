@@ -103,7 +103,19 @@ def find_record(sketch, record_id):
         raise ValueError("Sketch pattern no longer exists or has ambiguous identity")
     record = matches[0]
     if not validate_ownership(sketch, record):
-        raise ValueError("Sketch pattern ownership is stale")
+        geometry_count = sketch.GeometryCount
+        constraint_count = sketch.ConstraintCount
+        missing_geometry = [index for index in record["created"]
+                            if index >= geometry_count]
+        missing_constraints = [index for index in record.get("constraints", [])
+                               if index >= constraint_count]
+        raise ValueError(
+            "Sketch pattern ownership is stale (geometry {}/{}, constraints {}/{}, "
+            "missing geometry {}, missing constraints {}). Edit was blocked to "
+            "protect the sketch.".format(
+                len(record["created"]), geometry_count,
+                len(record.get("constraints", [])), constraint_count,
+                missing_geometry, missing_constraints))
     return record
 
 
