@@ -144,6 +144,16 @@ class PatternContracts(unittest.TestCase):
         self.assertIn("sketch_pattern.circle_for_edge(", panel)
         self.assertNotIn("index = int(suffix) - 1", panel)
 
+    def test_preview_refuses_to_delete_unrelated_sketch_geometry(self):
+        ui = (ADDON / "azdesign" / "sketch_pattern_ui.py").read_text()
+        self.assertIn("expected = self.original_geometry_count + len(self.created)", ui)
+        self.assertIn("if self.sketch.GeometryCount != expected:", ui)
+        self.assertIn("the preview will not delete unrelated geometry", ui)
+        self.assertLess(
+            ui.index("if self.sketch.GeometryCount != expected:"),
+            ui.index("self.sketch.delGeometry(index)"),
+        )
+
     def test_edit_routes_and_esc_are_not_native(self):
         commands = (ADDON / "azdesign" / "commands.py").read_text()
         edit = (ADDON / "azdesign" / "feature_edit.py").read_text()
