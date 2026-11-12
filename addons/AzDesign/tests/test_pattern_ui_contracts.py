@@ -177,6 +177,18 @@ class PatternContracts(unittest.TestCase):
         self.assertLess(preview.index("self.doc.abortTransaction()"),
                         preview.index("self.started = False"))
 
+    def test_sketch_pattern_history_has_stable_id_edit_route(self):
+        ui = (ADDON / "azdesign" / "ui.py").read_text()
+        self.assertIn("class SketchPatternHistoryButton", ui)
+        self.assertIn('self.record_id = item["id"]', ui)
+        self.assertIn("find_record(self.sketch, self.record_id)", ui)
+        self.assertIn("edit_pitch(self.sketch, self.record_id, x, y)", ui)
+        self.assertIn("def mouseDoubleClickEvent(self, event):", ui)
+        self.assertIn("timeline_records(sketch)", ui)
+        self.assertIn("self.pattern_buttons.append(button)", ui)
+        self.assertIn('getattr(o, "AzSketchPatternRecords", "")', ui)
+        self.assertIn("if Gui.Control.activeDialog():", ui)
+
     def test_edit_routes_and_esc_are_not_native(self):
         commands = (ADDON / "azdesign" / "commands.py").read_text()
         edit = (ADDON / "azdesign" / "feature_edit.py").read_text()
