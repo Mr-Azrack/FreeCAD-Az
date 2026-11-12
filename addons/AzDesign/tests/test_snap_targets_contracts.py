@@ -87,6 +87,27 @@ class EdgeReferenceTests(unittest.TestCase):
         cues = self.api.passive_sketch_cues(self.sketch, self.source, ("Edge1",))
         self.assertNotIn("Start", [item[0] for item in cues])
 
+    def test_nearest_passive_cue_rejects_ambiguous_screen_ties(self):
+        cues = (("Midpoint", "Edge1", 5.0, 0.0),
+                ("Center", "Edge2", 5.0, 0.0),
+                ("End", "Edge3", 7.0, 0.0))
+        project = lambda x, y: (10 * x, 10 * y)
+        self.assertEqual(self.api.nearest_passive_cue(cues, project, (50, 0)),
+                         cues[0])
+        self.assertIsNone(self.api.nearest_passive_cue(
+            (cues[0], cues[2]), project, (60, 0)))
+        self.assertIsNone(self.api.nearest_passive_cue(
+            cues, project, (300, 300)))
+        self.assertEqual(self.doc.calls, [])
+        self.assertEqual(self.sketch.added, [])
+
+    def test_passive_cue_rejects_invalid_radius_and_clipped_points(self):
+        with self.assertRaises(ValueError):
+            self.api.nearest_passive_cue((), lambda x, y: (x, y),
+                                         (0, 0), radius_px=0)
+        self.assertIsNone(self.api.nearest_passive_cue(
+            (("Center", "Edge1", 0, 0),), lambda x, y: None, (0, 0)))
+
     def test_single_edge_commits(self):
         self.assertEqual(self.api.link_body_edge(self.sketch, self.source, "Edge1"), 1)
         self.assertEqual(self.doc.calls, ["begin", "recompute", "commit"])
