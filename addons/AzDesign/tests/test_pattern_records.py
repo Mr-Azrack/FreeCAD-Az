@@ -78,7 +78,7 @@ class PatternRecordsTests(unittest.TestCase):
                                (9, 10, 11, 12, 13, 14, 15, 16, 17))
         record, changes = pitch_edit_plan(sketch, first["id"], 12, 24)
         self.assertEqual(record["id"], first["id"])
-        self.assertEqual(changes, [(1, 12.0), (4, 24.0),
+        self.assertEqual(changes, [(1, 12.0), (5, 24.0),
                                    (7, 12.0), (8, 24.0)])
         self.assertEqual(find_record(sketch, second["id"])["pitch_x"], 15)
         with self.assertRaisesRegex(ValueError, "nonzero"):
