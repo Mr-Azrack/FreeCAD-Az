@@ -1654,3 +1654,17 @@ NEXT EXACT ACTIONS:
 3. Native FreeCAD geometry validation: two independently persisted sketch patterns, pitch editing via timeline double-click, Cancel/Undo/Redo, FCStd save/reopen and stale index/constraint rejection.
 4. Keep count editing disabled until safe geometry/constraint reindexing and dependency semantics are proven.
 5. Only after fast/native checks pass, run 0.5.11-to-0.5.12 Windows hash-guarded patch, Qt startup, rollback and checksum verification, then consider release. Never overwrite immutable 0.5.11.
+
+
+## 2026-11-12 — 0.5.12 live hover integration checkpoint
+
+Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md, SESSION_HANDOFF.md and inspected snap_targets.py, snap_overlay.py, session.py and existing tests on branch codex/az-design-workbench. GitHub search_commits lists default-branch commits, not development HEAD; branch file fetches were authoritative. No local worktree available through GitHub connector.
+
+Commits 920bf31 and 93496c3: snap_overlay.HoverGuides.move now falls back to Gui.Selection.getPreselection when native sketch geometry produces no nearby snap. It uses viewport_passive_cue with FreeCAD world projection and Qt viewport scaling to display passive Start/End/Midpoint/Center symbols for model edges. Existing sketch cues take priority. No mouse event is consumed, no geometry/external link is inserted, and failures hide the overlay. A source contract asserts integration and absence of document mutations. This is not proof that getPreselection returns expected fields on FreeCAD 1.1 Windows, nor that all cues are visually aligned; owner GUI acceptance is pending. No test execution or release.
+
+NEXT EXACT ACTIONS:
+1. Run focused Python tests including test_snap_overlay_body_contract.py and test_snap_targets_contracts.py; register new test in CI workflow if not automatically discovered. Fix failures.
+2. Verify FreeCAD 1.1 Qt6 getPreselection() shape and viewport coordinate origins with a real installed GUI. Adjust projection and DPI as necessary; test native Rectangle/Line clicks, enter/leave, edit exit and workbench deactivation.
+3. Native FreeCAD tests for two independently owned sketch patterns, timeline double-click pitch edit, Cancel, Undo/Redo and FCStd save/reopen. Fix ownership corruption/stale references; keep unsupported count editing disabled.
+4. Inspect push CI via actual Actions runs (PR-only commit lookup cannot establish push status). Once fast/native tests pass, run guarded unique 0.5.11→0.5.12 Windows patch, Qt smoke, rollback and SHA256 checks.
+5. Never overwrite or republish 0.5.11; publish 0.5.12 only after verified gates.
