@@ -84,6 +84,15 @@ class FusionVideoContracts(unittest.TestCase):
         self.assertIn("OutListRecursive", source)
         self.assertIn("source.Document != sketch.Document", source)
 
+    def test_sketch_viewport_exposes_associative_edge_reference_action(self):
+        source = (ADDON / "azdesign" / "session.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('menu.addAction("Reference selected body edges")', source)
+        self.assertIn("link_selected_body_edges(active_sketch)", source)
+        self.assertIn("hit.Object != active_sketch", source)
+        self.assertIn("hit.Object.Document == active_sketch.Document", source)
+
     def test_sketch_pattern_lets_source_circle_be_selected_on_canvas(self):
         source = (ADDON / "azdesign" / "sketch_pattern_ui.py").read_text(
             encoding="utf-8"
