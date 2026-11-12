@@ -1,2 +1,4 @@
 Validate incremental 0.5.10 to 0.5.11 patch from commit 99282b24764de844327e91ba1b835ce7916543d5.
 Require native geometry, source tests, Windows installed-baseline patch, Qt startup, rollback, checksum and publication gates. Do not rebuild full installer.
+
+Retry on corrected workflow commit 16ed81442cbf13d59a1eb6455ca8071513642aed.
