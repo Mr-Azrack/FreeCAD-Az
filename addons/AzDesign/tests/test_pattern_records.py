@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from azdesign.pattern_records import append_record, read_records, validate_ownership
+from azdesign.pattern_records import append_record, read_records, validate_ownership, find_record, timeline_records
 
 
 class FakeSketch:
@@ -54,6 +54,37 @@ class PatternRecordsTests(unittest.TestCase):
         sketch.AzSketchPatternRecords = '[{"version": 1, "created": [1], "constraints": [2, 2]}]'
         with self.assertRaises(ValueError):
             read_records(sketch)
+
+    def test_stable_identity_and_independent_timeline_lookup(self):
+        sketch = FakeSketch()
+        first = append_record(sketch, (0, 2, 2, 10, 20), (1, 2, 3), (0, 1))
+        second = append_record(sketch, (4, 2, 2, 15, 25), (5, 6, 7), (2, 3))
+        self.assertNotEqual(first["id"], second["id"])
+        self.assertEqual(find_record(sketch, second["id"])["source"], 4)
+        items = timeline_records(sketch)
+        self.assertEqual([item["id"] for item in items], [first["id"], second["id"]])
+        self.assertTrue(all(item["editable"] for item in items))
+        sketch.AzSketchPatternRecords = json.dumps([second, first])
+        self.assertEqual(find_record(sketch, first["id"])["source"], 0)
+        sketch.ConstraintCount = 1
+        with self.assertRaises(ValueError):
+            find_record(sketch, second["id"])
+
+    def test_duplicate_identity_fails_closed(self):
+        sketch = FakeSketch()
+        first = append_record(sketch, (0, 2, 2, 10, 20), (1, 2, 3), (0, 1))
+        second = append_record(sketch, (4, 2, 2, 10, 20), (5, 6, 7), (2, 3))
+        second["id"] = first["id"]
+        sketch.AzSketchPatternRecords = json.dumps([first, second])
+        with self.assertRaisesRegex(ValueError, "Duplicate sketch pattern identity"):
+            read_records(sketch)
+
+    def test_legacy_record_is_visible_but_not_editable(self):
+        sketch = FakeSketch()
+        record = append_record(sketch, (0, 2, 2, 10, 20), (1, 2, 3))
+        del record["id"]
+        sketch.AzSketchPatternRecords = json.dumps([record])
+        self.assertFalse(timeline_records(sketch)[0]["editable"])
 
     def test_corrupt_record_fails_closed(self):
         sketch = FakeSketch()
