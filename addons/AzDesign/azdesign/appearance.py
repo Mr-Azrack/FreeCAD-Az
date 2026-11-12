@@ -71,7 +71,9 @@ class Appearance:
         group.addChild(picking)
         # World-space 10 mm major / 2 mm minor lines remain separate from
         # document geometry, picking and exports.
-        for major, rgb in ((False, (0.83, 0.85, 0.87)), (True, (0.72, 0.76, 0.80))):
+        # The grid is a reference, not foreground geometry: keep even
+        # major lines behind the model's visible edges and sketch cues.
+        for major, rgb in ((False, (0.91, 0.92, 0.93)), (True, (0.82, 0.85, 0.88))):
             level = coin.SoSeparator()
             color = coin.SoBaseColor()
             color.rgb = rgb

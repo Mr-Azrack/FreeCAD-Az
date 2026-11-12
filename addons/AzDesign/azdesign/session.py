@@ -388,6 +388,7 @@ class Session:
                 self.ribbon.advanced_menu.addAction(
                     label, lambda dock=dock: dock.setVisible(not dock.isVisible())
                 )
+        self.ribbon.advanced_menu.addAction("Restore Design layout", self.restore_design_layout)
         menus = self.ribbon.advanced_menu.addAction("FreeCAD menu bar")
         menus.setCheckable(True)
         menus.toggled.connect(self.main.menuBar().setVisible)
@@ -464,6 +465,17 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
         QtWidgets.QApplication.instance().aboutToQuit.connect(self.appearance.deactivate)
         self.tick()
         commands.notify("Design ready. Create Sketch to start, or S to find a tool.")
+
+    def restore_design_layout(self):
+        """Recover the native Design ribbon, Browser and compact history."""
+        if not self.active:
+            return
+        self.toolbar.show()
+        self.browser_dock.show()
+        self.history_dock.show()
+        self.main.resizeDocks([self.browser_dock], [260], QtCore.Qt.Horizontal)
+        self.main.resizeDocks([self.history_dock], [44], QtCore.Qt.Vertical)
+        self.navigation.place()
 
     def configure_view(self):
         if not Gui.activeDocument():

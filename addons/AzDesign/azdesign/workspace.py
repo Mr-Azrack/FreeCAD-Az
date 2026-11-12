@@ -443,9 +443,10 @@ class Navigation(QtWidgets.QFrame):
         self.mode = None
         self.mode_buttons = {}
         row = QtWidgets.QHBoxLayout(self)
-        row.setContentsMargins(5, 3, 5, 3)
+        row.setContentsMargins(4, 2, 4, 2)
         row.setSpacing(1)
-        row.addWidget(action_button("Home view", "Std_ViewIsometric", commands.home))
+        # The navigation cube has the dedicated Home control. Avoid a
+        # confusing second Home icon in the bottom navigation strip.
         for mode in ("orbit", "pan"):
             button = action_button(
                 mode.title() + " · drag with the left button · Esc to finish",
@@ -453,6 +454,8 @@ class Navigation(QtWidgets.QFrame):
                 lambda mode=mode: self.set_mode(None if self.mode == mode else mode),
             )
             button.setObjectName("AzNavigate_" + mode)
+            button.setFixedSize(34, 34)
+            button.setIconSize(QtCore.QSize(19, 19))
             button.setCheckable(True)
             self.mode_buttons[mode] = button
             row.addWidget(button)
@@ -461,9 +464,14 @@ class Navigation(QtWidgets.QFrame):
             ("Zoom in", "Std_ViewZoomIn"),
             ("Zoom out", "Std_ViewZoomOut"),
         ):
-            row.addWidget(action_button(text, command, lambda cmd=command: commands.invoke(cmd)))
+            button = action_button(text, command, lambda cmd=command: commands.invoke(cmd))
+            button.setFixedSize(34, 34)
+            button.setIconSize(QtCore.QSize(19, 19))
+            row.addWidget(button)
         display = action_button("Display settings", "display", lambda: None)
         display.setObjectName("AzDisplaySettings")
+        display.setFixedSize(34, 34)
+        display.setIconSize(QtCore.QSize(19, 19))
         display.setPopupMode(QtWidgets.QToolButton.InstantPopup)
         menu = QtWidgets.QMenu(display)
         for title, index in (("Shaded with visible edges", 6), ("Shaded", 5), ("Wireframe", 2)):
@@ -484,6 +492,8 @@ class Navigation(QtWidgets.QFrame):
         row.addWidget(display)
         views = action_button("Standard views", "views", lambda: None)
         views.setObjectName("AzStandardViews")
+        views.setFixedSize(34, 34)
+        views.setIconSize(QtCore.QSize(19, 19))
         views.setPopupMode(QtWidgets.QToolButton.InstantPopup)
         view_menu = QtWidgets.QMenu(views)
         for title, command in (
