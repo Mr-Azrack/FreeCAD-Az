@@ -2,6 +2,10 @@
 """Pure-Python regression for persisted sketch pattern ownership."""
 import json
 import unittest
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from azdesign.pattern_records import append_record, read_records, validate_ownership
 
