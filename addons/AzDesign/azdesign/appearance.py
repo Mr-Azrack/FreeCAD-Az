@@ -38,6 +38,7 @@ class Appearance:
         self.grid_visible = self.grid_preferences.GetBool("ShowGrid", True)
         self.sketch_grids = []
         self.last_view = None
+        self._fit_generation = 0
 
     def activate(self):
         for name, (kind, value) in self.values.items():
@@ -137,21 +138,37 @@ class Appearance:
         self.sketch_grids = []
 
     def fit(self, callback):
+        # FreeCAD may animate fitAll after returning from the Python call.
+        # Restoring the 400 mm decorative grid immediately makes that later
+        # camera framing include the grid and leaves a tiny, narrow model.
+        # Keep the grid hidden until the camera animation has settled.
+        self._fit_generation += 1
+        generation = self._fit_generation
         visible = []
         for _view, _root, node in self.grids:
             try:
                 visible.append((node, node.whichChild.getValue()))
                 node.whichChild = -1
-            except RuntimeError:
+            except (RuntimeError, ReferenceError):
                 pass
-        try:
-            return callback()
-        finally:
-            for node, value in visible:
+        def restore():
+            if generation != self._fit_generation:
+                return  # A newer Home/Fit is still animating.
+            for node, _previous in visible:
                 try:
-                    node.whichChild = value
-                except RuntimeError:
+                    if any(saved_node is node for _view, _root, saved_node in self.grids):
+                        node.whichChild = -3 if self.grid_visible and not modeling.in_sketch() else -1
+                except (RuntimeError, ReferenceError):
                     pass
+        try:
+            result = callback()
+        except Exception:
+            restore()
+            raise
+        if visible:
+            from .qt import QtCore
+            QtCore.QTimer.singleShot(1200, restore)
+        return result
 
     def deactivate(self):
         self.restore_sketch_grids()

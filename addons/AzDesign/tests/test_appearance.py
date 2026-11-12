@@ -91,5 +91,53 @@ class AppearanceTest(unittest.TestCase):
         self.run_lifecycle({})
 
 
+    def test_fit_hides_grid_until_camera_animation_and_skips_stale_timers(self):
+        group = ParameterGroup({})
+        app = types.ModuleType("FreeCAD")
+        app.ParamGet = lambda path: group
+        package = types.ModuleType("azdesign")
+        package.__path__ = []
+        modeling = types.ModuleType("azdesign.modeling")
+        modeling.in_sketch = lambda: None
+        qt = types.ModuleType("azdesign.qt")
+        timers = []
+        qt.QtCore = types.SimpleNamespace(
+            QTimer=types.SimpleNamespace(singleShot=lambda delay, cb: timers.append((delay, cb)))
+        )
+        spec = importlib.util.spec_from_file_location("azdesign.appearance", APPEARANCE_SOURCE)
+        module = importlib.util.module_from_spec(spec)
+        with patch.dict(sys.modules, {
+            "FreeCAD": app, "azdesign": package,
+            "azdesign.modeling": modeling, "azdesign.qt": qt
+        }):
+            spec.loader.exec_module(module)
+            appearance = module.Appearance()
+            class Switch:
+                def __init__(self):
+                    self.value = -3
+                def getValue(self):
+                    return self.value
+                def __eq__(self, other):
+                    return self.value == other
+            class Node:
+                def __init__(self):
+                    self._switch = Switch()
+                @property
+                def whichChild(self):
+                    return self._switch
+                @whichChild.setter
+                def whichChild(self, value):
+                    self._switch.value = value
+            node = Node()
+            appearance.grids = [(object(), object(), node)]
+            appearance.fit(lambda: self.assertEqual(node.whichChild, -1))
+            self.assertEqual(node.whichChild, -1)
+            self.assertEqual(timers[0][0], 1200)
+            appearance.fit(lambda: self.assertEqual(node.whichChild, -1))
+            timers[0][1]()
+            self.assertEqual(node.whichChild, -1)
+            timers[1][1]()
+            self.assertEqual(node.whichChild, -3)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
