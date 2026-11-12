@@ -59,13 +59,24 @@ class SketchPatternDraft:
             self.doc.openTransaction("Design: Preview sketch rectangular pattern")
             self.started = True
         self._drop_preview()
-        self.created = sketch_pattern.pattern_circles(
-            self.sketch, source, columns, rows, pitch_x, pitch_y,
-            manage_transaction=False,
-        )
-        self.doc.recompute()
-        self.valid = True
-        return self.created
+        try:
+            self.created = sketch_pattern.pattern_circles(
+                self.sketch, source, columns, rows, pitch_x, pitch_y,
+                manage_transaction=False,
+            )
+            self.doc.recompute()
+            self.valid = True
+            return self.created
+        except Exception:
+            # Native Sketcher can reject a constraint *after* adding geometry.
+            # The helper does not own this transaction; abort it here so a
+            # partially generated pattern cannot survive a failed preview.
+            self.doc.abortTransaction()
+            self.doc.recompute()
+            self.started = False
+            self.valid = False
+            self.created = ()
+            raise
 
     def accept(self):
         if not self.started or not self.valid:
