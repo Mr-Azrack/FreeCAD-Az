@@ -1583,3 +1583,19 @@ CRITICAL NEXT:
 3. Add passive nonmutating body-edge/midpoint/circle-center Sketcher viewport cues; preserve native tool mouse interactions and no implicit geometry mutation.
 4. For changing counts, explicitly design safe geometry/constraint reindexing and downstream dependency handling, or reject unsupported edits.
 5. Only after native geometry and full Windows 0.5.11→0.5.12 patch, Qt startup, rollback and checksum gates pass, consider release. Do not republish 0.5.11.
+
+
+## 2026-11-12 — 0.5.12 autonomous pass: first real Sketch Pattern timeline entry
+
+Inspected AGENTS.md and all four continuity files from codex/az-design-workbench. The latest handoff before this run ended at 5e592c75; GitHub commit search defaults to main and does not establish the feature branch HEAD. Used fetch_file with the explicit development ref to avoid modifying main.
+
+Committed 066de7b2: ui.History now includes distinct SketchPatternHistoryButton icons for each persisted pattern record, with stable-ID resolution via find_record, double-click and click opening Design-owned X/Y pitch prompts, and edit_pitch as a single native transaction. The History signature includes persisted record JSON so undo/redo or edits rebuild the icons. Invalid metadata is skipped rather than breaking the whole History widget. Legacy records lacking complete constraint ownership appear disabled. No fake PartDesign solid is created; counts cannot yet be edited. Commit 28d30321 adds a headless source contract in existing test_pattern_ui_contracts.py, already included in add-on CI. These are actual source commits, not verified native GUI tests.
+
+CI lookup for 066de7b2 returned no PR-triggered runs; that connector is insufficient to determine push Actions status. No FreeCAD runtime/Windows install was available in this tool session, so GUI behavior, Qt5/Qt6 compatibility, real save/reopen and Undo/Redo are NOT verified. Do not publish.
+
+NEXT EXACT ACTIONS:
+1. Run Python syntax/fast tests and actual FreeCAD native geometry on 28d30321; inspect push Actions via repository Actions UI/API and fix errors. Confirm command_icon("pattern") resolves a real SVG (replace with known packaged SVG if absent).
+2. Verify Qt History icon refresh and click/double-click behavior, edit_pitch setDatum Quantity compatibility, and native two-pattern edit/cancel/Undo/Redo/FCStd reopen; strengthen the editor with a single nonmodal Design panel if two QInputDialogs are awkward.
+3. Add safe nonmutating passive body-edge/midpoint/circle-center cues while Sketcher drawing; ensure no accidental addExternal until deliberate selection and no native event interception.
+4. Investigate reindexing-safe count changes or keep count editing explicitly unsupported.
+5. Validate native geometry, 0.5.11→0.5.12 Windows patch install, Qt startup, rollback and SHA256 before release. Keep v0.5.11 immutable and user's installed 0.5.11 untouched.
