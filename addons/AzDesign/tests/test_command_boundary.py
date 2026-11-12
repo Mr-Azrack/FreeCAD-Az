@@ -51,6 +51,7 @@ def main():
     # the old name left Project permanently grey and unusable.
     assert module.TOOLS["project"].command == "Sketcher_Projection"
     assert "Sketcher_Projection" in module.ALLOWED_NATIVE_COMMANDS
+    assert {"Std_ViewZoomIn", "Std_ViewZoomOut"} <= module.ALLOWED_NATIVE_COMMANDS
     print("Design command boundary: PASS")
 
 

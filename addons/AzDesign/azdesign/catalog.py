@@ -249,4 +249,4 @@ ALLOWED_NATIVE_COMMANDS = frozenset(
         "new", "open", "save", "export", "undo", "redo",
         "fit", "preferences",
     }
-)
+) | frozenset({"Std_ViewZoomIn", "Std_ViewZoomOut"})  # View-only, no model changes
