@@ -1566,3 +1566,20 @@ Read AGENTS.md and all four continuity files on codex/az-design-workbench. The p
 Committed 50cf7027: newly created Sketch Pattern records receive stable UUID identities persisted with native sketch metadata. read_records rejects duplicate/invalid identities. find_record resolves by ID (not fragile list position) and fails closed on stale ownership. timeline_records exposes distinct per-pattern labels and editable eligibility; legacy records without IDs remain visible but noneditable. This is a data/model foundation, NOT actual timeline widget insertion or independent geometric editing. Committed 3db7b5d6: pure-Python regressions for unique identities, reorder-stable lookup, duplicate rejection, stale ownership and legacy visibility. Tests have not been executed in a local FreeCAD environment in this execution.
 
 NEXT: 1) inspect current Actions results for 3db7b5d6 and fix any failures; 2) integrate timeline_records into workspace history UI with distinct icon and double-click targeting find_record(sketch, id); 3) implement native transactional in-place pattern editing with precise geometry and constraint ownership and safe rejection of downstream dependencies; 4) run two-pattern undo/redo and FCStd save/reopen tests under actual FreeCAD; 5) implement nonmutating sketch edge/midpoint/circle-center hover cues and deliberate associative linking; 6) validate full 0.5.11→0.5.12 Windows patch/Qt/rollback/checksums before publication. No release or Windows install changed.
+
+
+## 2026-11-12 — 0.5.12 autonomous pass: guarded native pitch edit groundwork
+
+Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and SESSION_HANDOFF.md from the development branch. Owner's working 0.5.11 remains untouched. Commits:
+- b91fe333: pattern_records.pitch_edit_plan resolves an individual persistent record by stable ID, validates exact constraint ownership and nonzero pitch, and plans dimension-only edits without changing geometry counts.
+- a5867b41: edit_pitch validates expected Equal/DistanceX/DistanceY/Vertical/Horizontal constraint types and source/copy links, checks other circle centers for overlap, and applies only the selected pattern's driving dimensions in a native document transaction; abort/recompute on failure. Counts cannot be edited safely with this method; do not claim full pattern editing.
+- 11706ee8: pure-Python regression cases for two independent patterns, pitch changes and legacy missing-constraint rejection. These were committed but not executed in a local FreeCAD runtime in this pass.
+
+GitHub fetch_commit_workflow_runs(11706ee8) returned an empty list; this endpoint only surfaces PR-triggered runs and is inconclusive about push CI. No Windows/native geometry acceptance or release has occurred.
+
+CRITICAL NEXT:
+1. Run fast package tests and native FreeCAD tests on current branch; fix any failing test. Verify actual FreeCAD 1.1 App.Units.Quantity(value, App.Units.Length) setDatum signature and native Constraint.First/Second semantics before GUI exposing edit_pitch. Validate Undo/Redo and FCStd save/reopen with two patterns. Inspect PR Actions using a suitable endpoint; empty commit-workflow lookup is not evidence of green CI.
+2. Implement Design-owned pattern edit panel for pitch, route each pattern's stable ID from an actual timeline entry and double-click, with correct icon. Current timeline_records is metadata only, not integrated.
+3. Add passive nonmutating body-edge/midpoint/circle-center Sketcher viewport cues; preserve native tool mouse interactions and no implicit geometry mutation.
+4. For changing counts, explicitly design safe geometry/constraint reindexing and downstream dependency handling, or reject unsupported edits.
+5. Only after native geometry and full Windows 0.5.11→0.5.12 patch, Qt startup, rollback and checksum gates pass, consider release. Do not republish 0.5.11.
