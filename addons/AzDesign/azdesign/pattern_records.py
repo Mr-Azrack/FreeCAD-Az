@@ -27,6 +27,9 @@ def read_records(sketch):
             if not isinstance(record_id, str) or not record_id.strip():
                 raise ValueError("Invalid sketch pattern identity")
             ids.append(record_id)
+        source = record.get("source")
+        if type(source) is not int or source < 0:
+            raise ValueError("Invalid sketch pattern source")
         indices = record.get("created")
         if not isinstance(indices, list) or not indices or any(
             type(index) is not int or index < 0 for index in indices
@@ -88,8 +91,8 @@ def append_record(sketch, parameters, created, constraints=()):
 def validate_ownership(sketch, record):
     """Fail closed before a future edit; never remove unrelated geometry."""
     indices = record["created"]
-    return (record["source"] < sketch.GeometryCount
-            and all(index < sketch.GeometryCount for index in indices)
+    return (0 <= record["source"] < sketch.GeometryCount
+            and all(0 <= index < sketch.GeometryCount for index in indices)
             and len(set(indices)) == len(indices)
             and all(i < sketch.ConstraintCount for i in record.get("constraints", [])))
 
