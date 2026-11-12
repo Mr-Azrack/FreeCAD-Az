@@ -25,10 +25,17 @@ def read_records(sketch):
             type(index) is not int or index < 0 for index in indices
         ) or len(set(indices)) != len(indices):
             raise ValueError("Invalid sketch pattern ownership")
+        constraints = record.get("constraints", [])
+        if not isinstance(constraints, list) or any(type(i) is not int or i < 0 for i in constraints) or len(set(constraints)) != len(constraints):
+            raise ValueError("Invalid sketch pattern constraint ownership")
+    all_geometry = [i for record in payload for i in record["created"]]
+    all_constraints = [i for record in payload for i in record.get("constraints", [])]
+    if len(all_geometry) != len(set(all_geometry)) or len(all_constraints) != len(set(all_constraints)):
+        raise ValueError("Overlapping sketch pattern ownership")
     return payload
 
 
-def append_record(sketch, parameters, created):
+def append_record(sketch, parameters, created, constraints=()):
     """Persist one independent pattern, within the caller's open transaction."""
     source, columns, rows, pitch_x, pitch_y = parameters
     indices = [int(index) for index in created]
@@ -38,7 +45,15 @@ def append_record(sketch, parameters, created):
         index >= sketch.GeometryCount for index in indices
     ):
         raise ValueError("Pattern references missing or source geometry")
+    constraint_indices = list(constraints)
+    if any(type(i) is not int or i < 0 for i in constraint_indices) or len(set(constraint_indices)) != len(constraint_indices):
+        raise ValueError("Invalid generated constraint indices")
+    if any(i >= sketch.ConstraintCount for i in constraint_indices):
+        raise ValueError("Pattern references missing constraints")
     records = read_records(sketch)
+    owned_constraints = {i for record in records for i in record.get("constraints", [])}
+    if owned_constraints.intersection(constraint_indices):
+        raise ValueError("Pattern would take ownership of another pattern's constraints")
     owned = {index for record in records for index in record["created"]}
     if owned.intersection(indices):
         raise ValueError("Pattern would take ownership of another pattern's geometry")
@@ -53,6 +68,7 @@ def append_record(sketch, parameters, created):
         "pitch_x": float(pitch_x),
         "pitch_y": float(pitch_y),
         "created": indices,
+        "constraints": constraint_indices,
     }
     records.append(record)
     setattr(sketch, PROPERTY, json.dumps(records, sort_keys=True))
@@ -64,4 +80,5 @@ def validate_ownership(sketch, record):
     indices = record["created"]
     return (record["source"] < sketch.GeometryCount
             and all(index < sketch.GeometryCount for index in indices)
-            and len(set(indices)) == len(indices))
+            and len(set(indices)) == len(indices)
+            and all(i < sketch.ConstraintCount for i in record.get("constraints", [])))
