@@ -189,3 +189,39 @@ def link_selected_body_edges(sketch):
         doc.abortTransaction()
         doc.recompute()
         raise
+
+
+def passive_sketch_cues(sketch, source, edge_names, tolerance=1e-6):
+    """Return read-only local-plane cues for visible source edges.
+
+    This function deliberately does not call addExternal, addGeometry,
+    openTransaction, or any native Sketcher tool. A viewport overlay can
+    consume the returned coordinates without changing the document.
+    Off-plane targets are rejected rather than falsely advertised as
+    coincident sketch snaps. The caller controls screen-space proximity.
+    """
+    if sketch is None or not sketch.isDerivedFrom("Sketcher::SketchObject"):
+        raise DesignError("An active sketch is required for passive cues.")
+    if source is None or source == sketch or source.Document != sketch.Document:
+        return ()
+    if sketch in getattr(source, "OutListRecursive", ()):
+        return ()
+    if not hasattr(source, "Shape") or source.Shape.isNull():
+        return ()
+    if not isinstance(tolerance, (int, float)) or tolerance <= 0:
+        raise ValueError("Snap plane tolerance must be positive.")
+    inverse = sketch.Placement.inverse()
+    cues = []
+    seen = set()
+    for target in from_object(source, edge_names):
+        point = inverse.multVec(target.point)
+        if abs(point.z) > tolerance:
+            continue
+        key = (target.edge_name, target.name,
+               round(float(point.x), 9), round(float(point.y), 9))
+        if key in seen:
+            continue
+        seen.add(key)
+        cues.append((target.name, target.edge_name,
+                     float(point.x), float(point.y)))
+    return tuple(cues)
