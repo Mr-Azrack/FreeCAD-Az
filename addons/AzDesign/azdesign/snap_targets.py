@@ -225,3 +225,46 @@ def passive_sketch_cues(sketch, source, edge_names, tolerance=1e-6):
         cues.append((target.name, target.edge_name,
                      float(point.x), float(point.y)))
     return tuple(cues)
+
+
+def nearest_passive_cue(cues, project_to_screen, cursor, radius_px=12.0):
+    """Choose one unambiguous viewport cue without altering Sketcher state.
+
+    project_to_screen(x, y) must return the pixel position of a local sketch
+    coordinate, or None for a clipped/hidden point. This deliberately accepts
+    a projection callback rather than assuming a particular FreeCAD/Qt version.
+    Ties at different geometry locations are rejected, never guessed.
+    """
+    import math
+    if not math.isfinite(float(radius_px)) or radius_px <= 0:
+        raise ValueError("Snap radius must be finite and positive.")
+    cx, cy = map(float, cursor)
+    if not (math.isfinite(cx) and math.isfinite(cy)):
+        return None
+    ranked = []
+    for cue in cues:
+        name, edge, x, y = cue
+        if not all(math.isfinite(float(v)) for v in (x, y)):
+            continue
+        screen = project_to_screen(x, y)
+        if screen is None:
+            continue
+        sx, sy = map(float, screen)
+        if not (math.isfinite(sx) and math.isfinite(sy)):
+            continue
+        distance = math.hypot(sx - cx, sy - cy)
+        if distance <= radius_px:
+            ranked.append((distance, cue))
+    if not ranked:
+        return None
+    ranked.sort(key=lambda item: item[0])
+    best_distance, best = ranked[0]
+    # Two overlapping points on different model edges can be coincident and
+    # still describe one location; two different locations equally near the
+    # cursor must not produce an arbitrary snap.
+    for distance, other in ranked[1:]:
+        if distance - best_distance > 0.5:
+            break
+        if math.hypot(other[2] - best[2], other[3] - best[3]) > 1e-7:
+            return None
+    return best
