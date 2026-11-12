@@ -164,3 +164,60 @@ def pitch_edit_plan(sketch, record_id, pitch_x, pitch_y):
             if abs(new_value) >= 0.001:
                 changes.append((ids[offset], new_value))
     return record, changes
+
+def edit_pitch(sketch, record_id, pitch_x, pitch_y):
+    """Edit only the selected pattern's driving dimensions in one Undo step.
+
+    No geometry/constraint deletion or reindexing is performed. All expected
+    native constraints are checked before opening a transaction.
+    """
+    record, changes = pitch_edit_plan(sketch, record_id, pitch_x, pitch_y)
+    constraints = sketch.Constraints
+    source = record["source"]
+    for pos, generated in enumerate(record["created"]):
+        group = record["constraints"][3 * pos:3 * pos + 3]
+        x = (pos + 1) % record["columns"]
+        y = (pos + 1) // record["columns"]
+        expected = ("Equal", "DistanceX" if x else "Vertical",
+                    "DistanceY" if y else "Horizontal")
+        for index, kind in zip(group, expected):
+            item = constraints[index]
+            if item.Type != kind or item.First != source or item.Second != generated:
+                raise ValueError("Sketch pattern constraints changed; refusing unsafe edit")
+    # Protect against a collision with any existing unowned circle before
+    # applying a dimensional change; native solver still makes final decision.
+    owned = set(record["created"])
+    source_geom = sketch.Geometry[source]
+    other_centers = [(g.Center.x, g.Center.y) for i, g in enumerate(sketch.Geometry)
+                     if i != source and i not in owned and hasattr(g, "Center")]
+    import math
+    for y in range(record["rows"]):
+        for x in range(record["columns"]):
+            if not (x or y):
+                continue
+            cx = source_geom.Center.x + x * float(pitch_x)
+            cy = source_geom.Center.y + y * float(pitch_y)
+            if any(math.hypot(cx - ox, cy - oy) < 0.001 for ox, oy in other_centers):
+                raise ValueError("Pattern would overlap another sketch circle")
+    doc = sketch.Document
+    doc.openTransaction("Design: Edit sketch pattern pitch")
+    try:
+        import FreeCAD as App
+        for index, value in changes:
+            sketch.setDatum(index, App.Units.Quantity(float(value), App.Units.Length))
+        record["pitch_x"], record["pitch_y"] = float(pitch_x), float(pitch_y)
+        records = read_records(sketch)
+        for index, item in enumerate(records):
+            if item.get("id") == record_id:
+                records[index] = record
+                break
+        setattr(sketch, PROPERTY, json.dumps(records, sort_keys=True))
+        doc.recompute()
+        if "Invalid" in tuple(str(s) for s in getattr(sketch, "State", ())):
+            raise ValueError("Sketch solver rejected the pattern edit")
+        doc.commitTransaction()
+    except Exception:
+        doc.abortTransaction()
+        doc.recompute()
+        raise
+    return record
