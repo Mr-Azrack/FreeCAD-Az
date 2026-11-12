@@ -504,7 +504,7 @@ jobs:
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File native-core/windows/ApplyAzPatch.ps1 -InstallDir "$baseline" -RollbackLatest -NoUI
           if ($LASTEXITCODE -ne 0) { throw 'Rollback failed' }
           $marker = Get-Content (Join-Path $baseline 'AZ Native Version.json') -Raw | ConvertFrom-Json
-          if ($marker.version -ne '0.5.10') { throw 'Original version was not restored' }
+          if ($marker.version -ne '0.5.11') { throw 'Original version was not restored' }
           if ('${{ steps.baseline_cache.outputs.cache-hit }}' -ne 'true') {
             # Only a fresh installer run has the OS registry registration
             # needed for a meaningful Inno Setup uninstall test.
