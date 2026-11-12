@@ -1640,3 +1640,17 @@ NEXT EXACT STEPS:
 2. Integrate the passive candidate provider and nearest resolver with actual Qt6 FreeCAD 1.1 Sketcher viewport hover/projection, nonintercepting native drawing; show small visible endpoint/midpoint/center indicators. Test enter/leave/edit mode cleanup and high-DPI scaling.
 3. Run native two-pattern editing, constraint ownership, timeline double-click, Undo/Redo, save/reopen and stale-ownership rejection; fix errors. Keep unsupported count editing disabled.
 4. Only after fast/native checks pass, validate 0.5.11→0.5.12 Windows incremental patch, Qt startup, rollback and hashes. Preserve immutable v0.5.11 and do not publish prematurely.
+
+
+## 2026-11-12 — 0.5.12 viewport coordinate adapter checkpoint
+
+Reviewed AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and current SESSION_HANDOFF.md on codex/az-design-workbench. Latest previous checkpoint was cd4b7d3. This run committed 49edd5e2 (snap_targets.viewport_passive_cue) and 2c612261 (focused adapter regressions). The new adapter transforms sketch-local candidate coordinates back through sketch.Placement into global FreeCAD vectors before viewport projection. It delegates ambiguity/radius filtering to nearest_passive_cue and never changes geometry or transactions. Tests cover offset sketch placement, correct midpoint selection, and read-only behavior. This is NOT live Qt hover drawing or automatic constraint insertion.
+
+No local FreeCAD/Qt installation was available through the GitHub connector. No tests were executed in this run; commit-workflow lookup is PR-only and not proof of push CI. Windows 0.5.11 remains unchanged. Do not publish 0.5.12 yet.
+
+NEXT EXACT ACTIONS:
+1. Execute tests/test_snap_targets_contracts.py in actual Python, inspect push CI via Actions API/UI, and fix failures.
+2. Find active Sketcher viewport event/preselection lifecycle in workspace.py/session.py and attach a nonintercepting hover indicator using viewport_passive_cue; ensure project_world uses FreeCAD 1.1 view projection with correct logical/device pixel scaling. Teardown on edit exit and workbench switch; no native drawing interference.
+3. Native FreeCAD geometry validation: two independently persisted sketch patterns, pitch editing via timeline double-click, Cancel/Undo/Redo, FCStd save/reopen and stale index/constraint rejection.
+4. Keep count editing disabled until safe geometry/constraint reindexing and dependency semantics are proven.
+5. Only after fast/native checks pass, run 0.5.11-to-0.5.12 Windows hash-guarded patch, Qt startup, rollback and checksum verification, then consider release. Never overwrite immutable 0.5.11.
