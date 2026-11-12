@@ -693,6 +693,56 @@ class FeatureButton(QtWidgets.QToolButton):
             obj.Document.commitTransaction()
 
 
+class SketchPatternHistoryButton(QtWidgets.QToolButton):
+    """Independent Design history entry for one persisted sketch pattern."""
+
+    def __init__(self, sketch, item, history_widget):
+        super().__init__()
+        self.sketch = sketch
+        self.record_id = item["id"]
+        self.history_widget = history_widget
+        self.setObjectName("AzSketchPatternHistory")
+        self.setIcon(command_icon("pattern"))
+        self.setIconSize(QtCore.QSize(22, 22))
+        self.setFixedSize(32, 32)
+        self.setToolTip(sketch.Label + " · " + item["label"] +
+                        (" · double-click to edit spacing" if item["editable"]
+                         else " · legacy/incomplete ownership; editing disabled"))
+        self.setEnabled(bool(item["editable"]))
+        self.clicked.connect(self.edit)
+
+    def mouseDoubleClickEvent(self, event):
+        self.edit()
+        event.accept()
+
+    def edit(self, *_):
+        if Gui.Control.activeDialog():
+            commands.notify("Finish the active operation before editing a pattern.", True)
+            return
+        from .pattern_records import find_record, edit_pitch
+        try:
+            record = find_record(self.sketch, self.record_id)
+            if modeling.in_sketch() is not None:
+                commands.notify("Finish Sketch before editing pattern history.", True)
+                return
+            x, ok = QtWidgets.QInputDialog.getDouble(
+                self, "Edit sketch pattern", "X center spacing (mm)",
+                float(record["pitch_x"]), -100000, 100000, 3)
+            if not ok:
+                return
+            y, ok = QtWidgets.QInputDialog.getDouble(
+                self, "Edit sketch pattern", "Y center spacing (mm)",
+                float(record["pitch_y"]), -100000, 100000, 3)
+            if not ok:
+                return
+            edit_pitch(self.sketch, self.record_id, x, y)
+            self.history_widget.signature = None
+            self.history_widget.refresh()
+            commands.notify("Sketch pattern spacing updated; Undo is available.")
+        except Exception as exc:
+            commands.notify("Sketch pattern edit: " + str(exc), True)
+
+
 class History(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
@@ -702,6 +752,7 @@ class History(QtWidgets.QWidget):
         self.setStyleSheet(STYLE)
         self.signature = None
         self.buttons = []
+        self.pattern_buttons = []
         layout = QtWidgets.QHBoxLayout(self)
         layout.setContentsMargins(9, 3, 9, 3)
         layout.setSpacing(4)
@@ -878,10 +929,13 @@ class History(QtWidgets.QWidget):
             doc.Name if doc else None,
             tuple((o.Name, o.Label, getattr(o, "Suppressed", False)) for o in features),
             tuple((b.Name, b.Tip.Name if b.Tip else "") for b in rolled),
+            tuple((o.Name, getattr(o, "AzSketchPatternRecords", "")) for o in doc.Objects
+                  if hasattr(o, "AzSketchPatternRecords")) if doc else (),
         )
         if signature != self.signature:
             self.signature = signature
             self.buttons = []
+            self.pattern_buttons = []
             page = QtWidgets.QWidget()
             row = QtWidgets.QHBoxLayout(page)
             row.setContentsMargins(0, 0, 0, 0)
@@ -909,6 +963,21 @@ class History(QtWidgets.QWidget):
                     marker.setStyleSheet("background: #3c596d;")
                     marker.setToolTip("Current Body Tip · later features are rolled back")
                     row.addWidget(marker)
+            # Sketch patterns are stored on native Sketcher objects, not as
+            # fake PartDesign solids. Show a distinct icon per stable record ID.
+            if doc:
+                from .pattern_records import timeline_records
+                for sketch in doc.Objects:
+                    if not getattr(sketch, "AzSketchPatternRecords", ""):
+                        continue
+                    try:
+                        items = timeline_records(sketch)
+                    except (ValueError, TypeError):
+                        continue  # corrupt ownership must never break History
+                    for item in items:
+                        button = SketchPatternHistoryButton(sketch, item, self)
+                        self.pattern_buttons.append(button)
+                        row.addWidget(button)
             if features and not rolled:
                 marker = QtWidgets.QFrame()
                 marker.setFixedSize(3, 31)
