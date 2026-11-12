@@ -50,7 +50,13 @@ def read_records(sketch):
 def append_record(sketch, parameters, created, constraints=()):
     """Persist one independent pattern, within the caller's open transaction."""
     source, columns, rows, pitch_x, pitch_y = parameters
-    indices = [int(index) for index in created]
+    if type(source) is not int or not 0 <= source < sketch.GeometryCount:
+        raise ValueError("Invalid pattern source geometry")
+    if type(columns) is not int or type(rows) is not int or columns < 1 or rows < 1:
+        raise ValueError("Invalid pattern dimensions")
+    indices = list(created)
+    if any(type(index) is not int for index in indices):
+        raise ValueError("Invalid generated geometry indices")
     if not indices or len(indices) != columns * rows - 1:
         raise ValueError("Pattern geometry count does not match dimensions")
     if source in indices or source < 0 or any(
@@ -67,8 +73,8 @@ def append_record(sketch, parameters, created, constraints=()):
     if owned_constraints.intersection(constraint_indices):
         raise ValueError("Pattern would take ownership of another pattern's constraints")
     owned = {index for record in records for index in record["created"]}
-    if owned.intersection(indices):
-        raise ValueError("Pattern would take ownership of another pattern's geometry")
+    if source in owned or owned.intersection(indices):
+        raise ValueError("Pattern would reference another pattern's generated geometry")
     if PROPERTY not in sketch.PropertiesList:
         sketch.addProperty("App::PropertyString", PROPERTY, "Design", 
                            "Versioned Sketch Pattern geometry ownership")
