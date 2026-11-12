@@ -96,6 +96,8 @@ jobs:
         run: python addons/AzDesign/tests/test_native_transform_contracts.py
       - name: Test Design-owned Pattern edit and live preview transactions
         run: python addons/AzDesign/tests/test_pattern_ui_contracts.py
+      - name: Test persisted independent sketch-pattern ownership
+        run: python addons/AzDesign/tests/test_pattern_records.py
       - name: Test original image-only history timeline assets
         run: python addons/AzDesign/tests/test_timeline_icons.py
       - name: Test Fusion video interaction-shortcut contracts
