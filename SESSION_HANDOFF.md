@@ -1503,3 +1503,31 @@ NEXT EXACT STEPS:
 6. Validate all native FreeCAD tests and then Windows 0.5.10-to-0.5.11
    incremental patch, Qt startup, rollback/uninstall and artifact hashes.
    Publish only after all release gates pass.
+
+
+## 2026-11-11 — 0.5.11 RELEASED; remaining features moved to 0.5.12
+
+Owner approved freezing 0.5.11 scope in ROADMAP.md and deferring automatic
+Fusion-style body-edge hover referencing and independently editable sketch-pattern
+timeline/history to 0.5.12. Do not add those deferred features to the already
+published 0.5.11 release or overwrite its immutable patch.
+
+The 0.5.11 release gate was successfully completed in GitHub Actions run
+43152125196, source ef0e32dcab3968544752c7909b57ac9e8dfa4315:
+native geometry SUCCESS, Windows patch SUCCESS, installed 0.5.10 baseline
+reconstructed from pinned/hash-checked patch chain, changed-only overlay,
+patch apply, Qt startup, rollback and SHA256 verification SUCCESS.
+The cached pinned 0.5.6 base was reused, avoiding a full installer rebuild.
+The full cold uninstaller path was SKIPPED because the cached baseline was used;
+do not claim cold uninstall was tested on this run.
+Public GitHub release verified: https://github.com/Mr-Azrack/FreeCAD-Az/releases/tag/v0.5.11
+Asset AzDesignNative-0.5.10-to-0.5.11.azpatch, 386285 bytes,
+SHA256 8685ff8132b602eb37015f06f53952870a73afd5cb9733b87331db4c87c4494d.
+Owner's real GUI acceptance is still pending.
+
+NEXT: 0.5.12 development must branch/scope from immutable 0.5.11, never
+modify or republish 0.5.11. First implement independent sketch-pattern
+constraint ownership and safe edit/cancel/Undo/save/reopen; wire Design timeline
+icon and double-click edit. Then add passive sketch body-edge/midpoint/circle
+center cues and deliberate associative link without P. Test native FreeCAD
+geometry and Windows patch only once the 0.5.12 feature batch is ready.
