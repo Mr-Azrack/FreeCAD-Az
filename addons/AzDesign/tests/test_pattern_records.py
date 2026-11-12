@@ -107,6 +107,17 @@ class PatternRecordsTests(unittest.TestCase):
         sketch.AzSketchPatternRecords = json.dumps([record])
         self.assertFalse(timeline_records(sketch)[0]["editable"])
 
+    def test_invalid_source_never_targets_other_geometry(self):
+        sketch = FakeSketch()
+        record = append_record(sketch, (0, 2, 2, 10, 20), (1, 2, 3))
+        for invalid in (-1, True, "0", None):
+            damaged = dict(record, source=invalid)
+            sketch.AzSketchPatternRecords = json.dumps([damaged])
+            with self.subTest(source=invalid), self.assertRaisesRegex(ValueError, "source"):
+                read_records(sketch)
+        sketch.AzSketchPatternRecords = json.dumps([dict(record, source=10)])
+        self.assertFalse(validate_ownership(sketch, read_records(sketch)[0]))
+
     def test_corrupt_record_fails_closed(self):
         sketch = FakeSketch()
         sketch.AzSketchPatternRecords = '[{"version": 1, "created": [2, 2]}]'
