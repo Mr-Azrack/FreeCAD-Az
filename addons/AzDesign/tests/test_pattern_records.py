@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from azdesign.pattern_records import append_record, read_records, validate_ownership, find_record, timeline_records
+from azdesign.pattern_records import append_record, read_records, validate_ownership, find_record, timeline_records, pitch_edit_plan
 
 
 class FakeSketch:
@@ -69,6 +69,27 @@ class PatternRecordsTests(unittest.TestCase):
         sketch.ConstraintCount = 1
         with self.assertRaises(ValueError):
             find_record(sketch, second["id"])
+
+    def test_independent_pitch_edit_plan_preserves_other_pattern(self):
+        sketch = FakeSketch()
+        first = append_record(sketch, (0, 2, 2, 10, 20), (1, 2, 3),
+                              (0, 1, 2, 3, 4, 5, 6, 7, 8))
+        second = append_record(sketch, (4, 2, 2, 15, 25), (5, 6, 7),
+                               (9, 10, 11, 12, 13, 14, 15, 16, 17))
+        record, changes = pitch_edit_plan(sketch, first["id"], 12, 24)
+        self.assertEqual(record["id"], first["id"])
+        self.assertEqual(changes, [(1, 12.0), (4, 24.0),
+                                   (7, 12.0), (8, 24.0)])
+        self.assertEqual(find_record(sketch, second["id"])["pitch_x"], 15)
+        with self.assertRaisesRegex(ValueError, "nonzero"):
+            pitch_edit_plan(sketch, first["id"], 0, 24)
+        self.assertEqual(find_record(sketch, first["id"])["pitch_x"], 10)
+
+    def test_pitch_edit_rejects_legacy_missing_constraints(self):
+        sketch = FakeSketch()
+        record = append_record(sketch, (0, 2, 2, 10, 20), (1, 2, 3))
+        with self.assertRaisesRegex(ValueError, "incomplete"):
+            pitch_edit_plan(sketch, record["id"], 12, 22)
 
     def test_duplicate_identity_fails_closed(self):
         sketch = FakeSketch()
