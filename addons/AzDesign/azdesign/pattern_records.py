@@ -20,13 +20,13 @@ def read_records(sketch):
         raise ValueError("Invalid sketch pattern record list")
     ids = []
     for record in payload:
+        if not isinstance(record, dict) or record.get("version") != VERSION:
+            raise ValueError("Unsupported sketch pattern record")
         record_id = record.get("id")
         if record_id is not None:
             if not isinstance(record_id, str) or not record_id.strip():
                 raise ValueError("Invalid sketch pattern identity")
             ids.append(record_id)
-        if not isinstance(record, dict) or record.get("version") != VERSION:
-            raise ValueError("Unsupported sketch pattern record")
         indices = record.get("created")
         if not isinstance(indices, list) or not indices or any(
             type(index) is not int or index < 0 for index in indices
@@ -124,3 +124,43 @@ def timeline_records(sketch):
                              validate_ownership(sketch, record)),
         })
     return result
+
+def pitch_edit_plan(sketch, record_id, pitch_x, pitch_y):
+    """Validate an in-place pitch edit without mutating native Sketcher.
+
+    Changing occurrence counts would reindex geometry and potentially damage
+    downstream features; this operation deliberately supports pitch only.
+    """
+    import math
+    record = find_record(sketch, record_id)
+    columns, rows = record["columns"], record["rows"]
+    if not (isinstance(columns, int) and isinstance(rows, int)
+            and columns >= 1 and rows >= 1
+            and len(record["created"]) == columns * rows - 1):
+        raise ValueError("Invalid persisted pattern dimensions")
+    if not record.get("constraints") or len(record["constraints"]) != 3 * len(record["created"]):
+        raise ValueError("Pattern constraint ownership is incomplete")
+    if any(not math.isfinite(float(p)) or abs(float(p)) > 100000
+           for p in (pitch_x, pitch_y)):
+        raise ValueError("Invalid pattern pitch")
+    pitch_x, pitch_y = float(pitch_x), float(pitch_y)
+    if (columns > 1 and abs(pitch_x) < 0.001) or (rows > 1 and abs(pitch_y) < 0.001):
+        raise ValueError("Pattern pitch must be nonzero")
+    # The creation routine stores Equal, then X, then Y for each copy.
+    # Reject a change that switches a zero-offset alignment constraint
+    # (Vertical/Horizontal) into a dimensional constraint or vice versa.
+    changes = []
+    for position, (x, y) in enumerate(
+            ( (x, y) for y in range(rows) for x in range(columns)
+              if x or y )):
+        ids = record["constraints"][position * 3: position * 3 + 3]
+        for offset, old_pitch, new_pitch, multiplier in (
+                (1, record["pitch_x"], pitch_x, x),
+                (2, record["pitch_y"], pitch_y, y)):
+            old_value = multiplier * old_pitch
+            new_value = multiplier * new_pitch
+            if (abs(old_value) < 0.001) != (abs(new_value) < 0.001):
+                raise ValueError("Pattern constraint type would change")
+            if abs(new_value) >= 0.001:
+                changes.append((ids[offset], new_value))
+    return record, changes
