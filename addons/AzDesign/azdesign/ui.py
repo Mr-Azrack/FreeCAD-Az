@@ -716,14 +716,18 @@ class SketchPatternHistoryButton(QtWidgets.QToolButton):
         event.accept()
 
     def edit(self, *_):
-        if Gui.Control.activeDialog():
+        # Sketcher's own edit task is expected while editing a sketch pattern.
+        # Reject unrelated active tasks, but don't force Finish Sketch just to
+        # change the spacing of this sketch's existing persisted pattern.
+        active_sketch = modeling.in_sketch()
+        if Gui.Control.activeDialog() and active_sketch is not self.sketch:
             commands.notify("Finish the active operation before editing a pattern.", True)
             return
         from .pattern_records import find_record, edit_pitch
         try:
             record = find_record(self.sketch, self.record_id)
-            if modeling.in_sketch() is not None:
-                commands.notify("Finish Sketch before editing pattern history.", True)
+            if active_sketch is not None and active_sketch is not self.sketch:
+                commands.notify("Finish the other sketch before editing this pattern.", True)
                 return
             x, ok = QtWidgets.QInputDialog.getDouble(
                 self, "Edit sketch pattern", "X center spacing (mm)",
