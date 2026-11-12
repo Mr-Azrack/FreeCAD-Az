@@ -100,7 +100,12 @@ class OverlayTests(unittest.TestCase):
             AlignCenter=12,
         ))
         qt.QtWidgets = types.SimpleNamespace(QLabel=Label)
+        snap_targets = types.ModuleType("azdesign.snap_targets")
+        # This suite isolates sketch-overlay placement; native body-edge
+        # inference has its own contract and FreeCAD-backed regression.
+        snap_targets.viewport_passive_cue = lambda *args, **kwargs: None
         self.patch = patch.dict(sys.modules, {
+            "azdesign.snap_targets": snap_targets,
             "FreeCADGui": gui,
             "azdesign.modeling": modeling,
             "azdesign.qt": qt,
