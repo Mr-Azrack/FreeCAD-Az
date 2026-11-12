@@ -1464,3 +1464,42 @@ NEXT EXACT STEPS:
    requiring P or interfering with Sketcher drawing.
 5. After full native tests pass, validate 0.5.10→0.5.11 Windows patch install,
    Qt startup, rollback/uninstall, artifact hash/publication before release.
+
+
+## 2026-11-11 — 0.5.11 independent sketch-pattern ownership groundwork
+
+Reviewed PROJECT_STATE.md, DECISIONS.md, ROADMAP.md, AGENTS.md and this handoff.
+Prior add-on CI 43142315554 passed for a91d2cb. This execution committed:
+- c68a20f: SketchPatternDraft.accept records ownership inside the same native
+  FreeCAD transaction as generated circles; metadata failures abort the
+  transaction rather than leaving untracked geometry.
+- 09e651f: new pattern_records.py stores versioned independent records as a
+  sketch App::PropertyString, with source, dimensions, pitch and created
+  Sketcher indices; refuses duplicate ownership and corrupt records.
+- 10f82be / 5899c1b: executable pure-Python persistence, collision and
+  corruption regressions, including root-run import setup.
+- 91a540b: fast CI registers the new tests.
+
+This is the first persistence layer, NOT an independently editable timeline
+feature yet. Existing pattern records are not automatically migrated; editing
+must validate indices and constraint ownership before deletion/replacement.
+The record currently tracks generated geometry indices, NOT constraint indices,
+so it is unsafe to implement deletion solely from this metadata. The record
+survives FCStd serialization via native sketch property, but real native
+save/reopen has not yet been exercised. No Windows patch was published.
+
+NEXT EXACT STEPS:
+1. Inspect Actions for 91a540b; repair package/modeling regressions.
+2. Add native FreeCAD test for Apply/Undo/Redo and FCStd save/reopen, checking
+   App::PropertyString and generated circle/constraint persistence.
+3. Extend records to stable generated constraint ownership; reject stale
+   indices, geometry reordering, or downstream references. Implement an
+   atomic edit transaction that can rebuild only its own circles/constraints.
+4. Add a Design-owned timeline entry with recognizable icon and double-click
+   edit panel routing to the exact independent record. Test two patterns
+   editing one without altering the other; Cancel/Undo/Redo/reopen.
+5. Implement automatic passive body-edge reference cues and deliberate
+   associative link without requiring P, avoiding unintended sketch mutation.
+6. Validate all native FreeCAD tests and then Windows 0.5.10-to-0.5.11
+   incremental patch, Qt startup, rollback/uninstall and artifact hashes.
+   Publish only after all release gates pass.
