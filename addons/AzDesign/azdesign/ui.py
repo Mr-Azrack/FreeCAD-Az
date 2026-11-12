@@ -729,17 +729,30 @@ class SketchPatternHistoryButton(QtWidgets.QToolButton):
             if active_sketch is not None and active_sketch is not self.sketch:
                 commands.notify("Finish the other sketch before editing this pattern.", True)
                 return
-            x, ok = QtWidgets.QInputDialog.getDouble(
-                self, "Edit sketch pattern", "X center spacing (mm)",
-                float(record["pitch_x"]), -100000, 100000, 3)
-            if not ok:
+            dialog = QtWidgets.QDialog(self)
+            dialog.setWindowTitle("Edit sketch pattern spacing · Design")
+            dialog.setMinimumWidth(300)
+            layout = QtWidgets.QVBoxLayout(dialog)
+            fields = QtWidgets.QFormLayout()
+            x_field = QtWidgets.QDoubleSpinBox(dialog)
+            y_field = QtWidgets.QDoubleSpinBox(dialog)
+            for field, value in ((x_field, record["pitch_x"]),
+                                 (y_field, record["pitch_y"])):
+                field.setRange(-100000, 100000)
+                field.setDecimals(3)
+                field.setSuffix(" mm")
+                field.setValue(float(value))
+                fields.addRow("X spacing" if field is x_field else "Y spacing", field)
+            layout.addLayout(fields)
+            buttons = QtWidgets.QDialogButtonBox(
+                QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel,
+                parent=dialog)
+            buttons.accepted.connect(dialog.accept)
+            buttons.rejected.connect(dialog.reject)
+            layout.addWidget(buttons)
+            if dialog.exec() != QtWidgets.QDialog.Accepted:
                 return
-            y, ok = QtWidgets.QInputDialog.getDouble(
-                self, "Edit sketch pattern", "Y center spacing (mm)",
-                float(record["pitch_y"]), -100000, 100000, 3)
-            if not ok:
-                return
-            edit_pitch(self.sketch, self.record_id, x, y)
+            edit_pitch(self.sketch, self.record_id, x_field.value(), y_field.value())
             self.history_widget.signature = None
             self.history_widget.refresh()
             commands.notify("Sketch pattern spacing updated; Undo is available.")
