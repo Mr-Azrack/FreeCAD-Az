@@ -210,20 +210,31 @@ def passive_sketch_cues(sketch, source, edge_names, tolerance=1e-6):
         return ()
     if not isinstance(tolerance, (int, float)) or tolerance <= 0:
         raise ValueError("Snap plane tolerance must be positive.")
+    import math
     inverse = sketch.Placement.inverse()
     cues = []
     seen = set()
-    for target in from_object(source, edge_names):
-        point = inverse.multVec(target.point)
-        if abs(point.z) > tolerance:
+    try:
+        candidates = from_object(source, edge_names)
+    except DesignError:
+        # Hover may traverse unsupported or transiently stale topology;
+        # never interrupt an active Sketcher drawing command.
+        return ()
+    for target in candidates:
+        try:
+            point = inverse.multVec(target.point)
+            xyz = (float(point.x), float(point.y), float(point.z))
+        except (AttributeError, TypeError, ValueError, RuntimeError):
+            continue
+        if not all(math.isfinite(v) for v in xyz) or abs(xyz[2]) > tolerance:
             continue
         key = (target.edge_name, target.name,
-               round(float(point.x), 9), round(float(point.y), 9))
+               round(xyz[0], 9), round(xyz[1], 9))
         if key in seen:
             continue
         seen.add(key)
         cues.append((target.name, target.edge_name,
-                     float(point.x), float(point.y)))
+                     xyz[0], xyz[1]))
     return tuple(cues)
 
 
@@ -246,10 +257,16 @@ def nearest_passive_cue(cues, project_to_screen, cursor, radius_px=12.0):
         name, edge, x, y = cue
         if not all(math.isfinite(float(v)) for v in (x, y)):
             continue
-        screen = project_to_screen(x, y)
+        try:
+            screen = project_to_screen(x, y)
+        except (ValueError, RuntimeError, TypeError, OverflowError):
+            continue
         if screen is None:
             continue
-        sx, sy = map(float, screen)
+        try:
+            sx, sy = map(float, screen)
+        except (TypeError, ValueError, OverflowError):
+            continue
         if not (math.isfinite(sx) and math.isfinite(sy)):
             continue
         distance = math.hypot(sx - cx, sy - cy)
