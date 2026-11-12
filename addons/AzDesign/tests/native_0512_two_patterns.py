@@ -6,7 +6,16 @@ import tempfile
 import sys
 from pathlib import Path
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PACKAGE_ROOT))
+# Match the Debian FreeCAD runtime discovery used by run_workflow.py.
+libraries = (
+    [Path(os.environ["FREECAD_LIB_DIR"])]
+    if os.environ.get("FREECAD_LIB_DIR")
+    else list(Path("/usr/lib").glob("freecad*/lib"))
+)
+sys.path[:0] = [str(PACKAGE_ROOT)] + [str(p) for p in libraries]
+for root in (Path("/usr/share/freecad/Mod"), Path("/usr/share/freecad-python3/Mod")):
+    if root.is_dir():
+        sys.path[:0] = [str(root)] + [str(p) for p in root.iterdir() if p.is_dir()]
 import FreeCAD as App
 import Part
 import azdesign
