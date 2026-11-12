@@ -58,6 +58,35 @@ class EdgeReferenceTests(unittest.TestCase):
     def select(self, *names):
         hit = types.SimpleNamespace(Object=self.source, SubElementNames=names)
         self.gui.Selection.getSelectionEx = lambda: [hit]
+    def test_passive_cues_do_not_mutate_sketch(self):
+        class Vec:
+            def __init__(self, x, y, z=0):
+                self.x, self.y, self.z = x, y, z
+            def __sub__(self, other):
+                return Vec(self.x - other.x, self.y - other.y, self.z - other.z)
+            @property
+            def Length(self):
+                return (self.x*self.x + self.y*self.y + self.z*self.z)**0.5
+        class Edge:
+            FirstParameter, LastParameter = 0, 1
+            Curve = object()
+            Vertexes = [types.SimpleNamespace(Point=Vec(0, 0)),
+                        types.SimpleNamespace(Point=Vec(10, 0))]
+            def isNull(self): return False
+            def valueAt(self, t): return Vec(10*t, 0)
+        self.source.Shape.Edges = [Edge()]
+        self.sketch.Placement = types.SimpleNamespace(
+            inverse=lambda: types.SimpleNamespace(multVec=lambda p: p))
+        cues = self.api.passive_sketch_cues(self.sketch, self.source, ("Edge1",))
+        self.assertEqual([item[0] for item in cues],
+                         ["Start", "End", "Midpoint"])
+        self.assertEqual(cues[-1][2:], (5.0, 0.0))
+        self.assertEqual(self.doc.calls, [])
+        self.assertEqual(self.sketch.added, [])
+        self.source.Shape.Edges[0].Vertexes[0].Point.z = 1
+        cues = self.api.passive_sketch_cues(self.sketch, self.source, ("Edge1",))
+        self.assertNotIn("Start", [item[0] for item in cues])
+
     def test_single_edge_commits(self):
         self.assertEqual(self.api.link_body_edge(self.sketch, self.source, "Edge1"), 1)
         self.assertEqual(self.doc.calls, ["begin", "recompute", "commit"])
