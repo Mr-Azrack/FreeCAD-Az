@@ -1394,3 +1394,24 @@ NEXT EXACT STEPS:
    and test edits/cancel/reopen.
 5. Only after fast and native tests pass, construct and validate the unique
    0.5.10-to-0.5.11 Windows patch, Qt startup and rollback. No release yet.
+
+
+## 2026-11-11 — Development pass: associative edge-reference viewport entry
+
+Verified fast Az Design run 43117834894 on 08fe43f SUCCESS.
+Committed 3e9e469: while editing a sketch, right-clicking the viewport with
+selected edges from another object now offers "Reference selected body edges".
+This calls the transactional native Sketcher external-reference backend
+without intercepting native Sketcher drawing clicks. Invalid/cross-document
+selections do not expose the action. Committed 9e92b47 source regression
+contract. This is an explicit selection action, NOT automatic hover projection,
+and Windows GUI behavior has not been validated. No installer published.
+
+NEXT: check CI for 9e92b47 and fix failures. Add real native FreeCAD 1.1
+geometry save/reopen and Undo/Redo tests for external references, then
+implement passive automatic model-edge midpoint/circle-center cues in the
+sketch viewport without modifying source geometry. Build independent
+persistent sketch-pattern parameter/history object with double-click
+Design-owned editing and safe cancellation; verify generated circle
+constraints, save/reopen and history undo. Only then build and test the
+0.5.10-to-0.5.11 Windows patch, Qt launch and rollback.
