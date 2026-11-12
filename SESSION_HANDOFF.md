@@ -1531,3 +1531,18 @@ constraint ownership and safe edit/cancel/Undo/save/reopen; wire Design timeline
 icon and double-click edit. Then add passive sketch body-edge/midpoint/circle
 center cues and deliberate associative link without P. Test native FreeCAD
 geometry and Windows patch only once the 0.5.12 feature batch is ready.
+
+
+## 2026-11-12 — 0.5.12 development: constraint ownership increment
+
+Owner confirms installed 0.5.11 works. Work remains scoped to codex/az-design-workbench; do not alter or republish 0.5.11.
+
+Commits ea81aeb7 and 617887b add optional constraint indices to persisted sketch-pattern records, reject duplicate ownership across patterns, reject invalid/missing constraints, and add focused regression tests. Legacy records without constraints remain readable, but are NOT safe for automated edit/delete because their constraint ownership is unknown. These changes are groundwork, not a finished editable timeline feature. No local FreeCAD or Windows execution was performed in this GitHub-tool session; inspect Actions on 617887b0 before relying on tests.
+
+NEXT EXACT ACTIONS:
+1. Inspect fast add-on CI for 617887b0 and fix any failures.
+2. Inspect actual SketchPatternDraft.accept and pattern_circles implementations; capture generated constraint indices from the real Sketcher API in the same transaction and pass them to append_record. Do not infer constraint ownership from geometry indices.
+3. Implement fail-closed atomic per-record edit with stable geometry/constraint ownership, including shifting indices safely or rejecting unsupported dependencies; test two patterns, cancel, undo/redo and FCStd reopen with native FreeCAD.
+4. Integrate each pattern record into the Design timeline with its own icon and double-click editor.
+5. Add passive nonmutating body-edge/midpoint/circle-center hover cues and explicit associative link; do not interrupt native Sketcher drawing.
+6. Only then run native geometry, Windows 0.5.11-to-0.5.12 patch install, Qt startup, rollback and checksum gates; publish only after all pass.
