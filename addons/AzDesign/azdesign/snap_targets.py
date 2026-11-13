@@ -501,3 +501,44 @@ def viewport_passive_cue(sketch, source, edge_names, project_world, cursor,
         return None
     hit = _body_snap_cues(sketch, source, edge_names, project_world, cursor, radius_px)
     return hit[1] if hit else None
+
+
+def align_new_line_endpoints(sketch, first, targets):
+    """Remove the pixel-rounding error from newly drawn line endpoints."""
+    import FreeCADGui as Gui
+    view = Gui.activeDocument().activeView()
+    placement = _sketch_placement(sketch)
+    vertices = []
+    for index, geometry in enumerate(sketch.Geometry[first:], first):
+        if isinstance(geometry, Part.LineSegment):
+            for pos in (1, 2):
+                px, py = view.getPointOnScreen(placement.multVec(sketch.getPoint(index, pos)))
+                vertices.append((index, pos, px, py))
+    matches = {}
+    for target in targets:
+        tx, ty = view.getPointOnScreen(placement.multVec(target))
+        nearest = None
+        distance = 5.0
+        for index, pos, px, py in vertices:
+            error = math.hypot(tx - px, ty - py)
+            if error < distance:
+                nearest, distance = (index, pos), error
+        if nearest:
+            matches[nearest] = target
+    if not matches or all((sketch.getPoint(*key) - target).Length < 1e-8
+                          for key, target in matches.items()):
+        return
+    move = getattr(sketch, "moveGeometry", None) or sketch.movePoint
+    doc = sketch.Document
+    doc.openTransaction("Design: Align snapped endpoints")
+    try:
+        for _ in range(2):
+            for (index, pos), target in matches.items():
+                move(index, pos, target)
+        if sketch.solve() or any((sketch.getPoint(*key) - target).Length > 1e-7
+                                 for key, target in matches.items()):
+            doc.abortTransaction()
+            return
+        doc.commitTransaction()
+    except (RuntimeError, ValueError):
+        doc.abortTransaction()

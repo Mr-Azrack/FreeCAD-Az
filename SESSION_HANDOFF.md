@@ -1914,3 +1914,10 @@ Owner confirmed the revised snapping works and reported Auto Extrude rejecting t
 Linux native modeling: 58 tests passed. Windows live Qt exercised two real viewport selections on a solid, checked the overlay depth bias and unchanged plane, verified positive Auto Join and negative Auto Cut by volume, accepted Cut, and confirmed overlay cleanup. The updated isolated desktop shortcut is FreeCAD-Az 0.5.12 DEV - Extrude Fix. The prior DEV build and production 0.5.11 are preserved. The release patch must be rebuilt after acceptance.
 
 Windows native discovery passed 206 tests, plus the independent two-pattern regression.
+
+
+## 2026-11-13 — Flush solid-edge snap and DEV cleanup
+
+Owner confirmed the Extrude fix and reported a thin step on a nominally flush Join. Windows reproduced one solid with 12 faces from a rectangle drawn at snapped corners: Sketcher's viewport event retained a subpixel world-space error. The filter now retains exact solid target coordinates for the drawing gesture and asks the native solver to align nearby newly created line endpoints. A conflicting correction rolls back; no geometry is modified on hover and no fixed or external constraints are inserted. This is exact initial placement, not an associative dependency. The Windows rectangle-to-Join regression now produces one valid six-face solid at the exact expected volume. Windows native discovery passed 206 tests plus the independent two-pattern regression; Linux native modeling passed 58 tests.
+
+The active desktop entries are Az Design Native (production 0.5.11) and FreeCAD-Az 0.5.12 DEV (flush-snap test). Prior DEV launchers are archived in LocalAppData AzDesign. Existing sessions and standard FreeCAD installs are preserved. After owner re-creates the affected sketch boundary in the revised DEV build, rebuild the incremental release patch from the pinned 0.5.11 baseline.

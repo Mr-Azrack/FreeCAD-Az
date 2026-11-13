@@ -76,7 +76,7 @@ class HoverGuides:
         self.last = result
         return True
 
-    def target(self, widget, event):
+    def target(self, widget, event, exact=False):
         sketch = modeling.in_sketch()
         if not sketch:
             return None
@@ -106,6 +106,7 @@ class HoverGuides:
 
             result = snap_hover.best_snap(sketch.Geometry, cursor, projection)
 
+            local = None
             if result is None:
                 # Read-only body-edge inference for both cues and drawing clicks.
                 try:
@@ -129,9 +130,9 @@ class HoverGuides:
                 if cue is not None:
                     import FreeCAD as App
                     name, edge, x, y = cue
-                    screen = project_world(
-                        placement.multVec(App.Vector(x, y, 0)))
+                    local = App.Vector(x, y, 0)
+                    screen = projection(local)
                     result = (name, screen, edge)
-            return result
+            return (result, local) if exact and result is not None else result
         except (RuntimeError, ValueError, TypeError, AttributeError, ReferenceError):
             return None

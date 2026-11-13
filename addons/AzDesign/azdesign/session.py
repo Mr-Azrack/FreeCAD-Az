@@ -28,6 +28,8 @@ class InteractionFilter(QtCore.QObject):
         self.forwarding = False
         self.profile_press = None
         self.snap_press = None
+        self.snap_points = []
+        self.snap_geometry = None
 
     def editable_focus(self):
         app = QtWidgets.QApplication.instance()
@@ -150,6 +152,7 @@ class InteractionFilter(QtCore.QObject):
                 event.accept()
                 return True
         if kind == QtCore.QEvent.KeyPress and event.key() == QtCore.Qt.Key_Escape:
+            self.clear_snap_points()
             # Design-owned preview transactions must abort on global Esc,
             # even when the actual Coin viewport has keyboard focus.
             from .solid_pattern import cancel_active as cancel_solid_pattern
@@ -277,6 +280,8 @@ class InteractionFilter(QtCore.QObject):
                 else QtCore.Qt.NoButton
             )
             return self.forward_mouse(watched, event, button, buttons, modifiers)
+        if kind == QtCore.QEvent.MouseButtonPress and event.button() == QtCore.Qt.RightButton:
+            self.clear_snap_points()
         if event.button() == QtCore.Qt.LeftButton:
             from .tasks import active_extrude
             task = active_extrude()
@@ -295,19 +300,32 @@ class InteractionFilter(QtCore.QObject):
                 viewport, position = self.snap_press
                 self.snap_press = None
                 if viewport is watched:
-                    return self.forward_mouse(watched, event, event.button(), event.buttons(),
-                                              event.modifiers(), position)
+                    consumed = self.forward_mouse(watched, event, event.button(), event.buttons(),
+                                                  event.modifiers(), position)
+                    self.finish_snapped_geometry()
+                    return consumed
             if (kind == QtCore.QEvent.MouseButtonPress and
                     event.modifiers() == QtCore.Qt.NoModifier and
                     self.is_sketch_tool_cursor(watched)):
                 # FreeCAD's active drawing handler installs a pixmap cursor.
                 # Leave ordinary selection and drag modes on native input.
-                target = self.session.snap_guides.target(watched, event)
-                if target is not None:
+                hit = self.session.snap_guides.target(watched, event, exact=True)
+                if hit is not None:
+                    target, local = hit
+                    sketch = modeling.in_sketch()
+                    if self.snap_geometry is None or self.snap_geometry[0] != sketch:
+                        self.clear_snap_points()
+                        self.snap_geometry = (sketch, sketch.GeometryCount)
+                    if local is not None and isinstance(target[2], str):
+                        self.snap_points.append(local)
                     position = QtCore.QPointF(*target[1])
                     self.snap_press = (watched, position)
-                    return self.forward_mouse(watched, event, event.button(), event.buttons(),
-                                              event.modifiers(), position)
+                    consumed = self.forward_mouse(watched, event, event.button(), event.buttons(),
+                                                  event.modifiers(), position)
+                    self.finish_snapped_geometry()
+                    return consumed
+            if kind == QtCore.QEvent.MouseButtonRelease:
+                QtCore.QTimer.singleShot(0, self.finish_snapped_geometry)
         if not self.session.remap_mouse:
             return False
         middle = event.button() == QtCore.Qt.MiddleButton or bool(
@@ -322,6 +340,26 @@ class InteractionFilter(QtCore.QObject):
         # picking, camera maths or geometry selection.
         modifiers = event.modifiers() ^ QtCore.Qt.ShiftModifier
         return self.forward_mouse(watched, event, event.button(), event.buttons(), modifiers)
+
+    def finish_snapped_geometry(self):
+        if self.snap_geometry is None:
+            return
+        sketch, first = self.snap_geometry
+        if modeling.in_sketch() != sketch:
+            self.clear_snap_points()
+            return
+        if sketch.GeometryCount <= first:
+            return
+        points = self.snap_points[:]
+        self.clear_snap_points()
+        if not points:
+            return
+        from .snap_targets import align_new_line_endpoints
+        align_new_line_endpoints(sketch, first, points)
+
+    def clear_snap_points(self):
+        self.snap_geometry = None
+        self.snap_points.clear()
 
     def forward_mouse(self, watched, event, button, buttons, modifiers, position=None):
         original = event.position() if hasattr(event, "position") else event.localPos()
@@ -566,6 +604,7 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
                 self.sketch_palette.refresh(sketch)
             else:
                 self.filter.snap_press = None
+                self.filter.clear_snap_points()
                 self.snap_guides.hide()
             self.history.refresh()
             self.browser.refresh()
