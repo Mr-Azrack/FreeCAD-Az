@@ -49,6 +49,9 @@ def icon_key(obj):
 
 
 def icon_path(obj):
-    key = icon_key(obj)
+    return icon_path_for_key(icon_key(obj))
+
+
+def icon_path_for_key(key):
     assert key in _KNOWN
     return str(_ICON_DIR / ("timeline-" + key + ".svg"))

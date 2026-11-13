@@ -110,6 +110,9 @@ def design_icon(key):
         painter.drawEllipse(15, 15, 10, 10)
         if k == "cut":
             painter.drawLine(6, 34, 34, 6)
+    elif k == "pattern":
+        for x, y in ((8, 8), (23, 8), (8, 23), (23, 23)):
+            painter.drawEllipse(x, y, 9, 9)
     elif k in ("fillet", "chamfer"):
         painter.drawLine(8, 31, 8, 10)
         painter.drawLine(8, 31, 31, 31)
@@ -702,7 +705,11 @@ class SketchPatternHistoryButton(QtWidgets.QToolButton):
         self.record_id = item["id"]
         self.history_widget = history_widget
         self.setObjectName("AzSketchPatternHistory")
-        self.setIcon(command_icon("pattern"))
+        from .timeline_icons import icon_path_for_key
+        icon = QtGui.QIcon(icon_path_for_key("pattern"))
+        if icon.pixmap(22, 22).isNull():
+            icon = design_icon("pattern")
+        self.setIcon(icon)
         self.setIconSize(QtCore.QSize(22, 22))
         self.setFixedSize(32, 32)
         self.setToolTip(sketch.Label + " · " + item["label"] +

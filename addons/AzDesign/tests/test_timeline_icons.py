@@ -8,7 +8,7 @@ from pathlib import Path
 
 ADDON = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ADDON))
-from azdesign.timeline_icons import icon_key, icon_path
+from azdesign.timeline_icons import icon_key, icon_path, icon_path_for_key
 
 
 class Feature:
@@ -49,6 +49,17 @@ class Icons(unittest.TestCase):
                 ), "Timeline icon must be vector graphics, never a font label")
         self.assertEqual(icon_key(Feature("PartDesign::FeaturePython", "AzExtrude")),
                          "extrude")
+
+    def test_sketch_pattern_uses_the_pattern_image_and_graphic_fallback(self):
+        solid_pattern = Feature("PartDesign::LinearPattern")
+        self.assertEqual(icon_path_for_key("pattern"), icon_path(solid_pattern))
+        source = (ADDON / "azdesign" / "ui.py").read_text(encoding="utf-8")
+        button = source.split("class SketchPatternHistoryButton", 1)[1].split("class History", 1)[0]
+        self.assertIn('QtGui.QIcon(icon_path_for_key("pattern"))', button)
+        self.assertIn("icon.pixmap(22, 22).isNull()", button)
+        self.assertIn('icon = design_icon("pattern")', button)
+        fallback = source.split('elif k == "pattern":', 1)[1].split("elif ", 1)[0]
+        self.assertIn("painter.drawEllipse(", fallback)
 
     def test_timeline_never_falls_back_to_text_abbreviations(self):
         source = (ADDON / "azdesign" / "ui.py").read_text(encoding="utf-8")
