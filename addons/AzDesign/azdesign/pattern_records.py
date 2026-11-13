@@ -5,6 +5,7 @@ Records describe native geometry; they never replace Sketcher constraints.
 Index validation is mandatory before an editor removes any owned geometry.
 """
 import json
+import math
 import uuid
 
 PROPERTY = "AzSketchPatternRecords"
@@ -54,6 +55,15 @@ def append_record(sketch, parameters, created, constraints=()):
         raise ValueError("Invalid pattern source geometry")
     if type(columns) is not int or type(rows) is not int or columns < 1 or rows < 1:
         raise ValueError("Invalid pattern dimensions")
+    # Reject invalid values before adding the property or touching persisted records.
+    try:
+        pitches = (float(pitch_x), float(pitch_y))
+    except (TypeError, ValueError, OverflowError):
+        raise ValueError("Invalid pattern pitch") from None
+    if any(not math.isfinite(value) or abs(value) > 100000 for value in pitches):
+        raise ValueError("Invalid pattern pitch")
+    if (columns > 1 and abs(pitches[0]) < 0.001) or (rows > 1 and abs(pitches[1]) < 0.001):
+        raise ValueError("Pattern pitch must be nonzero")
     indices = list(created)
     if (any(type(index) is not int or index < 0 for index in indices)
             or len(set(indices)) != len(indices)):

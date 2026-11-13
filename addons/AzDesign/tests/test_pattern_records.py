@@ -29,6 +29,17 @@ class PatternRecordsTests(unittest.TestCase):
         self.assertEqual(json.loads(sketch.AzSketchPatternRecords), records)
         self.assertTrue(all(validate_ownership(sketch, item) for item in records))
 
+    def test_append_rejects_nonfinite_and_zero_pitch_without_mutation(self):
+        sketch = FakeSketch()
+        append_record(sketch, (0, 2, 2, 10, 20), (1, 2, 3))
+        before = sketch.AzSketchPatternRecords
+        for px, py in ((float("nan"), 20), (10, float("inf")),
+                       (float("-inf"), 20), ("bad", 20), (None, 20),
+                       (0, 20), (10, 0), (0.0001, 20), (100001, 20)):
+            with self.subTest(pitch=(px, py)), self.assertRaises(ValueError):
+                append_record(sketch, (4, 2, 2, px, py), (5, 6, 7))
+            self.assertEqual(sketch.AzSketchPatternRecords, before)
+
     def test_rejects_overlapping_ownership(self):
         sketch = FakeSketch()
         append_record(sketch, (0, 2, 2, 10, 20), (1, 2, 3))
