@@ -120,6 +120,36 @@ class ExtrudePreviewUiTest(unittest.TestCase):
         self.task.timer.stop.assert_called_once()
         self.task.timer.start.assert_not_called()
 
+    def test_edit_first_extrude_face_pick_keeps_original_solid_visible(self):
+        # New Body Extrudes have no earlier Body Tip to display while
+        # picking a different source face. Never blank out their result.
+        feature = types.SimpleNamespace(
+            ViewObject=types.SimpleNamespace(Visibility=True)
+        )
+        self.task.operation.editing = [feature]
+        self.task.operation.outputs = [feature]
+        self.task.operation.original_bases = {"Body": None}
+        self.task.doc = types.SimpleNamespace(getObject=lambda _name: None)
+        self.task.pick_regions = Mock()
+        self.module.Gui.Selection = types.SimpleNamespace(clearSelection=Mock())
+        self.task.begin_face_pick("source")
+        self.assertTrue(feature.ViewObject.Visibility)
+        self.assertIn("reference-only", self.task.message.call_args.args[0])
+        self.task.operation.discard_preview.assert_called_once()
+
+    def test_face_pick_with_earlier_tip_hides_current_preview(self):
+        feature = types.SimpleNamespace(
+            ViewObject=types.SimpleNamespace(Visibility=True)
+        )
+        self.task.operation.editing = [feature]
+        self.task.operation.outputs = [feature]
+        self.task.operation.original_bases = {"Body": object()}
+        self.task.doc = types.SimpleNamespace(getObject=lambda _name: None)
+        self.task.pick_regions = Mock()
+        self.module.Gui.Selection = types.SimpleNamespace(clearSelection=Mock())
+        self.task.begin_face_pick("source")
+        self.assertFalse(feature.ViewObject.Visibility)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

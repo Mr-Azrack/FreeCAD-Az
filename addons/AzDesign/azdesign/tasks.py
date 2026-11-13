@@ -474,14 +474,24 @@ class ExtrudeTask:
             if obj:
                 obj.ViewObject.Visibility = False
         self.operation._restore_visibility()
-        for obj in self.operation.outputs:
-            obj.ViewObject.Visibility = False
-        for body_name, base in self.operation.original_bases.items():
-            body = self.doc.getObject(body_name)
-            if body and base:
-                history.reveal(body, base)
+        # Editing a first/New Body extrusion has no previous Body Tip to
+        # reveal. Hiding the edited result leaves only a stray sketch in
+        # view and makes it appear that the existing solid was deleted.
+        # Keep the existing result as a visual reference; addSelection
+        # already rejects this feature and downstream faces as sources.
+        has_prior_tip = any(base is not None for base in self.operation.original_bases.values())
+        keep_edit_reference = bool(self.operation.editing) and not has_prior_tip
+        if not keep_edit_reference:
+            for obj in self.operation.outputs:
+                obj.ViewObject.Visibility = False
+            for body_name, base in self.operation.original_bases.items():
+                body = self.doc.getObject(body_name)
+                if body and base:
+                    history.reveal(body, base)
         self.message(
             "Click an existing planar " + ("end face." if mode == "limit" else "face to extrude.")
+            + (" The current feature is reference-only; choose an independent earlier face."
+               if keep_edit_reference else "")
         )
         Gui.Selection.clearSelection()
 
