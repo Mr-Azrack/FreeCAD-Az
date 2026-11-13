@@ -126,7 +126,8 @@ class PatternRecordsTests(unittest.TestCase):
             with self.subTest(source=source), self.assertRaises(ValueError):
                 append_record(sketch, (source, 2, 2, 10, 20), (5, 6, 7))
             self.assertEqual(sketch.AzSketchPatternRecords, before)
-        for indices in ((5.0, 6, 7), (True, 6, 7)):
+        for indices in ((5.0, 6, 7), (True, 6, 7), (-1, 6, 7),
+                        (5, 5, 7), (5, 6, -1)):
             with self.subTest(indices=indices), self.assertRaises(ValueError):
                 append_record(sketch, (4, 2, 2, 10, 20), indices)
             self.assertEqual(sketch.AzSketchPatternRecords, before)
