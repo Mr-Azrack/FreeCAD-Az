@@ -204,8 +204,9 @@ def passive_sketch_cues(sketch, source, edge_names, tolerance=1e-6):
         raise DesignError("An active sketch is required for passive cues.")
     if source is None or source == sketch or source.Document != sketch.Document:
         return ()
-    if sketch in getattr(source, "OutListRecursive", ()):
-        return ()
+    # Read-only hover can examine an upstream feature on which the active
+    # sketch depends. Circular-dependency checks belong to link_body_edge,
+    # which actually changes model dependencies, not passive visual cues.
     if not hasattr(source, "Shape") or source.Shape.isNull():
         return ()
     if not isinstance(tolerance, (int, float)) or tolerance <= 0:
@@ -285,6 +286,60 @@ def nearest_passive_cue(cues, project_to_screen, cursor, radius_px=12.0):
         if math.hypot(other[2] - best[2], other[3] - best[3]) > 1e-7:
             return None
     return best
+
+
+def visible_body_cue(sketch, project_world, cursor, max_bodies=4,
+                     max_edges=120, radius_px=12.0):
+    """Fallback when native Sketcher does not expose model preselection.
+
+    Inspect only a bounded number of visible Body Tips in the active document.
+    This is presentation-only: no selection, projection, or geometry mutation.
+    Edges outside the sketch plane are rejected by passive_sketch_cues.
+    Upstream body geometry is safe for passive display; no links are created.
+    """
+    if sketch is None or sketch.Document is None:
+        return None
+    candidates = []
+    bodies_seen = 0
+    for body in sketch.Document.Objects:
+        if not hasattr(body, "isDerivedFrom") or not body.isDerivedFrom("PartDesign::Body"):
+            continue
+        if bodies_seen >= max_bodies:
+            break
+        bodies_seen += 1
+        feature = getattr(body, "Tip", None)
+        if feature is None or feature == sketch or not hasattr(feature, "Shape"):
+            # Some PartDesign versions make the active sketch the Body Tip.
+            # Find the most recent solid before it without changing the Tip.
+            feature = next((obj for obj in reversed(tuple(getattr(body, "Group", ())))
+                            if obj != sketch and hasattr(obj, "Shape")
+                            and not obj.Shape.isNull() and obj.Shape.Edges), None)
+        if feature is None:
+            continue
+        try:
+            if not body.ViewObject.Visibility:
+                continue
+            edges = feature.Shape.Edges
+            if not edges or len(edges) > max_edges:
+                continue
+            names = tuple("Edge" + str(n) for n in range(1, len(edges) + 1))
+            cues = passive_sketch_cues(sketch, feature, names)
+            for name, edge, x, y in cues:
+                world = sketch.Placement.multVec(App.Vector(x, y, 0))
+                screen = project_world(world)
+                if screen is not None:
+                    candidates.append((name, edge, x, y, screen))
+        except (AttributeError, RuntimeError, ValueError, TypeError):
+            continue
+    if not candidates:
+        return None
+    pixels = {(name, edge, x, y): screen for name, edge, x, y, screen in candidates}
+    return nearest_passive_cue(
+        tuple(pixels), lambda x, y: next(
+            (point for (_name, _edge, px, py), point in pixels.items()
+             if px == x and py == y), None),
+        cursor, radius_px,
+    )
 
 
 def viewport_passive_cue(sketch, source, edge_names, project_world, cursor,

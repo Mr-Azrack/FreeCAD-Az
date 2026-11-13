@@ -174,6 +174,71 @@ class EdgeReferenceTests(unittest.TestCase):
             (0, 0)))
         self.assertEqual(self.doc.calls, [])
 
+    def test_visible_body_fallback_finds_midpoint_without_preselection(self):
+        class Vec:
+            def __init__(self, x, y, z=0):
+                self.x, self.y, self.z = x, y, z
+            def __sub__(self, other):
+                return Vec(self.x-other.x, self.y-other.y, self.z-other.z)
+            @property
+            def Length(self):
+                return (self.x*self.x+self.y*self.y+self.z*self.z)**0.5
+        class Edge:
+            FirstParameter, LastParameter = 0, 1
+            Curve = object()
+            Vertexes = [types.SimpleNamespace(Point=Vec(0, 0)),
+                        types.SimpleNamespace(Point=Vec(10, 0))]
+            def isNull(self): return False
+            def valueAt(self, t): return Vec(10*t, 0)
+        self.api.App.Vector = Vec
+        self.source.Shape.Edges = [Edge()]
+        self.source.OutListRecursive = (self.sketch,)
+        self.sketch.Placement = types.SimpleNamespace(
+            inverse=lambda: types.SimpleNamespace(multVec=lambda p: p),
+            multVec=lambda p: p)
+        body = types.SimpleNamespace(
+            isDerivedFrom=lambda kind: kind == "PartDesign::Body",
+            Tip=self.sketch, Group=[self.source, self.sketch],
+            ViewObject=types.SimpleNamespace(Visibility=True))
+        self.doc.Objects = [body, self.source, self.sketch]
+        cue = self.api.visible_body_cue(
+            self.sketch, lambda point: (point.x, point.y), (5, 0), radius_px=3)
+        self.assertEqual(cue, ("Midpoint", "Edge1", 5.0, 0.0))
+        self.assertEqual(self.doc.calls, [])
+        self.assertEqual(self.sketch.added, [])
+        # Passive inference is safe for an upstream dependency, but creating
+        # an actual external link must still enforce the cycle guard.
+        with self.assertRaisesRegex(ValueError, "circular"):
+            self.api.link_body_edge(self.sketch, self.source, "Edge1")
+
+    def test_visible_body_fallback_finds_circular_hole_center(self):
+        class Vec:
+            def __init__(self, x, y, z=0): self.x, self.y, self.z = x, y, z
+            def __sub__(self, other): return Vec(self.x-other.x, self.y-other.y, self.z-other.z)
+            @property
+            def Length(self): return (self.x*self.x+self.y*self.y+self.z*self.z)**0.5
+        class Circle:
+            Center = Vec(25, 30)
+        class Edge:
+            Curve = Circle()
+            Vertexes = []
+            def isNull(self): return False
+        self.api.App.Vector = Vec
+        self.source.Shape.Edges = [Edge()]
+        self.sketch.Placement = types.SimpleNamespace(
+            inverse=lambda: types.SimpleNamespace(multVec=lambda p: p),
+            multVec=lambda p: p)
+        body = types.SimpleNamespace(
+            isDerivedFrom=lambda kind: kind == "PartDesign::Body",
+            Tip=self.source, Group=[self.source, self.sketch],
+            ViewObject=types.SimpleNamespace(Visibility=True))
+        self.doc.Objects = [body, self.source, self.sketch]
+        self.assertEqual(self.api.visible_body_cue(
+            self.sketch, lambda p: (p.x, p.y), (25, 30)),
+            ("Center", "Edge1", 25.0, 30.0))
+        self.assertEqual(self.doc.calls, [])
+        self.assertEqual(self.sketch.added, [])
+
     def test_single_edge_commits(self):
         self.assertEqual(self.api.link_body_edge(self.sketch, self.source, "Edge1"), 1)
         self.assertEqual(self.doc.calls, ["begin", "recompute", "commit"])

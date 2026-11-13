@@ -104,6 +104,7 @@ class OverlayTests(unittest.TestCase):
         # This suite isolates sketch-overlay placement; native body-edge
         # inference has its own contract and FreeCAD-backed regression.
         snap_targets.viewport_passive_cue = lambda *args, **kwargs: None
+        snap_targets.visible_body_cue = lambda *args, **kwargs: None
         self.patch = patch.dict(sys.modules, {
             "azdesign.snap_targets": snap_targets,
             "FreeCADGui": gui,

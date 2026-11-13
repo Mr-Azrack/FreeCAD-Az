@@ -9,7 +9,7 @@ never simulate Qt click events or silently insert fixed geometry.
 import FreeCADGui as Gui
 
 from . import modeling, snap_hover
-from .snap_targets import viewport_passive_cue
+from .snap_targets import viewport_passive_cue, visible_body_cue
 from .qt import QtCore, QtWidgets
 
 
@@ -84,6 +84,13 @@ class HoverGuides:
                 return (x * sx, widget.height() - y * sy)
 
             result = snap_hover.best_snap(sketch.Geometry, cursor, projection)
+
+            def project_world(world):
+                pt = view.getPointOnScreen(world)
+                x = float(pt.x) if hasattr(pt, "x") else float(pt[0])
+                y = float(pt.y) if hasattr(pt, "y") else float(pt[1])
+                return (x * sx, widget.height() - y * sy)
+
             if result is None:
                 # Read-only body-edge fallback; never consume Sketcher clicks.
                 try:
@@ -93,22 +100,23 @@ class HoverGuides:
                     if not names and getattr(pre, "SubElementName", ""):
                         names = (pre.SubElementName,)
                     if source is not None and names:
-                        def project_world(world):
-                            pt = view.getPointOnScreen(world)
-                            x = float(pt.x) if hasattr(pt, "x") else float(pt[0])
-                            y = float(pt.y) if hasattr(pt, "y") else float(pt[1])
-                            return (x * sx, widget.height() - y * sy)
                         cue = viewport_passive_cue(
                             sketch, source, names, project_world, cursor)
-                        if cue is not None:
-                            import FreeCAD as App
-                            name, edge, x, y = cue
-                            screen = project_world(
-                                sketch.Placement.multVec(App.Vector(x, y, 0)))
-                            result = (name, screen, edge)
+                    else:
+                        cue = None
                 except (AttributeError, RuntimeError, TypeError, ValueError,
                         ReferenceError):
-                    result = None
+                    cue = None
+                if cue is None:
+                    # Native Sketcher may suppress model-edge preselection.
+                    # Inspect a small, bounded set of visible Body Tips instead.
+                    cue = visible_body_cue(sketch, project_world, cursor)
+                if cue is not None:
+                    import FreeCAD as App
+                    name, edge, x, y = cue
+                    screen = project_world(
+                        sketch.Placement.multVec(App.Vector(x, y, 0)))
+                    result = (name, screen, edge)
             if result is None:
                 self.hide()
                 return
