@@ -512,3 +512,11 @@ pattern records. Source CI passed at 91a540b (run 43146857290).
 - [ ] Verify native FreeCAD geometry and 0.5.10→0.5.11 silent patch install,
   Qt startup, rollback/uninstall, and artifact checksums
 - [ ] Publish only the validated artifact through the existing update channel
+
+
+## 2026-11-13 — 0.5.12 Windows patch validation
+
+- [x] Verify 0.5.11 baseline provenance against the published patch payload, build the incremental candidate, and verify installed and rollback hashes on the disposable copy.
+- [x] Validate Design Home startup and independent sketch-pattern history edits in the live Windows GUI, including Cancel, upstream radius edit, Undo/Redo and FCStd reopen.
+- [ ] Complete the separate hands-on pointer acceptance for body edge, midpoint and circle center, including snap click-through, high DPI, and teardown on the exact candidate.
+- [ ] Retarget guarded patch CI for 0.5.11 to 0.5.12 and verify the online release delivery path at promotion. The existing updater selected the candidate using offline release metadata.
