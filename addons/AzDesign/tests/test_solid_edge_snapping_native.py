@@ -1,4 +1,4 @@
-﻿# SPDX-License-Identifier: LGPL-2.1-or-later
+# SPDX-License-Identifier: LGPL-2.1-or-later
 """Real FreeCAD regression for native solid references used by Sketcher snapping."""
 import unittest
 import FreeCAD as App
