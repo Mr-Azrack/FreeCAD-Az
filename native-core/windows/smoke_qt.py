@@ -33,19 +33,15 @@ def smoke(root):
         raise RuntimeError(f"Expected native Qt platform 'windows', received {platform}")
     # Exercise the actual Design Home Qt widget without creating a FreeCAD
     # document. A fresh native Start Menu launch must construct this view.
-    from PySide6.QtWidgets import QMdiArea, QPushButton
+    from PySide6.QtWidgets import QPushButton, QVBoxLayout, QWidget
     sys.path.insert(0, str(root / "Mod" / "AzDesign"))
     from azdesign.home import DesignHome
 
-    class HomeSession:
-        def __init__(self):
-            self.mdi = QMdiArea()
-
-    session = HomeSession()
-    session.mdi.resize(1200, 700)
-    home = DesignHome(session)
-    home.setGeometry(session.mdi.viewport().rect())
-    home.show()
+    ribbon = QWidget()
+    ribbon.setLayout(QVBoxLayout())
+    home = DesignHome(ribbon)
+    ribbon.layout().addWidget(home)
+    ribbon.show()
     app.processEvents()
     buttons = {button.text() for button in home.findChildren(QPushButton)}
     if not {"New Design", "Open File"}.issubset(buttons):
@@ -53,7 +49,7 @@ def smoke(root):
     if home.width() <= 0 or home.height() <= 0:
         raise RuntimeError("Native Design Home has invalid geometry")
     home.close()
-    session.mdi.close()
+    ribbon.close()
     print("PASS: native Design Home widget constructed and actions visible")
     app.quit()
 

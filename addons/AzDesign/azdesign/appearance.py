@@ -18,7 +18,9 @@ class Appearance:
             "BackgroundColor": ("Unsigned Long", 0xE9ECEFFF),
             "SelectionColor": ("Unsigned Long", 0x398DDFFF),
             "PreselectionColor": ("Unsigned Long", 0x83BAE8FF),
-            "EditedEdgeColor": ("Unsigned Long", 0x287AAFFF),
+            "EditedEdgeColor": ("Unsigned Long", 0x174C74FF),
+            "SketchEdgeColor": ("Unsigned Long", 0x174C74FF),
+            "SketchVertexColor": ("Unsigned Long", 0x174C74FF),
             "FullyConstrainedColor": ("Unsigned Long", 0x304D60FF),
             "FullyConstraintElementColor": ("Unsigned Long", 0x416B58FF),
             "ConstructionColor": ("Unsigned Long", 0x507FB6FF),
@@ -29,6 +31,8 @@ class Appearance:
         # entry, otherwise a dark Az edit color can survive into native CAD.
         self.sketch_defaults = {
             "EditedEdgeColor": 0xFFFFFFFF,
+            "SketchEdgeColor": 0xFFFFFFFF,
+            "SketchVertexColor": 0xFFFFFFFF,
             "FullyConstrainedColor": 0x00FF00FF,
             "FullyConstraintElementColor": 0x80CF9EFF,
             "ConstructionColor": 0x0000DCFF,

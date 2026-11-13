@@ -26,6 +26,8 @@ class InteractionFilter(QtCore.QObject):
         super().__init__(session.main)
         self.session = session
         self.forwarding = False
+        self.profile_press = None
+        self.snap_press = None
 
     def editable_focus(self):
         app = QtWidgets.QApplication.instance()
@@ -61,6 +63,10 @@ class InteractionFilter(QtCore.QObject):
             for part in ("QuarterWidget", "View3DInventorViewer", "QGLWidget", "QOpenGLWidget")
         )
 
+    def is_sketch_tool_cursor(self, widget):
+        return (modeling.in_sketch() is not None
+                and widget.cursor().shape() == QtCore.Qt.BitmapCursor)
+
     def eventFilter(self, watched, event):
         if not self.session.active or self.forwarding:
             return False
@@ -80,14 +86,17 @@ class InteractionFilter(QtCore.QObject):
                         border: 4px solid #d9eef8; border-radius: 8px; }
                 """)
         if kind == QtCore.QEvent.MouseMove and self.is_viewport(watched):
-            self.session.snap_guides.move(watched, event)
+            if self.session.navigation.mode or event.buttons() or event.modifiers():
+                self.session.snap_guides.hide()
+            elif self.session.snap_guides.move(watched, event) and self.is_sketch_tool_cursor(watched):
+                target = QtCore.QPointF(*self.session.snap_guides.last[1])
+                return self.forward_mouse(watched, event, event.button(), event.buttons(),
+                                          event.modifiers(), target)
         if kind == QtCore.QEvent.Leave and self.is_viewport(watched):
             self.session.snap_guides.hide()
         if kind == QtCore.QEvent.Resize and watched == self.session.mdi.viewport():
             self.session.navigation.place()
             self.session.canvas_actions.place()
-            if self.session.home.isVisible():
-                self.session.home.setGeometry(self.session.mdi.viewport().rect())
         if kind == QtCore.QEvent.ContextMenu and self.is_viewport(watched):
             # In sketch edit mode offer associative model-edge references
             # without intercepting native drawing clicks or mutating on hover.
@@ -268,6 +277,37 @@ class InteractionFilter(QtCore.QObject):
                 else QtCore.Qt.NoButton
             )
             return self.forward_mouse(watched, event, button, buttons, modifiers)
+        if event.button() == QtCore.Qt.LeftButton:
+            from .tasks import active_extrude
+            task = active_extrude()
+            if kind == QtCore.QEvent.MouseButtonRelease and self.profile_press:
+                owner, index = self.profile_press
+                self.profile_press = None
+                if task is owner and task.profile_at(watched, event) == index:
+                    task.toggle_profile(task.profile_list.item(index))
+                return True
+            if kind == QtCore.QEvent.MouseButtonPress and task is not None:
+                index = task.profile_at(watched, event)
+                if index is not None:
+                    self.profile_press = (task, index)
+                    return True
+            if kind == QtCore.QEvent.MouseButtonRelease and self.snap_press:
+                viewport, position = self.snap_press
+                self.snap_press = None
+                if viewport is watched:
+                    return self.forward_mouse(watched, event, event.button(), event.buttons(),
+                                              event.modifiers(), position)
+            if (kind == QtCore.QEvent.MouseButtonPress and
+                    event.modifiers() == QtCore.Qt.NoModifier and
+                    self.is_sketch_tool_cursor(watched)):
+                # FreeCAD's active drawing handler installs a pixmap cursor.
+                # Leave ordinary selection and drag modes on native input.
+                target = self.session.snap_guides.target(watched, event)
+                if target is not None:
+                    position = QtCore.QPointF(*target[1])
+                    self.snap_press = (watched, position)
+                    return self.forward_mouse(watched, event, event.button(), event.buttons(),
+                                              event.modifiers(), position)
         if not self.session.remap_mouse:
             return False
         middle = event.button() == QtCore.Qt.MiddleButton or bool(
@@ -283,11 +323,13 @@ class InteractionFilter(QtCore.QObject):
         modifiers = event.modifiers() ^ QtCore.Qt.ShiftModifier
         return self.forward_mouse(watched, event, event.button(), event.buttons(), modifiers)
 
-    def forward_mouse(self, watched, event, button, buttons, modifiers):
-        position = event.position() if hasattr(event, "position") else event.localPos()
+    def forward_mouse(self, watched, event, button, buttons, modifiers, position=None):
+        original = event.position() if hasattr(event, "position") else event.localPos()
+        position = original if position is None else position
         global_position = (
             event.globalPosition() if hasattr(event, "globalPosition") else event.screenPos()
         )
+        global_position += position - original
         forwarded = QtGui.QMouseEvent(
             event.type(), position, global_position, button, buttons, modifiers
         )
@@ -373,7 +415,8 @@ class Session:
         self.main.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.sketch_dock)
         self.sketch_dock.hide()
         from .home import DesignHome
-        self.home = DesignHome(self)
+        self.home = DesignHome(self.ribbon)
+        self.ribbon.layout().addWidget(self.home)
         self.navigation = Navigation(self, self.mdi.viewport())
         self.canvas_actions = CanvasActions(self, self.mdi.viewport())
         self.snap_guides = HoverGuides()
@@ -522,6 +565,7 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
             if sketch:
                 self.sketch_palette.refresh(sketch)
             else:
+                self.filter.snap_press = None
                 self.snap_guides.hide()
             self.history.refresh()
             self.browser.refresh()

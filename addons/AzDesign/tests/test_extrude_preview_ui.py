@@ -57,6 +57,7 @@ class ExtrudePreviewUiTest(unittest.TestCase):
         self.task.message = Mock()
         self.task.manipulator = None
         self.task.overlay_names = []
+        self.task.show_preview = Mock()
 
     def tearDown(self):
         self.patch.stop()

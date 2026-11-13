@@ -55,7 +55,7 @@ class FusionVideoContracts(unittest.TestCase):
     def test_extrude_preselects_plate_but_preserves_manual_region_selection(self):
         source = (ADDON / "azdesign" / "tasks.py").read_text(encoding="utf-8")
         self.assertIn("profiles.preferred_plate_region(self.region_data)", source)
-        self.assertIn("if index == recommended", source)
+        self.assertIn("self.set_profile_checked(item, index == recommended)", source)
         self.assertIn("self.select_all", source)
         self.assertIn("begin_face_pick", source)
 

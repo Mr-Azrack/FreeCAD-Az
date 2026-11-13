@@ -11,7 +11,7 @@ class HoverBodyContract(unittest.TestCase):
         source = SOURCE.read_text(encoding="utf-8")
         tree = ast.parse(source)
         cls = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "HoverGuides")
-        move = next(n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == "move")
+        move = next(n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == "target")
         calls = [n.func.attr if isinstance(n.func, ast.Attribute) else n.func.id
                  for n in ast.walk(move) if isinstance(n, ast.Call)
                  and isinstance(n.func, (ast.Name, ast.Attribute))]

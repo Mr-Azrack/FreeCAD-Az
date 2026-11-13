@@ -129,7 +129,7 @@ class OverlayTests(unittest.TestCase):
         self.assertTrue(guide.label.visible)
         self.assertEqual(guide.label.text, "△")
         self.assertIn((10, True), guide.label.attrs)
-        self.assertEqual(guide.label.position, (92, 192))
+        self.assertEqual(guide.label.position, (88, 187))
         self.assertIs(guide.owner, widget)
         guide.move(widget, Event(490, 100))
         self.assertFalse(guide.label.visible)
@@ -141,7 +141,7 @@ class OverlayTests(unittest.TestCase):
         guide = self.module.HoverGuides()
         guide.move(Widget(), Event(240, 200))
         self.assertEqual(guide.label.text, "⊙")
-        self.assertEqual(guide.label.position, (212, 192))
+        self.assertEqual(guide.label.position, (208, 187))
         self.assertTrue(guide.label.visible)
 
 

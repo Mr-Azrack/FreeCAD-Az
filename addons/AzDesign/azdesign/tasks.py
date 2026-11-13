@@ -21,6 +21,10 @@ def forget(task):
         _active_task = None
 
 
+def active_extrude():
+    return _active_task
+
+
 def cancel_active():
     if _active_task:
         _active_task.reject()
@@ -97,6 +101,9 @@ class ExtrudeTask:
         self.profile_list.setObjectName("AzProfileList")
         self.profile_list.setMaximumHeight(108)
         self.profile_list.setMinimumHeight(58)
+        self.profile_list.setStyleSheet(
+            "QListWidget::item { min-height: 24px; padding: 2px 6px; }"
+        )
         layout.addWidget(self.profile_list)
         region_controls = QtWidgets.QHBoxLayout()
         self.region_buttons = []
@@ -163,13 +170,14 @@ class ExtrudeTask:
         layout.insertWidget(1, self.status)
         self.show_preview = QtWidgets.QPushButton("Show solid preview")
         self.show_preview.clicked.connect(self.end_pick)
+        self.show_preview.hide()
         layout.addWidget(self.show_preview)
         layout.addStretch()
         self.timer = QtCore.QTimer(self.form)
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.preview)
         self.source.currentIndexChanged.connect(self.source_changed)
-        self.profile_list.itemChanged.connect(self.profile_changed)
+        self.profile_list.itemClicked.connect(self.toggle_profile)
         for control in (self.operation_choice, self.target, self.direction, self.extent):
             control.currentIndexChanged.connect(self.schedule)
         for control in (self.distance, self.distance2, self.offset, self.taper, self.taper2):
@@ -213,14 +221,12 @@ class ExtrudeTask:
                     region.face.common(r.face).Area > region.face.Area - profiles.TOL
                     for r in wanted
                 )
-                self.profile_list.item(index).setCheckState(
-                    QtCore.Qt.Checked if selected else QtCore.Qt.Unchecked
-                )
+                self.set_profile_checked(self.profile_list.item(index), selected)
             self.busy = False
-        self.preview()
-        self.schedule()
-        # Multiple regions must not automatically enter pick mode: that
-        # previously hid the Body and made the part flash/disappear.
+            self.profile_changed()
+        if self.picking != "profiles":
+            self.preview()
+            self.schedule()
 
     def set_source(self, source):
         for index, link in enumerate(self.source_links):
@@ -269,17 +275,13 @@ class ExtrudeTask:
                         ) if is_plate else
                         "Profile {} · {:.3f} mm²".format(index + 1, region.face.Area)
                     )
-                    item = QtWidgets.QListWidgetItem(label)
-                    item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
-                    item.setCheckState(
-                        QtCore.Qt.Checked if index == recommended else QtCore.Qt.Unchecked
-                    )
+                    item = QtWidgets.QListWidgetItem()
+                    item.setData(QtCore.Qt.UserRole, label)
+                    self.set_profile_checked(item, index == recommended)
                     self.profile_list.addItem(item)
                     overlay = self.doc.addObject("Part::Feature", "AzProfilePick")
                     overlay.addProperty("App::PropertyBool", "AzPreview")
                     overlay.AzPreview = True
-                    overlay.addProperty("App::PropertyInteger", "RegionIndex")
-                    overlay.RegionIndex = index
                     face = region.face.copy()
                     placement = source[0].getGlobalPlacement().multiply(face.Placement)
                     face.Placement = App.Placement()
@@ -289,7 +291,8 @@ class ExtrudeTask:
                     overlay.ViewObject.ShowInTree = False
                     overlay.ViewObject.ShapeColor = (0.31, 0.65, 0.90)
                     overlay.ViewObject.LineColor = (0.15, 0.35, 0.55)
-                    overlay.ViewObject.Transparency = 30
+                    overlay.ViewObject.Transparency = 38
+                    overlay.ViewObject.DisplayMode = "Flat Lines"
                     overlay.ViewObject.Visibility = False
                     self.overlay_names.append(overlay.Name)
                 if source[0]:
@@ -306,20 +309,62 @@ class ExtrudeTask:
         for button in self.region_buttons:
             button.setEnabled(bool(self.region_data))
         self.profile_changed()
+        if self.picking not in ("source", "limit") and len(self.region_data) > 1:
+            if self.pick_regions.isChecked():
+                self.apply_pick_visibility()
+            else:
+                self.pick_regions.setChecked(True)
+        elif self.picking == "profiles":
+            self.end_pick()
+
+    @staticmethod
+    def set_profile_checked(item, checked):
+        label = item.data(QtCore.Qt.UserRole)
+        item.setData(QtCore.Qt.UserRole + 1, checked)
+        item.setText(("✓  " if checked else "□  ") + label)
+
+    def toggle_profile(self, item):
+        if item.data(QtCore.Qt.UserRole) is None:
+            return
+        self.set_profile_checked(item, not item.data(QtCore.Qt.UserRole + 1))
+        self.profile_changed()
+
+    def profile_at(self, widget, event):
+        """Ray-pick the sketch face interior, including nested regions."""
+        if self.closed or self.picking != "profiles" or not self.region_data:
+            return None
+        source = self.source_link()[0]
+        if App.ActiveDocument != self.doc:
+            return None
+        gui_doc = Gui.activeDocument()
+        view = gui_doc.activeView() if gui_doc else None
+        if view is None:
+            return None
+        from .viewport import view_ray
+        ray = view_ray(view, widget, event)
+        if ray is None:
+            return None
+        inverse = source.getGlobalPlacement().inverse()
+        near, far = (inverse.multVec(point) for point in ray)
+        direction = far - near
+        if abs(direction.z) < profiles.TOL:
+            return None
+        point = near - direction * (near.z / direction.z)
+        matches = [index for index, region in enumerate(self.region_data)
+                   if region.face.isInside(point, profiles.TOL, False)]
+        return matches[0] if len(matches) == 1 else None
 
     def selected_descriptors(self):
         return [
             region.descriptor()
             for index, region in enumerate(self.region_data)
-            if self.profile_list.item(index).checkState() == QtCore.Qt.Checked
+            if self.profile_list.item(index).data(QtCore.Qt.UserRole + 1)
         ]
 
     def select_all(self, checked):
         self.busy = True
         for index in range(len(self.region_data)):
-            self.profile_list.item(index).setCheckState(
-                QtCore.Qt.Checked if checked else QtCore.Qt.Unchecked
-            )
+            self.set_profile_checked(self.profile_list.item(index), checked)
         self.busy = False
         self.profile_changed()
 
@@ -335,7 +380,7 @@ class ExtrudeTask:
             if obj:
                 obj.ViewObject.ShapeColor = (
                     (0.94, 0.57, 0.27)
-                    if self.profile_list.item(index).checkState() == QtCore.Qt.Checked
+                    if self.profile_list.item(index).data(QtCore.Qt.UserRole + 1)
                     else (0.31, 0.65, 0.90)
                 )
         self.schedule()
@@ -400,7 +445,7 @@ class ExtrudeTask:
             self.valid = False
             self.operation.discard_preview()
             self.message(
-                "Check a closed profile to preview. The original solid is still visible."
+                "Click a closed profile in the canvas or in the list. The original solid is still visible."
             )
             return
         try:
@@ -439,8 +484,9 @@ class ExtrudeTask:
         self.picking = "profiles" if checked else None
         if checked:
             self.apply_pick_visibility()
+            self.show_preview.show()
             self.message(
-                "Click shaded regions to select or deselect them. Choose Show solid preview when ready."
+                "Click inside shaded profiles to select or deselect. Show solid preview when ready."
             )
         else:
             self.end_pick()
@@ -460,6 +506,7 @@ class ExtrudeTask:
                 obj.ViewObject.Visibility = True
 
     def begin_face_pick(self, mode):
+        self.show_preview.hide()
         self.timer.stop()
         self.operation.discard_preview()
         self.valid = False
@@ -497,6 +544,7 @@ class ExtrudeTask:
 
     def end_pick(self):
         self.picking = None
+        self.show_preview.hide()
         self.pick_regions.blockSignals(True)
         self.pick_regions.setChecked(False)
         self.pick_regions.blockSignals(False)
@@ -513,13 +561,7 @@ class ExtrudeTask:
         if self.closed or document != self.doc.Name:
             return
         obj = self.doc.getObject(name)
-        if self.picking == "profiles" and obj and getattr(obj, "AzPreview", False):
-            item = self.profile_list.item(obj.RegionIndex)
-            item.setCheckState(
-                QtCore.Qt.Unchecked if item.checkState() == QtCore.Qt.Checked else QtCore.Qt.Checked
-            )
-            Gui.Selection.clearSelection()
-        elif self.picking in ("source", "limit") and obj and sub.startswith("Face"):
+        if self.picking in ("source", "limit") and obj and sub.startswith("Face"):
             if obj.isDerivedFrom("PartDesign::Body"):
                 obj = features.body_tip(obj)
             if obj in self.operation.outputs or any(

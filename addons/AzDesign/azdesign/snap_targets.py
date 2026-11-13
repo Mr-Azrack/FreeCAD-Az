@@ -6,6 +6,7 @@ charge while drawing. This module exposes otherwise hard-to-find exact
 centers, arc/line midpoints and endpoints from selected 3D edges.
 """
 
+import math
 from dataclasses import dataclass
 
 import FreeCAD as App
@@ -283,8 +284,9 @@ def passive_sketch_cues(sketch, source, edge_names, tolerance=1e-6):
         return ()
     if not isinstance(tolerance, (int, float)) or tolerance <= 0:
         raise ValueError("Snap plane tolerance must be positive.")
-    import math
-    inverse = sketch.Placement.inverse()
+    inverse = _sketch_placement(sketch).inverse()
+    source_parent = (source.getGlobalPlacement().multiply(source.Placement.inverse())
+                     if hasattr(source, "getGlobalPlacement") else None)
     cues = []
     seen = set()
     try:
@@ -295,7 +297,8 @@ def passive_sketch_cues(sketch, source, edge_names, tolerance=1e-6):
         return ()
     for target in candidates:
         try:
-            point = inverse.multVec(target.point)
+            world = source_parent.multVec(target.point) if source_parent else target.point
+            point = inverse.multVec(world)
             xyz = (float(point.x), float(point.y), float(point.z))
         except (AttributeError, TypeError, ValueError, RuntimeError):
             continue
@@ -319,7 +322,6 @@ def nearest_passive_cue(cues, project_to_screen, cursor, radius_px=12.0):
     a projection callback rather than assuming a particular FreeCAD/Qt version.
     Ties at different geometry locations are rejected, never guessed.
     """
-    import math
     if not math.isfinite(float(radius_px)) or radius_px <= 0:
         raise ValueError("Snap radius must be finite and positive.")
     cx, cy = map(float, cursor)
@@ -360,6 +362,75 @@ def nearest_passive_cue(cues, project_to_screen, cursor, radius_px=12.0):
     return best
 
 
+def _sketch_placement(sketch):
+    return sketch.getGlobalPlacement() if hasattr(sketch, "getGlobalPlacement") else sketch.Placement
+
+
+def _body_snap_cues(sketch, source, names, project_world, cursor, radius_px):
+    """Rank exact in-plane points first, then the nearest straight edge."""
+    placement = _sketch_placement(sketch)
+    inverse = placement.inverse()
+    source_parent = (source.getGlobalPlacement().multiply(source.Placement.inverse())
+                     if hasattr(source, "getGlobalPlacement") else None)
+
+    def project(x, y):
+        return project_world(placement.multVec(App.Vector(x, y, 0)))
+
+    points = passive_sketch_cues(sketch, source, names)
+    candidates = []
+    for cue in points:
+        if cue[0] != "Center":
+            continue
+        name, edge_name, x, y = cue
+        edge = source.Shape.Edges[int(edge_name[4:]) - 1]
+        if not hasattr(edge, "discretize"):
+            continue
+        samples = edge.discretize(Number=64)
+        ring = [project_world(source_parent.multVec(point) if source_parent else point)
+                for point in samples]
+        distances = [math.hypot(cursor[0] - screen[0], cursor[1] - screen[1])
+                     for screen in ring if screen is not None]
+        if distances and min(distances) <= radius_px:
+            candidates.append((min(distances), cue))
+    if candidates:
+        candidates.sort(key=lambda hit: hit[0])
+        distance, center = candidates[0]
+        if not any(other_distance - distance <= 0.5
+                   and math.hypot(cue[2] - center[2], cue[3] - center[3]) > 1e-7
+                   for other_distance, cue in candidates[1:]):
+            return (0, center)
+    point = nearest_passive_cue(points, project, cursor, radius_px)
+    if point is not None:
+        return (0, point)
+    edges = []
+    for name in names:
+        if not name.startswith("Edge") or not name[4:].isdigit():
+            continue
+        index = int(name[4:]) - 1
+        if not 0 <= index < len(source.Shape.Edges):
+            continue
+        edge = source.Shape.Edges[index]
+        if not isinstance(edge.Curve, Part.Line) or len(edge.Vertexes) != 2:
+            continue
+        ends = [v.Point for v in edge.Vertexes]
+        if source_parent:
+            ends = [source_parent.multVec(point) for point in ends]
+        a, b = (inverse.multVec(point) for point in ends)
+        if max(abs(a.z), abs(b.z)) > 1e-6:
+            continue
+        p, q = project(a.x, a.y), project(b.x, b.y)
+        if p is None or q is None:
+            continue
+        dx, dy = q[0] - p[0], q[1] - p[1]
+        length2 = dx * dx + dy * dy
+        if not length2:
+            continue
+        t = max(0, min(1, ((cursor[0] - p[0]) * dx + (cursor[1] - p[1]) * dy) / length2))
+        edges.append(("Edge", name, a.x + t * (b.x - a.x), a.y + t * (b.y - a.y)))
+    edge = nearest_passive_cue(edges, project, cursor, min(radius_px, 8.0))
+    return (1, edge) if edge else None
+
+
 def visible_body_cue(sketch, project_world, cursor, max_bodies=4,
                      max_edges=120, radius_px=12.0):
     """Fallback when native Sketcher does not expose model preselection.
@@ -395,23 +466,24 @@ def visible_body_cue(sketch, project_world, cursor, max_bodies=4,
             if not edges or len(edges) > max_edges:
                 continue
             names = tuple("Edge" + str(n) for n in range(1, len(edges) + 1))
-            cues = passive_sketch_cues(sketch, feature, names)
-            for name, edge, x, y in cues:
-                world = sketch.Placement.multVec(App.Vector(x, y, 0))
-                screen = project_world(world)
+            hit = _body_snap_cues(sketch, feature, names, project_world, cursor, radius_px)
+            if hit is not None:
+                priority, cue = hit
+                screen = project_world(_sketch_placement(sketch).multVec(App.Vector(cue[2], cue[3], 0)))
                 if screen is not None:
-                    candidates.append((name, edge, x, y, screen))
+                    candidates.append((priority, math.hypot(cursor[0] - screen[0],
+                                                           cursor[1] - screen[1]), cue))
         except (AttributeError, RuntimeError, ValueError, TypeError):
             continue
     if not candidates:
         return None
-    pixels = {(name, edge, x, y): screen for name, edge, x, y, screen in candidates}
-    return nearest_passive_cue(
-        tuple(pixels), lambda x, y: next(
-            (point for (_name, _edge, px, py), point in pixels.items()
-             if px == x and py == y), None),
-        cursor, radius_px,
-    )
+    candidates.sort(key=lambda hit: hit[:2])
+    rank, distance, best = candidates[0]
+    if any(other_rank == rank and other_distance - distance <= 0.5
+           and math.hypot(cue[2] - best[2], cue[3] - best[3]) > 1e-7
+           for other_rank, other_distance, cue in candidates[1:]):
+        return None
+    return best
 
 
 def viewport_passive_cue(sketch, source, edge_names, project_world, cursor,
@@ -423,16 +495,9 @@ def viewport_passive_cue(sketch, source, edge_names, project_world, cursor,
     sketches attached to rotated or offset faces. No Sketcher tool or document
     transaction is invoked. The caller owns visual display and teardown.
     """
-    cues = passive_sketch_cues(sketch, source, edge_names)
-    if not cues:
+    if source is None or source == sketch or source.Document != sketch.Document:
         return None
-
-    def project_local(x, y):
-        try:
-            world = sketch.Placement.multVec(App.Vector(x, y, 0))
-            return project_world(world)
-        except (AttributeError, ValueError, RuntimeError, TypeError,
-                OverflowError):
-            return None
-
-    return nearest_passive_cue(cues, project_local, cursor, radius_px)
+    if not hasattr(source, "Shape") or source.Shape.isNull():
+        return None
+    hit = _body_snap_cues(sketch, source, edge_names, project_world, cursor, radius_px)
+    return hit[1] if hit else None

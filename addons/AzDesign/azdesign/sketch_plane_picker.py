@@ -28,44 +28,23 @@ class _FaceObserver:
 
 class SketchPlanePicker(QtWidgets.QFrame):
     def __init__(self, session):
-        super().__init__(session.mdi.viewport())
+        super().__init__(session.ribbon)
         self.setObjectName("AzSketchPlanePicker")
         self.session = session
         self.observer = _FaceObserver(self)
         self.listening = False
-        self.setStyleSheet("""
-        QFrame#AzSketchPlanePicker { background: #ffffff;
-            border: 1px solid #9ebdce; border-radius: 9px; }
-        QFrame#AzSketchPlanePicker QLabel { color: #294a60; background: transparent; }
-        QFrame#AzSketchPlanePicker QPushButton { min-height: 37px; min-width: 80px;
-            padding: 5px 12px; border: 1px solid #a9c9dc; border-radius: 5px;
-            background: #eaf5fa; color: #174c72; font-weight: 600; }
-        QFrame#AzSketchPlanePicker QPushButton:hover {
-            background: #d6ebf7; border-color: #438db4; }
-        QFrame#AzSketchPlanePicker QPushButton#AzPlaneCancel {
-            background: #f6f7f9; color: #586b78; border-color: #cbd3d9; }
-        """)
-        self.setFixedWidth(440)
-        layout = QtWidgets.QVBoxLayout(self)
-        layout.setContentsMargins(16, 11, 16, 12)
-        layout.setSpacing(8)
-        title = QtWidgets.QLabel("CREATE SKETCH — SELECT A PLANE OR FACE")
-        title.setStyleSheet("font-size: 13px; font-weight: bold;")
-        layout.addWidget(title)
-        hint = QtWidgets.QLabel("Click a planar face on the model, or choose an origin plane.")
-        hint.setWordWrap(True)
-        layout.addWidget(hint)
-        row = QtWidgets.QHBoxLayout()
+        row = QtWidgets.QHBoxLayout(self)
+        row.setContentsMargins(5, 0, 5, 4)
+        row.addWidget(QtWidgets.QLabel("Sketch plane"))
         for label, value in (("XY · Top", "XY"), ("XZ · Front", "XZ"), ("YZ · Right", "YZ")):
             button = QtWidgets.QPushButton(label)
             button.clicked.connect(lambda _checked=False, plane=value: self.select_plane(plane))
             row.addWidget(button)
-        layout.addLayout(row)
-        cancel = QtWidgets.QPushButton("Cancel · Esc")
-        cancel.setObjectName("AzPlaneCancel")
+        cancel = QtWidgets.QPushButton("Cancel")
         cancel.clicked.connect(self.cancel)
-        layout.addWidget(cancel, 0, QtCore.Qt.AlignRight)
-        self.adjustSize()
+        row.addWidget(cancel)
+        row.addStretch()
+        session.ribbon.layout().addWidget(self)
         self.hide()
 
     def show_picker(self):
@@ -87,14 +66,10 @@ class SketchPlanePicker(QtWidgets.QFrame):
             for obj in doc.Objects
         ))
         if has_model:
-            self.hide()
             self.session.ribbon.hint.setText(
-                "CREATE SKETCH · Click a flat model face · Esc cancels"
+                "Click a flat model face or choose an origin plane · Esc cancels"
             )
-        else:
-            self.move(max(8, (self.parentWidget().width()-self.width())//2), 16)
-            self.show()
-            self.raise_()
+        self.show()
 
     def release(self):
         global _active
