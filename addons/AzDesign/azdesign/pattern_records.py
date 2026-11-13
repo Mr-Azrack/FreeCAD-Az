@@ -55,7 +55,8 @@ def append_record(sketch, parameters, created, constraints=()):
     if type(columns) is not int or type(rows) is not int or columns < 1 or rows < 1:
         raise ValueError("Invalid pattern dimensions")
     indices = list(created)
-    if any(type(index) is not int for index in indices):
+    if (any(type(index) is not int or index < 0 for index in indices)
+            or len(set(indices)) != len(indices)):
         raise ValueError("Invalid generated geometry indices")
     if not indices or len(indices) != columns * rows - 1:
         raise ValueError("Pattern geometry count does not match dimensions")
