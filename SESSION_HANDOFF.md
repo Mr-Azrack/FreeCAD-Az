@@ -1,4 +1,4 @@
-# FreeCAD-Az â€” recovery handoff
+# FreeCAD-Az Ã¢â‚¬â€ recovery handoff
 
 **Updated:** 2026-11-06
 **Repository:** https://github.com/Mr-Azrack/FreeCAD-Az
@@ -39,7 +39,7 @@ Record: date/time; actual branch and HEAD; exact files/commits; tests run and re
 
 **Rule:** Git is the authoritative memory, and this handoff points to it.
 
-## Implementation-session completion update â€” 2026-11-05
+## Implementation-session completion update Ã¢â‚¬â€ 2026-11-05
 
 **Tested code:** `dac67fee9cebb9cb7e342a45098fd913510f10f6`. **Inspected docs parent:**
 `f500e7271468a21ff3e7b9d3ad8a8fe1c9c400d2`. This update preserves the concurrent
@@ -63,7 +63,7 @@ perform the Windows shop-part acceptance workflow listed above, record actual
 versions/results, then choose the next measured usability gap. Do not duplicate the
 already implemented profile selection, parameters, Q or rollback from stale notes.
 
-## Startup failure follow-up â€” 0.2.1
+## Startup failure follow-up Ã¢â‚¬â€ 0.2.1
 
 Parent inspected before this fix: `8b27bb09993a40d4c52b64f210951cb17aee5c40`.
 Owner's Windows FreeCAD v1-1 installation failed while executing InitGui.py because
@@ -94,7 +94,7 @@ PR #1 remains draft and main is unchanged. The inherited Dependency Review setti
 issue persists. The remaining immediate action is the owner's Windows/1.1 reinstall
 and startup/modeling retest; Linux startup validation does not close that gate.
 
-## First-document failure follow-up â€” 0.2.2, 2026-11-05
+## First-document failure follow-up Ã¢â‚¬â€ 0.2.2, 2026-11-05
 
 Inspected parent: `788e74da80a86f30a0b48747f9d2bbe52da06bd7`, branch
 `codex/az-design-workbench`. The owner reported the Create Sketch None.activeView
@@ -140,7 +140,7 @@ Then complete the representative shop-part acceptance workflow. The New-document
 workaround remains valid for an installation that has not yet been updated.
 Linux evidence does not establish the Windows/1.1 acceptance gate.
 
-## Workspace redesign checkpoint â€” 0.3.0, 2026-11-06
+## Workspace redesign checkpoint Ã¢â‚¬â€ 0.3.0, 2026-11-06
 
 Inspected source parent: `5d9cc1056615878e320fcee107d8008ff0d1e698` on
 `codex/az-design-workbench`. The owner says the existing installation works and
@@ -203,7 +203,7 @@ undo/save/reopen and Native CAD restoration on a representative shop part. Use
 that feedback to choose the next visual/ergonomic gap; do not mark complete Fusion
 parity or Windows/Qt6 acceptance from this Linux checkpoint.
 
-## Compatibility and grid follow-up â€” 0.3.1, 2026-11-06
+## Compatibility and grid follow-up Ã¢â‚¬â€ 0.3.1, 2026-11-06
 
 Parent inspected: `d6d9611917a9e47745659c87fedda456cab4c5dc` on
 `codex/az-design-workbench`. Owner likes the new layout, then reported Midplane
@@ -225,7 +225,7 @@ saved model object. Updated sketch entry/Finish Sketch fitting accordingly.
 
 Fresh passing checks: 3 modern/legacy property contracts, 4 appearance lifecycles,
 13 document-context, 5 startup, 4 installer, 26 native modeling tests; final installed
-fresh-app grid suite passed 16 checks and a 20Ã—20Ã—6 solid smoke check (2400 mmÂ³).
+fresh-app grid suite passed 16 checks and a 20Ãƒâ€”20Ãƒâ€”6 solid smoke check (2400 mmÃ‚Â³).
 The real native saved preference kind was Boolean and its restoration passed.
 Manual inspection confirmed readable aligned sketch grid and properly framed
 modeling floor. Earlier candidate passed 27+30 GUI checks, but a workspace run
@@ -258,7 +258,7 @@ workspace exit without Boolean errors, and reviews default grids in modeling and
 sketching. Record any remaining full traceback. Linux native checks plus modern
 API contracts do not establish Windows/1.1 kernel acceptance.
 
-## 2026-11-06 â€” Az Design 0.3.2 Hole stabilization handoff
+## 2026-11-06 Ã¢â‚¬â€ Az Design 0.3.2 Hole stabilization handoff
 
 Source parent inspected when starting: b481b386212c5d69521e5ed8f6c4cc7305925b9d;
 work continues on codex/az-design-workbench, draft PR #1. The next agent MUST
@@ -310,7 +310,7 @@ and editing a Hole with downstream features are intentionally delegated to
 Native CAD. Package CI creates an Actions artifact; as of source checkpoint,
 no checked-in addons/releases/AzDesign-0.3.2.zip exists.
 
-### Verified packaged review build â€” 0.3.2
+### Verified packaged review build Ã¢â‚¬â€ 0.3.2
 
 [CI run 42248286120](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42248286120)
 passed native modeling and installer/package jobs. Artifact
@@ -326,7 +326,7 @@ The user's chat has also been provided the exact tested package bytes. The
 conversation-file link is not a durable GitHub release; CI artifacts can expire.
 The checked-in ZIP under addons/releases remains version 0.3.1.
 
-## 2026-11-06 â€” 0.3.3 modeled-thread crash-lab handoff
+## 2026-11-06 Ã¢â‚¬â€ 0.3.3 modeled-thread crash-lab handoff
 
 User tested the 0.3.2 Hole UI and says it works, though still not as polished as
 Fusion. User requested real modeled threads enabled so the native crash can be
@@ -382,7 +382,7 @@ Important: Windows FreeCAD 1.1 GUI acceptance and modeled-thread crash
 reproduction remain outstanding. The first real crash should be reproduced
 in a separate disposable FreeCAD process, followed by log analysis.
 
-## 2026-11-06 â€” 0.3.4 edit-mode bugfix handoff
+## 2026-11-06 Ã¢â‚¬â€ 0.3.4 edit-mode bugfix handoff
 
 Reported by owner: Az 0.3.3 interactive Hole panel successfully created real
 spiral-thread geometry with no crash; no macro was run. Editing those threads
@@ -410,7 +410,7 @@ recur request exact first traceback or screenshot and latest experimental log.
 The original 0.3.3 creation success does not prove that modeled-thread edit
 itself is safe or that save/reopen works. No fork merge.
 
-### Verified 0.3.4 editable native Hole package â€” 2026-11-06
+### Verified 0.3.4 editable native Hole package Ã¢â‚¬â€ 2026-11-06
 
 **Verified CI:** [Az Design run 42271403820](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42271403820) passed both jobs. The native FreeCAD 1.0 modeling suite passed **29 tests**, including a real native threaded Hole edit, modified-depth preview and Cancel rollback test. The packaged offline HoleSpec tests (**6**), HoleOperation tests (**7**, including existing modeled-hole edit and native LinkSub Profile inputs), and durable logger test (**1**) passed, along with earlier install/workspace checks. This does **not** run helical `ModelThread=True` in FreeCAD 1.1 Windows; only the owner can validate that.
 
@@ -421,11 +421,11 @@ Outer and inner ZIP CRC checks passed; both macro files and edited code were ver
 
 **Still pending:** User's actual Windows GUI/FreeCAD 1.1 trial of edit existing *modeled helical* threads, changing standard/size, save/reopen. If any errors persist capture first traceback, FreeCAD version and newest `AzDesign-Diagnostics` log. Do not conflate cosmetic native regression with a real modeled-helix edit stress test. PR remains draft/unmerged, checked-in release ZIP remains 0.3.1.
 
-## 2026-11-06 â€” Owner confirmation: 0.3.4 modeled Hole editing
+## 2026-11-06 Ã¢â‚¬â€ Owner confirmation: 0.3.4 modeled Hole editing
 
 The owner installed/tested Az Design 0.3.4 after the modeled-thread editing fixes and reported **"ok that works great"**. Earlier owner testing confirmed that the Az Hole panel generated visible real helical threads on Windows without crashing. This is owner-reported GUI acceptance of the updated editing workflow, not a claim that every thread standard, size, save/reopen, downstream dependency, or native crash scenario has been tested. The 0.3.4 package/native CI checks previously passed; PR #1 remains a draft. Continue collecting exact repro cases for any remaining UX or geometry bugs.
 
-## 2026-11-06 â€” 0.3.5 Hole UX iteration
+## 2026-11-06 Ã¢â‚¬â€ 0.3.5 Hole UX iteration
 
 Owner said no need to ask permission, prefers to break/fix incrementally.
 Recovered draft PR #1 on `codex/az-design-workbench`, base head
@@ -453,7 +453,7 @@ switching center sketches before preview, then modeled thread edit (still
 manual) on Windows. Next project slice can polish the Extrude task and timeline
 without changing geometry engine unexpectedly.
 
-### Verified 0.3.5 package and automated evidence â€” 2026-11-06
+### Verified 0.3.5 package and automated evidence Ã¢â‚¬â€ 2026-11-06
 
 [Az Design CI run 42280673897](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42280673897)
 passed both **package** and **native modeling** jobs. The GitHub artifact
@@ -472,7 +472,7 @@ acceptance is needed for the new grouped Qt task, debounced preview and
 thread-size/source switching. The earlier Windows 0.3.4 modeled-thread
 edit confirmation is still valuable, but should not be treated as a 0.3.5 test.
 
-## 2026-11-07 â€” 0.3.6 timeline editing/deletion handoff
+## 2026-11-07 Ã¢â‚¬â€ 0.3.6 timeline editing/deletion handoff
 
 New user report: bottom roll-back ribbon is not Fusion-like; cannot delete a
 feature and cannot truly modify one. Continued GitHub-first on draft PR #1,
@@ -507,7 +507,7 @@ confirmation, earlier Hole edit, and native Pad/Pocket edits. Known limits:
 arbitrary middle delete preserving later features, dependency repair and drag
 reorder remain future stages. Do not merge draft PR #1 without owner sign-off.
 
-### Verified 0.3.6 timeline Edit/Delete package â€” 2026-11-07
+### Verified 0.3.6 timeline Edit/Delete package Ã¢â‚¬â€ 2026-11-07
 
 [Az Design CI run 42342092612](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42342092612)
 passed **package** and **native modeling** jobs for source commit
@@ -528,7 +528,7 @@ release ZIP remains 0.3.1; use the passing Actions artifact for 0.3.6.
 **Windows FreeCAD 1.1 timeline GUI validation is still pending.** PR #1
 remains draft and unmerged.
 
-## 2026-11-07 â€” 0.3.7 in-app update bootstrap
+## 2026-11-07 Ã¢â‚¬â€ 0.3.7 in-app update bootstrap
 
 User asks if Az can avoid recurring manual ZIP downloads. Project startup
 confirmed public `Mr-Azrack/FreeCAD-Az`, draft PR #1 on branch
@@ -559,7 +559,7 @@ inspect ZIP CRC/package version/contents and rerun extracted offline updater
 tests before shipping link. Record exact artifact ID and SHA256 in state and
 handoff. PR #1 must remain draft/unmerged.
 
-### Verified 0.3.7 self-updater bootstrap artifact â€” November 7, 2026
+### Verified 0.3.7 self-updater bootstrap artifact Ã¢â‚¬â€ November 7, 2026
 
 [Az Design add-on CI 42343163558](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42343163558)
 passed both the **package** and **native modeling** jobs after the exact
@@ -580,7 +580,7 @@ test_hole_ui_policy, test_hole_panel. Its root FreeCAD-Az repository remains
 large; the updater intentionally fetches only the pinned AzDesign subtree.
 
 **Owner action:** perform one final manual install of 0.3.7 ZIP, restart
-FreeCAD; thereafter use ribbon Update Az or File â†’ Check for updates,
+FreeCAD; thereafter use ribbon Update Az or File Ã¢â€ â€™ Check for updates,
 confirm, and fully restart after installation. When already current, the
 button should report 0.3.7 without modifying installation. For first live
 acceptance, verify this no-op check, then use it to upgrade a future 0.3.8+
@@ -588,12 +588,12 @@ CI-passing build. The official ZIP under `addons/releases` is still older.
 Keep draft PR #1 unmerged; do not claim an actual Windows network update was
 observed.
 
-## 2026-11-07 â€” Owner acceptance: 0.3.7 updater bootstrap
+## 2026-11-07 Ã¢â‚¬â€ Owner acceptance: 0.3.7 updater bootstrap
 
 Following installation of Az Design 0.3.7, owner reported **"OK THAT WORKED WOOT"** in response to the instruction to run **Update Az** and verify the up-to-date result. Treat this as owner confirmation that the 0.3.7 installation and in-app check flow worked on their Windows FreeCAD machine. It does **not** validate downloading/installing a newer 0.3.8+ build yet; validate the actual upgrade path when a new tested version exists. Continue incremental break/fix workflow, PR #1 stays draft and unmerged.
 
 
-## 2026-11-07 â€” Next Fusion-like UX priorities agreed for planning
+## 2026-11-07 Ã¢â‚¬â€ Next Fusion-like UX priorities agreed for planning
 
 User asks for next primary changes to close Fusion 360 layout, workflow,
 look/feel gap. Inspected current `codex/az-design-workbench`, draft PR #1,
@@ -615,7 +615,7 @@ Next change if owner says proceed: 0.3.8 first increment, verify Windows
 Build small tests for Body Tip rollback marker and selection/active/rolled
 visuals before any arbitrary reorder. Keep PR draft and preserve continuity.
 
-## 2026-11-07 â€” Consolidated 0.4.0 Fusion-inspired workflow sprint
+## 2026-11-07 Ã¢â‚¬â€ Consolidated 0.4.0 Fusion-inspired workflow sprint
 
 Owner explicitly requested all six previously proposed layout/workflow/look-and-feel upgrades be delivered **together**, rather than six incremental versions. Source changes committed on `codex/az-design-workbench`; PR #1 remains draft/unmerged. No main-branch modifications. User already tested 0.3.7 Update Az bootstrap.
 
@@ -641,7 +641,7 @@ Native FreeCAD object/geometry/kernel unchanged. We did NOT implement arbitrary 
 - Documentation updated for this combined build and remaining parity limitations.
 
 
-### Verified consolidated 0.4.0 CI/artifact â€” 2026-11-07
+### Verified consolidated 0.4.0 CI/artifact Ã¢â‚¬â€ 2026-11-07
 
 [Az Design CI run 42344629492](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42344629492)
 completed with successful **package** and **native modeling** jobs after
@@ -666,11 +666,11 @@ leaving workbench. Check (1) drag timeline scrub and restore latest;
 (2) Sketch Palette and native solver; (3) Browser Body grouping;
 (4) selected face right-click/canvas actions; (5) Quick Dimension/Undo on a
 test solid, (6) existing modeled Hole edit. Do not yet claim actual Windows
-acceptance of these integrated controls or an actual 0.3.7â†’0.4.0 HTTPS upgrade.
+acceptance of these integrated controls or an actual 0.3.7Ã¢â€ â€™0.4.0 HTTPS upgrade.
 PR #1 remains draft/unmerged.
 
 
-## 2026-11-07 â€” 0.4.1 owner Windows screenshot: repair nonfunctional oversized Sketch Palette
+## 2026-11-07 Ã¢â‚¬â€ 0.4.1 owner Windows screenshot: repair nonfunctional oversized Sketch Palette
 
 After installing/testing the consolidated 0.4.0 UI on Windows FreeCAD 1.1,
 owner provided a screenshot showing the custom right palette consumed almost
@@ -726,7 +726,7 @@ verified supported native implementation is available. Do not claim full
 Fusion 360 Sketch Palette parity. Keep draft PR #1 unmerged.
 
 
-## 2026-11-07 â€” 0.4.2 Windows report-view bugfix handoff
+## 2026-11-07 Ã¢â‚¬â€ 0.4.2 Windows report-view bugfix handoff
 
 Owner reported: `tasks.py:509 int(QDialogButtonBox.Ok |
 Cancel) TypeError: StandardButton` and FreeCAD native out-of-scope
@@ -760,7 +760,7 @@ save the FCStd file; changing link types occurs in native transaction.
 No Windows execution evidence yet. Keep draft PR #1 unmerged.
 
 
-### Verified 0.4.2 corrective release â€” 2026-11-07
+### Verified 0.4.2 corrective release Ã¢â‚¬â€ 2026-11-07
 
 **Both CI jobs passed:** [Az Design run 42377682997](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42377682997),
 package and native modeling successful after the headless Hole Qt stub was
@@ -783,17 +783,17 @@ Python tests reran and passed in the working container:
 **Owner step:** installed 0.4.1 can now press **Update Az**, confirm 0.4.2,
 then fully restart FreeCAD. Test creating/editing Extrude from sketch inside
 another Body and check Report view for the exact two previous errors.
-Previously saved legacy features are repaired on a user-initiated **Edit â†’
-valid preview â†’ OK**, then Save; merely opening old files is nonmutating.
+Previously saved legacy features are repaired on a user-initiated **Edit Ã¢â€ â€™
+valid preview Ã¢â€ â€™ OK**, then Save; merely opening old files is nonmutating.
 Actual user Windows 1.1 GUI acceptance is **not yet observed**. Keep PR #1
 draft/unmerged.
 
 
-## 2026-11-07 â€” Video-driven 0.4.3 Extrude preview fix
+## 2026-11-07 Ã¢â‚¬â€ Video-driven 0.4.3 Extrude preview fix
 
-An owner-uploaded 7.97-second 1896Ã—908 Windows FreeCAD 1.1 video
+An owner-uploaded 7.97-second 1896Ãƒâ€”908 Windows FreeCAD 1.1 video
 (`20261107-2027-14.5165198.mp4`) showed solid Body
-(Extrude007 â†’ Hole â†’ Extrude018/019) with `Sketch001` two profiles
+(Extrude007 Ã¢â€ â€™ Hole Ã¢â€ â€™ Extrude018/019) with `Sketch001` two profiles
 flashing between visible/blank. Native Report view showed `Body:
 Tip shape is empty`, old TopoShape hasher mismatch, plus invalid connected
 solid status. No user text was present; interpreted as request to debug
@@ -833,7 +833,7 @@ multi-profile selection no longer blanks the block and invalid preview
 returns original Body. Hasher mismatch may be a separate issue.
 
 
-### Verified 0.4.3 release artifact (owner video regression) â€” November 7, 2026
+### Verified 0.4.3 release artifact (owner video regression) Ã¢â‚¬â€ November 7, 2026
 
 [Az Design CI run 42411861600](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42411861600)
 passed **both package and native modeling** jobs on the corrected
@@ -855,7 +855,7 @@ Six focused extracted tests passed in local Python:
 `test_updater`, `test_hole_panel`, `test_interaction`,
 `test_hole_operation`.
 
-Owner can upgrade installed 0.4.2 via **Update Az â†’ 0.4.3 â†’ full FreeCAD
+Owner can upgrade installed 0.4.2 via **Update Az Ã¢â€ â€™ 0.4.3 Ã¢â€ â€™ full FreeCAD
 restart**. Test selecting no profile, switching between two sketch regions,
 choosing Pick profiles in view and attempting a nonconnecting Join: the
 original block should remain visible when no valid preview exists.
@@ -863,7 +863,7 @@ original block should remain visible when no valid preview exists.
 still reported. Keep PR #1 draft and unmerged.
 
 
-## 2026-11-08 â€” Az Design 0.5.0 fixture acceptance handoff
+## 2026-11-08 Ã¢â‚¬â€ Az Design 0.5.0 fixture acceptance handoff
 
 Owner authorized building 0.5.0 and requested execution rather than small
 steps. Recovered actual development branch
@@ -902,13 +902,13 @@ Once both jobs pass:
 - record evidence in state/handoff and update PR #1 metadata. PR must remain
   DRAFT, unmerged.
 - user currently has Update Az from prior 0.4.x installs; instruct
-  Update Az â†’ 0.5.0 â†’ fully restart FreeCAD. Owner Windows 1.1 screen
+  Update Az Ã¢â€ â€™ 0.5.0 Ã¢â€ â€™ fully restart FreeCAD. Owner Windows 1.1 screen
   acceptance and real first part remain necessary.
 - don't claim complete Fusion parity or that the patch has fixed all
   previous TopoShape hasher warnings; those may be separate.
 
 
-### Verified Az Design 0.5.0 installer and tests â€” November 8, 2026
+### Verified Az Design 0.5.0 installer and tests Ã¢â‚¬â€ November 8, 2026
 
 [Az Design CI run 42450344286](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42450344286)
 finished with successful **package** and **native modeling** jobs, including
@@ -939,7 +939,7 @@ any new first traceback rather than claiming this fixes every TopoShape
 or historical topology naming issue.
 
 
-## 2026-11-08 â€” Automatic Fusion-style snapping correction + core path
+## 2026-11-08 Ã¢â‚¬â€ Automatic Fusion-style snapping correction + core path
 
 During 0.5.1 work owner clarified intended snap/center interaction is
 **automatic on cursor** (midpoint triangle when sliding on an edge;
@@ -985,7 +985,7 @@ Native core patch needs separate branch/build/test/installer track
 and should not disrupt the current installed FreeCAD 1.1.
 
 
-### Verified 0.5.1 packaged workbench and native-modeling CI â€” November 8, 2026
+### Verified 0.5.1 packaged workbench and native-modeling CI Ã¢â‚¬â€ November 8, 2026
 
 [Az Design CI run 42454414615](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42454414615)
 passed BOTH **package** and **native FreeCAD modeling** jobs after adding
@@ -1014,7 +1014,7 @@ an independent native Az application is compiled and preference enabled.
 No stock FreeCAD binaries were modified. Keep PR #1 draft/unmerged.
 
 
-## 2026-11-08 â€” Standalone native Windows app build underway
+## 2026-11-08 Ã¢â‚¬â€ Standalone native Windows app build underway
 
 Owner said "make it happen" after distinction between the Python workbench
 updater and a separately compiled FreeCAD C++ application. Actual branch:
@@ -1050,7 +1050,7 @@ previous runs on new native-code workflow runs.
 No changes to installed Windows FreeCAD 1.1 or its user's files.
 
 
-## 2026-11-09 â€” Windows native Qt startup QuickFix delivered
+## 2026-11-09 Ã¢â‚¬â€ Windows native Qt startup QuickFix delivered
 
 User screenshot: Windows dialog "This application failed to start
 because no Qt platform plugin could be initialized." Repo recovery:
@@ -1086,7 +1086,7 @@ latest run/jobs if next user asks for full corrected preview, and only
 claim success if compile+smoke+artifact passed.
 
 
-## 2026-11-09 â€” Installed-app and patch updater source committed, CI running
+## 2026-11-09 Ã¢â‚¬â€ Installed-app and patch updater source committed, CI running
 
 Repo `Mr-Azrack/FreeCAD-Az`, branch
 `codex/az-design-workbench`, PR #1 still draft/unmerged.
@@ -1124,7 +1124,7 @@ small changed-file archives generated by create_patch.py.
 Existing FreeCAD 1.1 and old portable folder left unchanged.
 
 
-## 2026-11-09 â€” Installer pipeline recovery (current session)
+## 2026-11-09 Ã¢â‚¬â€ Installer pipeline recovery (current session)
 
 - Reviewed native setup workflow and confirmed run 42613707498: Windows patch integration tests **passed**; installer job was **cancelled** during the Inno compiler step; no installer artifact was uploaded. Do not claim release readiness.
 - Committed `5d5990a`: `.github/workflows/az-native-installer.yml` sets `cancel-in-progress: false` for this expensive setup pipeline and increases its upper timeout to 300 minutes. Other commits cannot cancel the current test build by concurrency policy.
@@ -1134,7 +1134,7 @@ Existing FreeCAD 1.1 and old portable folder left unchanged.
 - Preserve draft PR #1 and the separate existing stock FreeCAD install; no merge or force push.
 
 
-## 2026-11-09 evening â€” owner Windows UI screenshot / Offset Plane
+## 2026-11-09 evening Ã¢â‚¬â€ owner Windows UI screenshot / Offset Plane
 
 Owner confirmed native Windows installer 0.5.2 installs/starts without error and provided two screenshots: Az's Sketch ribbon/browser/history shows truncated short button captions and a large blue selected datum-plane overlay; native FreeCAD Part Design Datum Plane Parameters task is cumbersome and takes over the work area. No owner Windows acceptance of layout or plane UX yet.
 
@@ -1143,7 +1143,7 @@ Root cause inspected in `addons/AzDesign/azdesign/catalog.py`: the Offset Plane 
 Next: confirm current Actions run for the new changes, fix failures, add native-modeling tests for origin/face datum offsets and undo/save. Reproduce clipping under Windows at actual display scaling and repair history/navigation labels. Add a compact Az edit path for existing DatumPlane if owner wants one-step edits. Ensure native installer/patcher packages this code only after passing CI. Keep stock FreeCAD untouched and PR draft.
 
 
-## 2026-11-09 evening â€” Design-only command boundary and automatic document routing
+## 2026-11-09 evening Ã¢â‚¬â€ Design-only command boundary and automatic document routing
 
 Owner directs: treat integrated FreeCAD core as implementation detail; do not expose accidental raw FreeCAD feature task panels through Design. Visible product/workbench name should be **Design**, not "Az Design". New ordinary model documents should default to Design after Home, while reopens preserve the last saved workbench and CAM/specialized modeling contexts are not hijacked.
 
@@ -1155,71 +1155,71 @@ Owner directs: treat integrated FreeCAD core as implementation detail; do not ex
 - Remaining: inspect all other pathways (context menus, keyboard dispatch, native edit handlers) that might still invoke unwanted raw task panels; design proper replacement panels per feature instead of silently bypassing FreeCAD's native kernel. Preserve explicit native CAD access and document interchange. Windows interactive workbench-restore and Home testing not yet verified by owner. Never promise exact last-used on unsaved workbench changes; FreeCAD persists its workbench association when saving a document.
 
 
-## 2026-11-09 evening â€” Native update 0.5.3 handoff
+## 2026-11-09 evening Ã¢â‚¬â€ Native update 0.5.3 handoff
 
 User asked for one integrated update button after confirming installed native 0.5.2 works. Implemented source: `native-core/windows/AzOnlineUpdates.cs`, updated `AzUpdater.cs`, `commands.py`, Windows installer CI and `test_online_updates.cs`, plus manual publish workflow. Search commit history around `52dcf69`, `e762ad0`, `fd150ff`, `faf4e64`, `3001596`, `d16e9c5`, `8c86d26`. Verify branch HEAD because subsequent docs/edits may have advanced it.
 
-Behavior: inside native 0.5.3, Design Update opens bundled AzUpdater.exe; online Check for Updates queries latest non-prerelease GitHub Release, selects exact source-version patch and verifies GitHub SHA256 digest before calling existing rollback-safe PowerShell process. For currently installed 0.5.2, UI still lacks these new features: first run Windows Native - Update with verified 0.5.2â†’0.5.3 .azpatch (manual selector), only AFTER artifact passes CI. Manual promotion workflow cannot run from draft feature branch alone because workflow_dispatch requires default-branch presence; no public release published yet.
+Behavior: inside native 0.5.3, Design Update opens bundled AzUpdater.exe; online Check for Updates queries latest non-prerelease GitHub Release, selects exact source-version patch and verifies GitHub SHA256 digest before calling existing rollback-safe PowerShell process. For currently installed 0.5.2, UI still lacks these new features: first run Windows Native - Update with verified 0.5.2Ã¢â€ â€™0.5.3 .azpatch (manual selector), only AFTER artifact passes CI. Manual promotion workflow cannot run from draft feature branch alone because workflow_dispatch requires default-branch presence; no public release published yet.
 
 Critical next action: fetch current run jobs and failures for Az Native Windows Installer workflow, verify `patch-tests` compiler and complete native 0.5.3 patch generation/Qt/rollback/artifact. Correct any compile or scripted build failure. Do not claim success until those gates pass; do not force-push/merge draft PR/replace stock FreeCAD. Update docs at next verified milestone.
 
-### Additional updater safety checkpoint â€” November 9
+### Additional updater safety checkpoint Ã¢â‚¬â€ November 9
 
 Commit `417d25f` guards native patch initiation: if the currently installed Design FreeCAD.exe is running, AzUpdater presents a save/close instruction and rechecks the exact installed FreeCAD.exe path. It leaves the updater open and refuses mutation if the CAD process remains active. This avoids launching the independent patch process while an unsaved Design window is still running. Compiler-path fix commit `8eaa6d2` removed accidental duplicated path separators in patch-test CI. Verify those commits and the latest Windows CI status before announcing availability. Latest CI work is not yet verified passing; no public Release or downloadable 0.5.3 patch was confirmed in this session.
 
 
-### 2026-11-09 22:57 ET â€” Windows patch CI diagnosis
+### 2026-11-09 22:57 ET Ã¢â‚¬â€ Windows patch CI diagnosis
 
-Run 42735700610 completed: patch-tests succeeded; installer failed at actual 0.5.2â†’0.5.3 patch application. 44,382-byte patch included `AZ Native Version.json`, which ApplyAzPatch.ps1 correctly rejected. Cause was case-sensitive generator `EXCLUDES` containing `Az Native Version.json` rather than actual uppercase `AZ Native Version.json`. Fixed `files_in` exclusion using `rel.casefold()` and added safe_rel guard in commit `e29a928`; updated `test_create_patch.py` to use exact Windows marker casing and check rejection in `cd0ca8f`. New native installer workflow run 42752811713 was pending; do not announce update ready until patch apply, Qt startup, rollback and publication pass. Existing 0.5.2 remains unchanged.
+Run 42735700610 completed: patch-tests succeeded; installer failed at actual 0.5.2Ã¢â€ â€™0.5.3 patch application. 44,382-byte patch included `AZ Native Version.json`, which ApplyAzPatch.ps1 correctly rejected. Cause was case-sensitive generator `EXCLUDES` containing `Az Native Version.json` rather than actual uppercase `AZ Native Version.json`. Fixed `files_in` exclusion using `rel.casefold()` and added safe_rel guard in commit `e29a928`; updated `test_create_patch.py` to use exact Windows marker casing and check rejection in `cd0ca8f`. New native installer workflow run 42752811713 was pending; do not announce update ready until patch apply, Qt startup, rollback and publication pass. Existing 0.5.2 remains unchanged.
 
 
-## 2026-11-09 late â€” Owner confirms native 0.5.3 patch / readability regression
+## 2026-11-09 late Ã¢â‚¬â€ Owner confirms native 0.5.3 patch / readability regression
 
 Owner showed AzUpdater.exe reporting `Installed version: 0.5.3` after manually extracting and applying `.azpatch`. This confirms the local version marker and native updater UI (not independently verified modeling task operations). Quick Start still had hardcoded 0.5.1; `commands.py` now reads installed native marker dynamically (commit `84a0d00`), not yet in owner's 0.5.3 patch.
 
-Owner reported smaller/worse text controls in 0.5.3. Inspected explicit 9â€“11 px fonts and fixed-height ribbon/history in `ui.py`, Browser in `workspace.py`, and status/history in `session.py`. Enlarged readability and flexible ribbon page sizing (commits `09ad58f`, `3054eb6`, `f6f8c07`). The separate native Windows updater also had inherited small system fonts: enlarged window/font/button layout in `AzUpdater.cs` (commit `00dba95`). These fixes are committed on feature branch, **not yet installed or validated on owner's Windows PC**. Latest add-on CI run on preceding UI commit: 42758455235; native installer: 42758455231. Before shipping a new patch: ensure latest CI including C# updater resize passes, inspect Windows screenshot at 100/125/150 percent DPI, confirm main ribbon button names not clipped and Browser/history readable. Avoid reusing the fixed 0.5.3 version for an altered payload; version bump/compatible patch from installed 0.5.3 will be required. No full reinstall necessary.
+Owner reported smaller/worse text controls in 0.5.3. Inspected explicit 9Ã¢â‚¬â€œ11 px fonts and fixed-height ribbon/history in `ui.py`, Browser in `workspace.py`, and status/history in `session.py`. Enlarged readability and flexible ribbon page sizing (commits `09ad58f`, `3054eb6`, `f6f8c07`). The separate native Windows updater also had inherited small system fonts: enlarged window/font/button layout in `AzUpdater.cs` (commit `00dba95`). These fixes are committed on feature branch, **not yet installed or validated on owner's Windows PC**. Latest add-on CI run on preceding UI commit: 42758455235; native installer: 42758455231. Before shipping a new patch: ensure latest CI including C# updater resize passes, inspect Windows screenshot at 100/125/150 percent DPI, confirm main ribbon button names not clipped and Browser/history readable. Avoid reusing the fixed 0.5.3 version for an altered payload; version bump/compatible patch from installed 0.5.3 will be required. No full reinstall necessary.
 
 
-## 2026-11-10 â€” 0.5.4 release handoff
+## 2026-11-10 Ã¢â‚¬â€ 0.5.4 release handoff
 
-Following owner's explicit â€œok do that,â€ edited `.github/workflows/az-native-installer.yml` to target native 0.5.4 against original Windows 0.5.3 installer from successful run 42752856389, not more recent 0.5.3 rebuilt with typography. Patched archive is `AzDesignNative-0.5.3-to-0.5.4.azpatch`, with verified baseline installer SHA256, native installation, delta application, Qt smoke, rollback and fresh 0.5.4 installer. Updated `.github/workflows/az-native-publish.yml` for manual release and `test_online_updates.cs` for current baseline. Commits: `e6f949a`, `b71cdbf`, `6aa72df`, `183f67a`, `3648c5e`. Ensure latest CI tests actually pass and repair any failures. Do not publish or merge the draft PR automatically; existing 0.5.3 on owner's machine remains unchanged. The release promotion workflow only runs on default branch after explicit approval.
+Following owner's explicit Ã¢â‚¬Å“ok do that,Ã¢â‚¬Â edited `.github/workflows/az-native-installer.yml` to target native 0.5.4 against original Windows 0.5.3 installer from successful run 42752856389, not more recent 0.5.3 rebuilt with typography. Patched archive is `AzDesignNative-0.5.3-to-0.5.4.azpatch`, with verified baseline installer SHA256, native installation, delta application, Qt smoke, rollback and fresh 0.5.4 installer. Updated `.github/workflows/az-native-publish.yml` for manual release and `test_online_updates.cs` for current baseline. Commits: `e6f949a`, `b71cdbf`, `6aa72df`, `183f67a`, `3648c5e`. Ensure latest CI tests actually pass and repair any failures. Do not publish or merge the draft PR automatically; existing 0.5.3 on owner's machine remains unchanged. The release promotion workflow only runs on default branch after explicit approval.
 
 
-## 2026-11-10 â€” Native Windows CI patch-only optimization handoff
+## 2026-11-10 Ã¢â‚¬â€ Native Windows CI patch-only optimization handoff
 
 User explicitly asked to optimize slow Windows CI. Created `.github/workflows/az-native-patch.yml` commit `a2d342b` and restricted expensive `az-native-installer.yml` to manual workflow_dispatch commit `d1f01ef`; updated approved publisher to require successful new `Az Native Windows Patch` run commit `5f3be22`. Routine PR workflow downloads only original verified 0.5.3 installer (run 42752856389) rather than ALSO downloading compiled native 1.1 core. It creates partial `Mod/AzDesign` and updater/script overlays, compiles AzUpdater.exe with extracted bundled FreeCAD icon, hashes changed files via existing generator, tests real baseline apply, Qt smoke, rollback/uninstall, uploads small patch. This saves full installer recompaction/upload but still requires initial baseline download and install for trustworthy old hash checking. Never trigger full installer as part of normal PR merely for routine visual text updates. First patch-only Windows Actions run: https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42818046881, in progress during authoring. Inspect its jobs/logs, repair Windows-specific PowerShell or file layout failures, update state. Preserve draft PR; no default-branch merge or release publishing without approval. Existing owner-installed 0.5.3 untouched.
 
 
-## 2026-11-10 morning â€” owner 0.5.4 update lookup and missing icons
+## 2026-11-10 morning Ã¢â‚¬â€ owner 0.5.4 update lookup and missing icons
 
-Owner screenshot proves local Windows native updater `Installed version: 0.5.4`, with `Check for Updates` HTTP 404 from `/releases/latest`. This means no accessible public latest release (a private repo can also cause 404); the already-installed 0.5.4 is unaffected and a successful manual patch does not establish a public release. Adjusted `AzOnlineUpdates.Find` to interpret exact HTTP 404 as no public verified release, preserving all SHA256/HTTPS/selection validation for real published assets (commit `dd314b2`). Owner also highlighted bare text with missing icons on SOLID commands and canvas/history navigation. Source relied on native FreeCAD SVG/icon registrations not necessarily shipped in packaged runtime. Added locally painted geometry-based vector-like Qt icons in `ui.py` (commit `790c620`) and wired canvas/browser/history action buttons in `workspace.py` (commit `57a67f1`); these avoid absent native resource images and fallback abbreviations. Must verify Windows Qt painting, actual screenshot, icon sizes/legibility; automated tests alone do not establish visual quality. Latest native patch run for this change 42819280809 pending, add-on 42819280938 queued. Do not claim this fix installed on owner's 0.5.4; requires a new versioned patch baseline (likely 0.5.4â†’0.5.5). Release publication remains gated/manual on main and no draft PR merged.
+Owner screenshot proves local Windows native updater `Installed version: 0.5.4`, with `Check for Updates` HTTP 404 from `/releases/latest`. This means no accessible public latest release (a private repo can also cause 404); the already-installed 0.5.4 is unaffected and a successful manual patch does not establish a public release. Adjusted `AzOnlineUpdates.Find` to interpret exact HTTP 404 as no public verified release, preserving all SHA256/HTTPS/selection validation for real published assets (commit `dd314b2`). Owner also highlighted bare text with missing icons on SOLID commands and canvas/history navigation. Source relied on native FreeCAD SVG/icon registrations not necessarily shipped in packaged runtime. Added locally painted geometry-based vector-like Qt icons in `ui.py` (commit `790c620`) and wired canvas/browser/history action buttons in `workspace.py` (commit `57a67f1`); these avoid absent native resource images and fallback abbreviations. Must verify Windows Qt painting, actual screenshot, icon sizes/legibility; automated tests alone do not establish visual quality. Latest native patch run for this change 42819280809 pending, add-on 42819280938 queued. Do not claim this fix installed on owner's 0.5.4; requires a new versioned patch baseline (likely 0.5.4Ã¢â€ â€™0.5.5). Release publication remains gated/manual on main and no draft PR merged.
 
 
-## 2026-11-10 07:xx ET â€” new 0.5.5 patch follows owner 0.5.4 screen capture
+## 2026-11-10 07:xx ET Ã¢â‚¬â€ new 0.5.5 patch follows owner 0.5.4 screen capture
 
 After confirmation that owner has 0.5.4 installed and updater `/releases/latest` returned HTTP 404, corrected online check to report no accessible public verified update instead of fatal HTTP 404 (`dd314b2`). Owner also highlighted lack of toolbar icons (plain names) across main SOLID ribbon, navigation strip, history. Added generated Qt icons independent of native FreeCAD SVG resources in `ui.py` (`790c620`) and `workspace.py` (`57a67f1`). As owner has 0.5.4, immediately advanced fast Windows patch workflow to `AzDesignNative-0.5.4-to-0.5.5.azpatch` with original verified 0.5.4 full Windows setup from successful CI run 42809599278 pinned, hash-verified (commit `c811fda`). Updated manual full installer workflow, gated release promoter and online updater policy tests for 0.5.5 (commits `cb2ee9b`, `d6fd28b`, `14cc4a9`). Last 0.5.5 fast patch CI observed running: https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42819472920. Not yet proven green nor published; DO NOT tell user to install untested code. Auto-watch has been retargeted to 0.5.5. GitHub release publication still requires human approval and main-branch publisher; the API 404 may mean no public releases or a private repository. Do not assume missing release is resolved merely from local error handling. Need live Windows icon quality acceptance after patch.
 
 
-## 2026-11-10 08:xx ET â€” owner-approved 0.5.5 release promotion
+## 2026-11-10 08:xx ET Ã¢â‚¬â€ owner-approved 0.5.5 release promotion
 
 Owner authorized proceeding through technical steps without repeated approval. Verified fast Windows patch CI run 42819472920: patch job success and `AzDesignNative-0.5.4-to-0.5.5-PATCH` artifact present (~26 KB outer Actions archive). Repository public. To avoid merging unfinished feature PR #1, created release-only PR #2 and merged a SHA/CI-gated, manual `az-native-publish.yml` onto main (squash `6e4dba5`). Because GitHub connector lacks workflow_dispatch action, created and merged narrowly scoped one-shot push trigger PR #3 (squash `2aeb26d`) authorizing only a specific versioned release request on main. Committed `.github/release-requests/native-0.5.5.txt` to main at `43c03c1`, containing exactly `publish v0.5.5 from verified patch CI run 42819472920`. Publisher on main verifies CI workflow identity, success, branch, release not yet existing, and artifact SHA256 before `gh release create`. Independently confirmed publisher and request file both exist on main. BUT not yet confirmed GitHub Actions push-trigger run succeeded or public v0.5.5 Release published: GitHub connector only exposes PR-triggered run lookup; web/API fetch unavailable here. Environment `native-release` may require additional human review. DO NOT claim public release or online update working until separately verified via releases/latest or GitHub Actions. Existing owner 0.5.4 installation remains unchanged. Monitor and resolve any gated/publish errors using an appropriate GitHub Actions UI or Work browser; release watcher remains active.
 
 
-## 2026-11-10 â€” user requests Design Home as native launch landing view
+## 2026-11-10 Ã¢â‚¬â€ user requests Design Home as native launch landing view
 
 Owner screenshot after 0.5.5 install shows new local icons in Design ribbon, while FreeCAD's native Start page appears separately on empty launch. User wants **Design's own start screen instead of native FreeCAD Start** and better nav controls. Implemented `addons/AzDesign/azdesign/home.py` Qt widget with New/Open; `session.py` home overlay and removal of eager auto-document creation; `AzDesignLauncher.cs` sets `AZ_DESIGN_NATIVE_HOME` for no-argument launches; `InitGui.py` delayed guarded activate Design; `ui.py` and `workspace.py` more specific pan/orbit/zoom/view icons. Added widget smoke to `native-core/windows/smoke_qt.py`. Commits include `16dbb4d`, `39a8f5e`, `e6753c7`, `241c188`, `58b850a`, `46c6b88`, `4a66f30`.
 
 Fast patch now reconstructs exact owner-installed 0.5.5 by installing verified 0.5.4 setup (run 42809599278) and applying verified 0.5.5 patch artifact (run 42819472920), then generates `AzDesignNative-0.5.5-to-0.5.6.azpatch` including new `AzDesign.exe`, updater, patch applicator, Mod/AzDesign. Clean workflow committed at `9870f42` after repairing accidental JavaScript replacement-string `$'` expansion that briefly malformed YAML in earlier commits; **always verify latest file only**. Offline metadata tests updated to 0.5.6, last commit `da4b04e`. GitHub connector commit workflow runs returned no new patch checks at time of note; cannot claim CI tested or released. Latest branch needs Windows CI run verification; do not publish on inference. User's 0.5.5 installation unchanged. Existing automated patch readiness watcher retargeted to 0.5.6. Main public release is still v0.5.5; a separately gated 0.5.6 promotion will be needed. Separate unfinished Design feature PR #1 remains unmerged.
 
 
-## 2026-11-10 â€” live practical-part testing feedback and immediate fixes
+## 2026-11-10 Ã¢â‚¬â€ live practical-part testing feedback and immediate fixes
 
-Owner shared two screenshots and two 1918Ã—1078 MP4 recordings. Native Preferences under Displayâ†’3D View shows camera radio circles without selected dot; native Create Sketch modal plane selection is poor; user wants click an origin plane or actual flat part face as in Fusion. Design ribbon top shortcuts are still letters. Selection action overlay Activate/Isolate blocks the cube, which lacks obvious Home. Sketcher Rectangle fails to exit on Esc after ribbon interaction, though Dimension Esc works. A long MP4 shows EXTRUDE task panel operating in Cut mode with no profile selected while a Sketch exists, blocking further commands.
+Owner shared two screenshots and two 1918Ãƒâ€”1078 MP4 recordings. Native Preferences under DisplayÃ¢â€ â€™3D View shows camera radio circles without selected dot; native Create Sketch modal plane selection is poor; user wants click an origin plane or actual flat part face as in Fusion. Design ribbon top shortcuts are still letters. Selection action overlay Activate/Isolate blocks the cube, which lacks obvious Home. Sketcher Rectangle fails to exit on Esc after ribbon interaction, though Dimension Esc works. A long MP4 shows EXTRUDE task panel operating in Cut mode with no profile selected while a Sketch exists, blocking further commands.
 
-Source commits on `codex/az-design-workbench`: new nonmodal `sketch_plane_picker.py` with XY/XZ/YZ actions and SelectionObserver for planar model faces (`b40ae55`), refactor `modeling.create_sketch` to call it instead of QInputDialog (`eb4df63`); canvas selection bar hidden (`b1594d6`); Escape forwards to Sketcher viewport when focus stolen and cancels plane chooser (`eaebec4`); auto-select sole valid sketch and reject Cut before first solid (`748ed6c`); native Preferences QRadioButton indicator checked style (`f6a982f`); top ribbon icon pictograms (`1a07f92`); custom cube-side Home button and teardown (`8a9056d`, `b05e1ef`); Windows CI adds Python compileall gate (`efa2cac`). These are NOT Windows-tested or released yet. Do not misstate release readiness. First clean testing action: inspect latest `Az Native Windows Patch` workflow for current SHA on PR #1; metadata lookup returned no new run IDs in previous turn. Test real 0.5.5â†’0.5.6 candidate, ensure source stays on designated feature branch. Check nonmodal selection observer, screenshot icon placement, native Preferences radio checks and Escape behavior under real FreeCAD 1.1 Windows.
+Source commits on `codex/az-design-workbench`: new nonmodal `sketch_plane_picker.py` with XY/XZ/YZ actions and SelectionObserver for planar model faces (`b40ae55`), refactor `modeling.create_sketch` to call it instead of QInputDialog (`eb4df63`); canvas selection bar hidden (`b1594d6`); Escape forwards to Sketcher viewport when focus stolen and cancels plane chooser (`eaebec4`); auto-select sole valid sketch and reject Cut before first solid (`748ed6c`); native Preferences QRadioButton indicator checked style (`f6a982f`); top ribbon icon pictograms (`1a07f92`); custom cube-side Home button and teardown (`8a9056d`, `b05e1ef`); Windows CI adds Python compileall gate (`efa2cac`). These are NOT Windows-tested or released yet. Do not misstate release readiness. First clean testing action: inspect latest `Az Native Windows Patch` workflow for current SHA on PR #1; metadata lookup returned no new run IDs in previous turn. Test real 0.5.5Ã¢â€ â€™0.5.6 candidate, ensure source stays on designated feature branch. Check nonmodal selection observer, screenshot icon placement, native Preferences radio checks and Escape behavior under real FreeCAD 1.1 Windows.
 
 
-## 2026-11-10 â€” real CAD part feature blockers: source work committed, testing outstanding
+## 2026-11-10 Ã¢â‚¬â€ real CAD part feature blockers: source work committed, testing outstanding
 
 Owner image of Sketch001 after adding an inner rectangle on an existing Pad shows multiple crowded driving/reference dimensions (45mm, 13.5mm, 5mm, others), underconstrained 2 DoF; the actual projection button greyed out, no visible Move, Hole required manual sketch, Mirror/Pattern unavailable. Implemented in source on `codex/az-design-workbench`:
 - `azdesign/move_body.py` first-pass body/component Move with XYZ and Undo, registered as Az_Move, exposed under SOLID MODIFY (commits `9165de8`, `2bdb3de`, `b26199c`, `1d75457`).
@@ -1231,52 +1231,52 @@ Owner image of Sketch001 after adding an inner rectangle on an existing Pad show
 Do not claim current user's installed 0.5.5 has these changes. Need verify fresh GitHub Actions run(s); connector `fetch_commit_workflow_runs` repeatedly returned no workflow runs for latest branch SHA despite commits. Investigate PR-triggered synthetic merge refs/Actions dispatch if appropriate; fix syntax/test failures. Then controlled 0.5.6 release. Keep draft PR #1 and stock FreeCAD separate.
 
 
-### Latest final check â€” 2026-11-10 practical-part fix set
+### Latest final check Ã¢â‚¬â€ 2026-11-10 practical-part fix set
 
-Additional source refinements: Hole-first flow now supports selecting the face *after* clicking Hole via nonmodal observer (commit f11a1f9); Escape and workspace teardown clear that observer (0fa0064); incomplete hole-center sketch state clears on workspace exit (057044a, 7036326). Native Sketcher Project now points at confirmed FreeCAD 1.1 `Sketcher_Projection` rather than stale disabled command. Pattern/Mirror have explicit allowlist tests (637b358) and native contract test registered in add-on CI (f9bbf6b, 3aa7b0d). Latest branch SHA checked: 7036326; GitHub connector reported no associated workflow runs or status contexts. All new features are source-only and not yet proven in the ownerâ€™s installed app. Do not publish 0.5.6 or say Windows-validated before CI and physical modeling tests. Once running, test face-first Hole, Sketcher projected solid edges, native mirror and linear pattern with existing pocket, Move and Undo, label toggle, real feature editing and save/reopen. Preserve .FCStd data and untouched stock FreeCAD.
-
-
-## 2026-11-10 11:xx ET â€” Direct GitHub browser visibility restored
-
-Owner pointed out connected Chrome GitHub Actions tab. Browser tab ID 873331943 at `https://github.com/Mr-Azrack/FreeCAD-Az/actions` exposed actual runs, proving prior `fetch_commit_workflow_runs` empty results **did not mean GitHub CI absent**. The branch push to SHA 024a339 produced **Az Native Windows Patch #17, run 42839590614, SUCCESS**, 0.5.5â†’0.5.6 PATCH artifact present, and **Az Design add-on #335, run 42839590701, FAILURE** in `package` job, `Test first command and hidden-document lifecycle`. Fetched failing job 129910920911 logs; specifically `test_document_context.py::test_create_sketch_with_only_hidden_calculator_opens_visible_design` imported actual `sketch_plane_picker.py` with mocked `QtWidgets` lacking QFrame because test still assumed old `QInputDialog.getItem`. This is a stale test contract after nonmodal plane chooser, **not proof of a production QFrame error**. Updated test to patch fake picker module, assert `show()` and no modal dialog, preserving visible-vs-hidden document expectations; committed SHA `5ae5a5007a3cb813b90383a81b751c1820e2ee71`. GitHub connector returned no workflow runs for that new SHA, so **this fix not yet CI verified**. Successful Windows run #17 applies only to earlier 024a339 and does not cover later Move/Mirror/Pattern/Hole code; DO NOT publish that old artifact as current release. Need check latest branch's actual Actions UI or PR workflow, confirm addon+Windows builds and address remaining test failures, then publish controlled 0.5.6 patch. Public v0.5.5 release publisher run 42821021349 was successful, consistent with owner's updater discovering 0.5.5.
+Additional source refinements: Hole-first flow now supports selecting the face *after* clicking Hole via nonmodal observer (commit f11a1f9); Escape and workspace teardown clear that observer (0fa0064); incomplete hole-center sketch state clears on workspace exit (057044a, 7036326). Native Sketcher Project now points at confirmed FreeCAD 1.1 `Sketcher_Projection` rather than stale disabled command. Pattern/Mirror have explicit allowlist tests (637b358) and native contract test registered in add-on CI (f9bbf6b, 3aa7b0d). Latest branch SHA checked: 7036326; GitHub connector reported no associated workflow runs or status contexts. All new features are source-only and not yet proven in the ownerÃ¢â‚¬â„¢s installed app. Do not publish 0.5.6 or say Windows-validated before CI and physical modeling tests. Once running, test face-first Hole, Sketcher projected solid edges, native mirror and linear pattern with existing pocket, Move and Undo, label toggle, real feature editing and save/reopen. Preserve .FCStd data and untouched stock FreeCAD.
 
 
-## 2026-11-10 â€” User-directed workflow streamlining, applied
+## 2026-11-10 11:xx ET Ã¢â‚¬â€ Direct GitHub browser visibility restored
 
-User requested middle ground between one bug/one fix and giant risky change sets. **Implemented**, not merely proposed: `.github/workflows/az-native-patch.yml` no longer triggers on ordinary `addons/AzDesign/**`/native-core push or all PRs. It runs only when `.github/validation-requests/native-0.5.6.txt` is intentionally changed on trusted `codex/az-design-workbench`, or manual dispatch. Also added preflight package contract tests on Windows ahead of the expensive 0.5.4+0.5.5 reconstructed baseline download. `.github/workflows/az-design.yml` remains fast automatic add-on/modeling CI for each ordinary source change. Root `BATCH_VALIDATION.md` establishes 3â€“6 related bugs or one complete owner workflow per candidate, frequent lightweight commits, grouped diagnostic review of all failures, versioned candidate validation and manual public release with real GUI owner testing. Add-on #336 failed `test_hole_panel.py` because new HoleFacePicker inherited QFrame while stub omitted it; test harness updated commit 5722293. The 0.5.6 candidate marker does not yet exist; do not create or announce release before fast CI passes. Owner's installed v0.5.5 unchanged. GitHub browser tab provides real Actions list; commit-to-runs connector lookup may be incomplete. Do not revert the deliberate batch gate simply to force a quick Windows run.
+Owner pointed out connected Chrome GitHub Actions tab. Browser tab ID 873331943 at `https://github.com/Mr-Azrack/FreeCAD-Az/actions` exposed actual runs, proving prior `fetch_commit_workflow_runs` empty results **did not mean GitHub CI absent**. The branch push to SHA 024a339 produced **Az Native Windows Patch #17, run 42839590614, SUCCESS**, 0.5.5Ã¢â€ â€™0.5.6 PATCH artifact present, and **Az Design add-on #335, run 42839590701, FAILURE** in `package` job, `Test first command and hidden-document lifecycle`. Fetched failing job 129910920911 logs; specifically `test_document_context.py::test_create_sketch_with_only_hidden_calculator_opens_visible_design` imported actual `sketch_plane_picker.py` with mocked `QtWidgets` lacking QFrame because test still assumed old `QInputDialog.getItem`. This is a stale test contract after nonmodal plane chooser, **not proof of a production QFrame error**. Updated test to patch fake picker module, assert `show()` and no modal dialog, preserving visible-vs-hidden document expectations; committed SHA `5ae5a5007a3cb813b90383a81b751c1820e2ee71`. GitHub connector returned no workflow runs for that new SHA, so **this fix not yet CI verified**. Successful Windows run #17 applies only to earlier 024a339 and does not cover later Move/Mirror/Pattern/Hole code; DO NOT publish that old artifact as current release. Need check latest branch's actual Actions UI or PR workflow, confirm addon+Windows builds and address remaining test failures, then publish controlled 0.5.6 patch. Public v0.5.5 release publisher run 42821021349 was successful, consistent with owner's updater discovering 0.5.5.
 
 
-## 2026-11-10 â€” Owner 0.5.6 launch and four-hole pattern report
+## 2026-11-10 Ã¢â‚¬â€ User-directed workflow streamlining, applied
+
+User requested middle ground between one bug/one fix and giant risky change sets. **Implemented**, not merely proposed: `.github/workflows/az-native-patch.yml` no longer triggers on ordinary `addons/AzDesign/**`/native-core push or all PRs. It runs only when `.github/validation-requests/native-0.5.6.txt` is intentionally changed on trusted `codex/az-design-workbench`, or manual dispatch. Also added preflight package contract tests on Windows ahead of the expensive 0.5.4+0.5.5 reconstructed baseline download. `.github/workflows/az-design.yml` remains fast automatic add-on/modeling CI for each ordinary source change. Root `BATCH_VALIDATION.md` establishes 3Ã¢â‚¬â€œ6 related bugs or one complete owner workflow per candidate, frequent lightweight commits, grouped diagnostic review of all failures, versioned candidate validation and manual public release with real GUI owner testing. Add-on #336 failed `test_hole_panel.py` because new HoleFacePicker inherited QFrame while stub omitted it; test harness updated commit 5722293. The 0.5.6 candidate marker does not yet exist; do not create or announce release before fast CI passes. Owner's installed v0.5.5 unchanged. GitHub browser tab provides real Actions list; commit-to-runs connector lookup may be incomplete. Do not revert the deliberate batch gate simply to force a quick Windows run.
+
+
+## 2026-11-10 Ã¢â‚¬â€ Owner 0.5.6 launch and four-hole pattern report
 
 Owner supplied 20261110-1830 video: native installed 0.5.6 starts ordinary FreeCAD Part Design and Report view shows `NameError: name '_az_App' is not defined` in `InitGui.py`; owner also dislikes stock FreeCAD splash/start page. Implemented bound deferred callback references in `addons/AzDesign/InitGui.py` (commit cdddc3c), tests for cleared loader namespace and existing-doc route in `test_startup.py` (c6902cf, 55e69ce). Native-launch-only `ShowSplasher = false` preference applied to Design's own FREECAD_USER_HOME profile for next launch and callback delay reduced 1200 to 250 ms (7c34e46, 1bf376b); stock FreeCAD remains independent. Actual Windows user rerun not confirmed.
 
-Owner also reports pattern only applied to solid features and cannot produce four hole locations in a sketch. Implemented `azdesign/sketch_pattern.py` (fb10c82) with source-circle selection/dropdown, 2Ã—2 default row/column pitch and solver-native constraint-driven copies (Equal radius, center offsets relative to source, zero-distance alignment constraints). Wire Sketch Modify ribbon/commands (5f4d8fb, 2f18cb4). Added FreeCAD engine integration test in `test_workflow.py` (363b1ed) for pattern from one circle â†’ 4 circles â†’ diameter edit â†’ native Hole removing 4 through-holes from plate; overlap/spacing rejection. New code requires successful CI + owner test; do not claim tested GUI merely from source commits.
+Owner also reports pattern only applied to solid features and cannot produce four hole locations in a sketch. Implemented `azdesign/sketch_pattern.py` (fb10c82) with source-circle selection/dropdown, 2Ãƒâ€”2 default row/column pitch and solver-native constraint-driven copies (Equal radius, center offsets relative to source, zero-distance alignment constraints). Wire Sketch Modify ribbon/commands (5f4d8fb, 2f18cb4). Added FreeCAD engine integration test in `test_workflow.py` (363b1ed) for pattern from one circle Ã¢â€ â€™ 4 circles Ã¢â€ â€™ diameter edit Ã¢â€ â€™ native Hole removing 4 through-holes from plate; overlap/spacing rejection. New code requires successful CI + owner test; do not claim tested GUI merely from source commits.
 
-Since 0.5.6 is already locally installed, updated `.github/workflows/az-native-patch.yml` for **0.5.6â†’0.5.7** (ad68421, 5cbfadd) with pinned 0.5.6 patch artifact run 42871091253, SHA256 check, reconstructed installed baseline, patch/apply/rollback/uninstall. Windows candidate is gated by Linux FreeCAD native geometry job before patch job (7d2fa3d). Trigger changed to `.github/validation-requests/native-0.5.7.txt`; NOT yet released. Need run candidate and inspect test failures as a batch, then update state; keep current 0.5.6 untouched until green and approved.
+Since 0.5.6 is already locally installed, updated `.github/workflows/az-native-patch.yml` for **0.5.6Ã¢â€ â€™0.5.7** (ad68421, 5cbfadd) with pinned 0.5.6 patch artifact run 42871091253, SHA256 check, reconstructed installed baseline, patch/apply/rollback/uninstall. Windows candidate is gated by Linux FreeCAD native geometry job before patch job (7d2fa3d). Trigger changed to `.github/validation-requests/native-0.5.7.txt`; NOT yet released. Need run candidate and inspect test failures as a batch, then update state; keep current 0.5.6 untouched until green and approved.
 
 
-## 2026-11-10 â€” 0.5.7 splash fixed prelaunch, candidate must be superseded
+## 2026-11-10 Ã¢â‚¬â€ 0.5.7 splash fixed prelaunch, candidate must be superseded
 
 After v0.5.7 candidate #1 was triggered, recognized native Python `InitGui` preference update only disables splash for *subsequent* launches. Owner says startup popup not needed at all, including first launch. Implemented `AzDesignLauncher.PrepareNoSplash(user.cfg)` in native C# executable (commit c2deef4): before spawning FreeCAD, ensure Design's dedicated local app profile XML `Root/BaseApp/Preferences/General/FCBool ShowSplasher=0`, preserving unrelated preferences, staged atomic file replacement + backup, idempotence; if malformed/locked, noncritical failure does not block CAD startup. Stock FreeCAD profile untouched. Added C# first-launch native profile test `native-core/windows/test_launcher_profile.cs` (335e205) and required compiler System.Xml.dll for native patch/install workflows with early validation gate (71d0178, 7967223). No actual Windows acceptance test on owner's machine yet.
 
-**ACTION:** Supersede first 0.5.7 candidate marker with latest source SHA once all batch commits present; previous candidate does not include C# launcher fix. Run guarded geometry, headless add-on tests, Windows launcher first-run profile test, 0.5.6 baseline apply/Qt/rollback. Do not publish or advise installation of old candidate. Manual user test should be: open app no splash/stock Start; create sketch on plate face; draw one circle; Sketch â†’ Rectangular Pattern 2Ã—2 with X/Y pitch; Finish Sketch â†’ Hole (through all); measure four valid holes; save/reopen. Owner already installed v0.5.6; incremental target is v0.5.7.
+**ACTION:** Supersede first 0.5.7 candidate marker with latest source SHA once all batch commits present; previous candidate does not include C# launcher fix. Run guarded geometry, headless add-on tests, Windows launcher first-run profile test, 0.5.6 baseline apply/Qt/rollback. Do not publish or advise installation of old candidate. Manual user test should be: open app no splash/stock Start; create sketch on plate face; draw one circle; Sketch Ã¢â€ â€™ Rectangular Pattern 2Ãƒâ€”2 with X/Y pitch; Finish Sketch Ã¢â€ â€™ Hole (through all); measure four valid holes; save/reopen. Owner already installed v0.5.6; incremental target is v0.5.7.
 
 
-## 2026-11-10 â€” v0.5.7 GitHub workflow incident: resolved configuration, live acceptance in progress
+## 2026-11-10 Ã¢â‚¬â€ v0.5.7 GitHub workflow incident: resolved configuration, live acceptance in progress
 
-Owner reported workflows showing errors and stuck. Browser GitHub Actions view showed #21â€“#35 failed instantly with no jobs. Root cause was a malformed .github/workflows/az-native-patch.yml caused by source-editing an incomplete PowerShell block; truncated SHA256 check, duplicated build steps/tail, and incorrect candidate trigger path remained. Fixed by rebuilding one contiguous 0.5.6 baseline reconstruction and patch build, requiring exactly one each of geometry, Windows patch, reconstruction and upload steps; corrected 0.5.7 marker path, System.Xml launcher compile reference, and installed baseline error wording. Commit `27569ea33f04685077d88b08d095d9883bb2e803`. Submitted 0.5.7 candidate #3 marker commit `1e9c172bb5fe1f7e38306e4238e8f7832842b10b`.
+Owner reported workflows showing errors and stuck. Browser GitHub Actions view showed #21Ã¢â‚¬â€œ#35 failed instantly with no jobs. Root cause was a malformed .github/workflows/az-native-patch.yml caused by source-editing an incomplete PowerShell block; truncated SHA256 check, duplicated build steps/tail, and incorrect candidate trigger path remained. Fixed by rebuilding one contiguous 0.5.6 baseline reconstruction and patch build, requiring exactly one each of geometry, Windows patch, reconstruction and upload steps; corrected 0.5.7 marker path, System.Xml launcher compile reference, and installed baseline error wording. Commit `27569ea33f04685077d88b08d095d9883bb2e803`. Submitted 0.5.7 candidate #3 marker commit `1e9c172bb5fe1f7e38306e4238e8f7832842b10b`.
 
-**Confirmed via GitHub API:** new [Az Native Windows Patch #36](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42899554668) was accepted and running; native FreeCAD `geometry` job completed **successfully** (including 2Ã—2 four-hole test), Windows `patch` job running and currently installing pinned 0.5.4 baseline. At this checkpoint Windows output is NOT yet a verified patch, no 0.5.7 release published, owner's installed 0.5.6 untouched. Do not claim full release ready until Windows package/apply/rollback completes. **Process improvement:** add a lightweight actionlint/YAML structure check to fast CI in a *separate validated batch* to prevent rejected workflows. Avoid changing the running candidate SHA.
+**Confirmed via GitHub API:** new [Az Native Windows Patch #36](https://github.com/Mr-Azrack/FreeCAD-Az/actions/runs/42899554668) was accepted and running; native FreeCAD `geometry` job completed **successfully** (including 2Ãƒâ€”2 four-hole test), Windows `patch` job running and currently installing pinned 0.5.4 baseline. At this checkpoint Windows output is NOT yet a verified patch, no 0.5.7 release published, owner's installed 0.5.6 untouched. Do not claim full release ready until Windows package/apply/rollback completes. **Process improvement:** add a lightweight actionlint/YAML structure check to fast CI in a *separate validated batch* to prevent rejected workflows. Avoid changing the running candidate SHA.
 
-## 2026-11-10 â€” Fusion UX batch implemented; remaining Windows gate
+## 2026-11-10 Ã¢â‚¬â€ Fusion UX batch implemented; remaining Windows gate
 
 After owner's full-resolution Fusion plate recording, implemented source on codex/az-design-workbench. New files: azdesign/timeline_icons.py, pattern_canvas.py, solid_pattern_engine.py, solid_pattern.py, sketch_pattern_ui.py; original SVG assets in Resources/Icons/timeline-*.svg. Updated UI and catalog/commands/feature_edit/session routing: Solid Linear Pattern on direct MODIFY toolbar; selection from canvas/Browser, Design-owned live native preview, spacing/extent, optional second grid direction, edit from timeline, Cancel/Esc transaction rollback. Sketch Rectangular Pattern on Sketch MODIFY: in-canvas panel with real solver-native live circles, X/Y drag handles, Apply/Cancel; four-hole sketch workflow feeds Hole. History feature buttons plus Edit/Delete/Resume/Settings now image icons and fixed DPI-safe sizes.
 
-Fast tests wired: test_pattern_ui_contracts.py, test_timeline_icons.py and real native Holeâ†’LinearPattern preview/cancel/edit in test_workflow.py. Version-robust TransformMode/Mode fixed using runtime native enum choices and Length=(count-1)*pitch. Linux Debian FreeCAD native build lacks Direction2/Occurrences2/Length2; 1D native test mandatory and two-axis assertions conditional; Windows owner's FreeCAD 1.1 must verify two-axis actually works. Latest fully verified test source b1b602ccc2884de83df6bcafc6e5646938e71fda: Az Design add-on workflow run 42928162310 (#407), package SUCCESS + modeling SUCCESS.
+Fast tests wired: test_pattern_ui_contracts.py, test_timeline_icons.py and real native HoleÃ¢â€ â€™LinearPattern preview/cancel/edit in test_workflow.py. Version-robust TransformMode/Mode fixed using runtime native enum choices and Length=(count-1)*pitch. Linux Debian FreeCAD native build lacks Direction2/Occurrences2/Length2; 1D native test mandatory and two-axis assertions conditional; Windows owner's FreeCAD 1.1 must verify two-axis actually works. Latest fully verified test source b1b602ccc2884de83df6bcafc6e5646938e71fda: Az Design add-on workflow run 42928162310 (#407), package SUCCESS + modeling SUCCESS.
 
 NEXT: Submit current complete UI batch through versioned .github/validation-requests/native-0.5.7.txt marker, inspect Windows job and artifact. Do not claim Windows GUI acceptance just because Python CI passed; user installed 0.5.6 last confirmed, keep it until patch verified. Official updater publication must be separate.
 
-## 2026-11-10 â€” Fast iteration improvement after user complained about long build rotations
+## 2026-11-10 Ã¢â‚¬â€ Fast iteration improvement after user complained about long build rotations
 
 User requested faster development cycle. Measured completed #37 Windows candidate from GitHub Actions jobs API: Windows patch job ~8m09, old 0.5.4 installer download ~3m55, cold 0.5.4 install ~3m12; source/unit/Qt/rollback far shorter. #37 passed and has v0.5.7 candidate artifact (but remains unreleased).
 
@@ -1287,20 +1287,20 @@ Actions taken:
 - Cache is not yet warm, and no actual cache-hit speed comparison has been run. Next batch marker will incur first cold download/installation plus cache upload; only subsequent candidates may be materially faster. Before claiming an improvement, compare cold run, cache upload size/time and subsequent cached restore duration. Respect GitHub repository cache storage quota.
 - User installation remains 0.5.6 last confirmed; do not publish new version without owner GUI acceptance.
 
-## 2026-11-10 â€” Correct version increment after 0.5.7 already installed
+## 2026-11-10 Ã¢â‚¬â€ Correct version increment after 0.5.7 already installed
 
-Owner reported trying a 0.5.6â†’0.5.7 patch while Design says installed 0.5.7; updater rejects. This is correct behavior and not a failure to override. There were two different successful 0.5.7 artifacts: original Windows candidate #36 (run 42899554668; ~333 KB) and later Fusion UI candidate #37 (run 42928685669; ~410 KB). Cannot safely install the latter over the former because both share installed version 0.5.7 and differ in file hashes. User installed 0.5.7, likely via #36 from earlier download guidance, but device provenance is unverified; Remote Desktop Commander shows laptop OFFLINE. Do not force patch, change version marker, roll back, or overwrite current installation.
+Owner reported trying a 0.5.6Ã¢â€ â€™0.5.7 patch while Design says installed 0.5.7; updater rejects. This is correct behavior and not a failure to override. There were two different successful 0.5.7 artifacts: original Windows candidate #36 (run 42899554668; ~333 KB) and later Fusion UI candidate #37 (run 42928685669; ~410 KB). Cannot safely install the latter over the former because both share installed version 0.5.7 and differ in file hashes. User installed 0.5.7, likely via #36 from earlier download guidance, but device provenance is unverified; Remote Desktop Commander shows laptop OFFLINE. Do not force patch, change version marker, roll back, or overwrite current installation.
 
-Work completed in repo: native patch workflow now targets marker .github/validation-requests/native-0.5.8.txt, reconstructs pinned 0.5.6 base via verified artifacts/cache, then downloads and SHA256-validates #36 0.5.7 patch, applies it to reconstruct real 0.5.7, creates 0.5.7â†’0.5.8 from latest Design source, and checks apply, Qt startup, rollback to 0.5.7, and uninstall. Manual publisher updated to 0.5.8. Cheap structural validator updated to enforce the correct prior build, from/to version, checksum gate. Future marker still needs creation following fast CI green. **Critical:** target is pinned to #36's 0.5.7 file hashes; if user actually installed #37, we will need a separate #37-compatible build and explicit selection. No Windows 0.5.8 run is verified yet. Do not publish until correct baseline and GUI acceptance verified.
+Work completed in repo: native patch workflow now targets marker .github/validation-requests/native-0.5.8.txt, reconstructs pinned 0.5.6 base via verified artifacts/cache, then downloads and SHA256-validates #36 0.5.7 patch, applies it to reconstruct real 0.5.7, creates 0.5.7Ã¢â€ â€™0.5.8 from latest Design source, and checks apply, Qt startup, rollback to 0.5.7, and uninstall. Manual publisher updated to 0.5.8. Cheap structural validator updated to enforce the correct prior build, from/to version, checksum gate. Future marker still needs creation following fast CI green. **Critical:** target is pinned to #36's 0.5.7 file hashes; if user actually installed #37, we will need a separate #37-compatible build and explicit selection. No Windows 0.5.8 run is verified yet. Do not publish until correct baseline and GUI acceptance verified.
 
-## 2026-11-10 â€” v0.5.8 officially published for the in-app Update button
+## 2026-11-10 Ã¢â‚¬â€ v0.5.8 officially published for the in-app Update button
 
-Owner screenshot showed 0.5.7 Check for Updates saying "No compatible verified patch is published". Diagnosis: current installed AzOnlineUpdates.Find() only reads public https://api.github.com/repos/Mr-Azrack/FreeCAD-Az/releases/latest and selects a non-draft/non-prerelease named AzDesignNative-{installed}-to-{new}.azpatch with GitHub SHA256 asset digest. Windows CI run #39 (42949194221), source 56bfacadf8a197b49fda8e510ccc55c9fd65b3ec, had passed geometry and Windows patch tests and created 0.5.7â†’0.5.8 artifact but no GitHub Release; latest public release was v0.5.5.
+Owner screenshot showed 0.5.7 Check for Updates saying "No compatible verified patch is published". Diagnosis: current installed AzOnlineUpdates.Find() only reads public https://api.github.com/repos/Mr-Azrack/FreeCAD-Az/releases/latest and selects a non-draft/non-prerelease named AzDesignNative-{installed}-to-{new}.azpatch with GitHub SHA256 asset digest. Windows CI run #39 (42949194221), source 56bfacadf8a197b49fda8e510ccc55c9fd65b3ec, had passed geometry and Windows patch tests and created 0.5.7Ã¢â€ â€™0.5.8 artifact but no GitHub Release; latest public release was v0.5.5.
 
 FIX COMPLETED: On main, updated .github/workflows/az-native-publish.yml to exact-version/sha-protected 0.5.8 release. Added one-time .github/release-requests/native-0.5.8.txt marker, commit 77b5c438a6181aec42e28fea4ca658af497c039e. Publication Actions run 42952761200 succeeded. Independently fetched public GitHub releases/latest: tag v0.5.8, draft=false, prerelease=false, asset AzDesignNative-0.5.7-to-0.5.8.azpatch (406048 bytes), SHA256 digest d4a5a9244049edda3ecf1be8b43e729bcdfd520b83f9153ee898f587e7e00c78, browser URL https://github.com/Mr-Azrack/FreeCAD-Az/releases/download/v0.5.8/AzDesignNative-0.5.7-to-0.5.8.azpatch. Release page https://github.com/Mr-Azrack/FreeCAD-Az/releases/tag/v0.5.8. It should now be discoverable by the existing 0.5.7 in-app Check for Updates, WITHOUT manual ZIP handling. No local install was remotely performed. The patch is based on original 0.5.7 Build #36; if owner's installed 0.5.7 is the different Build #37, hash verification will refuse application. Never bypass it; reconstruct the appropriate installed baseline for that alternate build if necessary. Future versions MUST be unique and publisher must be updated/triggered, not just CI-built. Verify owner GUI acceptance after install.
 
 
-## 2026-11-10 â€” Owner explicitly directed "function like Fusion", video-driven correction batch
+## 2026-11-10 Ã¢â‚¬â€ Owner explicitly directed "function like Fusion", video-driven correction batch
 
 Full owner FreeCAD 1.1.0 MP4 from zip and Fusion 360 MP4 mounted /mnt/data; reference FUSION_FREECAD_VIDEO_GAP_REVIEW.md in repo. Fusion (~3:43) completed same plate, Design (~13:06) required manual hole layout/translation, many numbered Extrude profiles, a plane popup over an existing solid, and raw FreeCAD Fillet. Implemented linked fixes (verified code commits):
 - profile helper & Extrude recommended region: 826b640 and b98e205, real FreeCAD native perforated plate test beb3ace.
@@ -1308,11 +1308,11 @@ Full owner FreeCAD 1.1.0 MP4 from zip and Fusion 360 MP4 mounted /mnt/data; refe
 - Sketch Rectangular Pattern direct source selection observer while panel open, commit d68e624.
 - New Design nonmodal Fillet/Chamfer pick-after-command panel, no document mutation before Apply, OCCT auto preflight, Esc/workbench cleanup, plus parametric native history editing transaction and undo; code commits ccc6d02, 8bf348a, a675456, ddbb444, 6e95143. NOT a shaded 3D preview yet.
 - fast tests test_fusion_video_workflows.py + test_workflow.py actual 65x100x8 plate 8-hole perforated volume and finished Fillet radius change/Undo; test commits dd55f1a, 709e5df, CI wiring e208246, 0c8aeaa. Full Az Design CI #433 (42958378856) green for package+modeling at 709e5df; subsequent workflow-only 0.5.9-version commits pending fast CI.
-- 0.5.9 native patch pipeline updated to marker native-0.5.9.txt, recovers exact 0.5.6 cache/pinned installer, applies original 0.5.7 Build #36, then checksum-verified PUBLIC 0.5.8 Build #39 patch from run 42949194221 to reconstruct installed 0.5.8 before generating candidate 0.5.8â†’0.5.9. Cheap YAML validator checks exact pin, from/to, rollback. Workflow version commits 639ef95, be71f93.
+- 0.5.9 native patch pipeline updated to marker native-0.5.9.txt, recovers exact 0.5.6 cache/pinned installer, applies original 0.5.7 Build #36, then checksum-verified PUBLIC 0.5.8 Build #39 patch from run 42949194221 to reconstruct installed 0.5.8 before generating candidate 0.5.8Ã¢â€ â€™0.5.9. Cheap YAML validator checks exact pin, from/to, rollback. Workflow version commits 639ef95, be71f93.
 NEXT: confirm new fast CI green, create .github/validation-requests/native-0.5.9.txt pinned source SHA, inspect Windows 0.5.9 artifact + Qt/install/rollback, then decide release publication through updater. Owner currently testing ~0.5.8; do not reinstall or rewrite v0.5.8. Monitor actual Windows GUI edge interaction and automatic plate-hole profile behavior on same part, not just headless results. Keep Github-first durable handoff and no same-version patch rewrites.
 
 
-## 2026-11-10 â€” v0.5.9 published for Fusion-video workflow acceptance
+## 2026-11-10 Ã¢â‚¬â€ v0.5.9 published for Fusion-video workflow acceptance
 
 Verified evidence: guarded Windows candidate Build #40 (run 42959009956) completed both geometry SUCCESS and patch SUCCESS, with AzDesignNative-0.5.8-to-0.5.9-PATCH. Baseline reconstructed from hash-verified original 0.5.7 Build #36 and PUBLIC 0.5.8 Build #39. Native Windows patch install, Qt startup and rollback to 0.5.8 passed. Candidate source SHA 89cd91ba4e15381950db1543873320e90a0b80f0.
 
@@ -1320,12 +1320,12 @@ On main, v0.5.9 publishing marker committed at e72130698043e88f46717fc7416ea2543
 
 Owner GUI still unverified: source circle picking while Sketch Pattern open; auto-selecting perforated plate region with holes; hiding large face chooser over existing body; nonmodal edge selection and Fillet edit/undo. Automated native geometry/Qt startup is not Windows UI acceptance. Fillet auto-validates the actual OCCT result but does NOT show a shaded ghost-result preview. Do not claim full Fusion behavior parity; retain rollback and unique versioning.
 
-## 2026-11-11 â€” 0.5.11 Fusion workflow parity (in progress)
+## 2026-11-11 Ã¢â‚¬â€ 0.5.11 Fusion workflow parity (in progress)
 
 User authorized proceeding without routine approvals. Compare supplied Fusion 360 (3m43s) and FreeCAD (10m) recordings. Fix: body-edge reference snapping during sketch without P, streamlined sketch plane/face selection, hide incidental constraint glyphs while retaining solver, reliable pattern canvas picking, and a persistent editable pattern feature with timeline icon and double-click editing. Commits 52e1480 (selection fallback) and 506293d (generated constraint virtual space) are unvalidated. Validate native Sketcher API behavior and undo/redo; do not release until real installed baseline and Qt smoke pass. Next: implement persistent editable pattern architecture and automatic edge reference workflow; add tests. Do not confuse a geometry-copy operation with a parametric timeline feature.
 
 
-## 2026-11-11 â€” 0.5.11 development automation checkpoint
+## 2026-11-11 Ã¢â‚¬â€ 0.5.11 development automation checkpoint
 
 Branch: `codex/az-design-workbench`. Source commits:
 `6233bc2` (shared ambiguity-safe sketch edge resolver),
@@ -1348,11 +1348,11 @@ not modify source solids; (3) design persistent editable sketch-pattern
 parameters with robust undo/reopen semantics and timeline edit routing,
 rather than relying on one-off generated circles; (4) add real FreeCAD
 modeling tests for these features and test save/reopen and cancellation;
-(5) build and validate 0.5.10 â†’ 0.5.11 Windows patch only after all gates pass.
+(5) build and validate 0.5.10 Ã¢â€ â€™ 0.5.11 Windows patch only after all gates pass.
 Do not claim 0.5.11 released yet.
 
 
-## 2026-11-11 â€” Associative sketch edge reference implementation checkpoint
+## 2026-11-11 Ã¢â‚¬â€ Associative sketch edge reference implementation checkpoint
 
 Commit 014cddade introduces `snap_targets.link_body_edge(sketch, source, edge_name)`.
 This wraps native Sketcher `addExternal` in a reversible document transaction,
@@ -1367,10 +1367,10 @@ disrupting native Sketcher drawing; add native geometry test verifying source
 edit updates external geometry, save/reopen and undo. Then implement persistent
 sketch-pattern editing with timeline icon and double-click edit, including
 save/reopen and Undo/Redo tests. Inspect fast CI for 014cddade; batch Windows
-0.5.10â†’0.5.11 patch only after full feature/tests pass.
+0.5.10Ã¢â€ â€™0.5.11 patch only after full feature/tests pass.
 
 
-## 2026-11-11 â€” Hourly development pass: native external-reference tests
+## 2026-11-11 Ã¢â‚¬â€ Hourly development pass: native external-reference tests
 
 Read PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and this handoff before changes.
 Verified Az Design CI run 43117400436 for ce6a2c2 was SUCCESS.
@@ -1396,7 +1396,7 @@ NEXT EXACT STEPS:
    0.5.10-to-0.5.11 Windows patch, Qt startup and rollback. No release yet.
 
 
-## 2026-11-11 â€” Development pass: associative edge-reference viewport entry
+## 2026-11-11 Ã¢â‚¬â€ Development pass: associative edge-reference viewport entry
 
 Verified fast Az Design run 43117834894 on 08fe43f SUCCESS.
 Committed 3e9e469: while editing a sketch, right-clicking the viewport with
@@ -1417,7 +1417,7 @@ constraints, save/reopen and history undo. Only then build and test the
 0.5.10-to-0.5.11 Windows patch, Qt launch and rollback.
 
 
-## 2026-11-11 â€” 0.5.11 pattern preview geometry ownership guard
+## 2026-11-11 Ã¢â‚¬â€ 0.5.11 pattern preview geometry ownership guard
 
 Read PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and SESSION_HANDOFF.md.
 Verified latest preceding Az Design run 43128628694 SUCCESS for 9e92b47.
@@ -1434,12 +1434,12 @@ failure rollback for partially generated constraints/geometry and ensure
 native Sketcher save/reopen and undo tests. Implement persistent independent
 sketch-pattern metadata/feature and Design-owned timeline edit routing,
 then automatic passive edge cues without unintended document mutation.
-Validate complete native FreeCAD geometry and Windows 0.5.10â†’0.5.11
+Validate complete native FreeCAD geometry and Windows 0.5.10Ã¢â€ â€™0.5.11
 installed patch, Qt startup, rollback and owner GUI acceptance before
 publishing. Preserve version-specific patch hash verification.
 
 
-## 2026-11-11 â€” 0.5.11 failed Sketcher preview transaction safety
+## 2026-11-11 Ã¢â‚¬â€ 0.5.11 failed Sketcher preview transaction safety
 
 Read PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and this handoff.
 Commits 812d843 and a91d2cb: SketchPatternDraft.preview now aborts the
@@ -1462,11 +1462,11 @@ NEXT EXACT STEPS:
 4. Implement passive, nonmutating in-sketch hover snap cues to real body
    edges/centers and associative projection on deliberate user action, without
    requiring P or interfering with Sketcher drawing.
-5. After full native tests pass, validate 0.5.10â†’0.5.11 Windows patch install,
+5. After full native tests pass, validate 0.5.10Ã¢â€ â€™0.5.11 Windows patch install,
    Qt startup, rollback/uninstall, artifact hash/publication before release.
 
 
-## 2026-11-11 â€” 0.5.11 independent sketch-pattern ownership groundwork
+## 2026-11-11 Ã¢â‚¬â€ 0.5.11 independent sketch-pattern ownership groundwork
 
 Reviewed PROJECT_STATE.md, DECISIONS.md, ROADMAP.md, AGENTS.md and this handoff.
 Prior add-on CI 43142315554 passed for a91d2cb. This execution committed:
@@ -1505,7 +1505,7 @@ NEXT EXACT STEPS:
    Publish only after all release gates pass.
 
 
-## 2026-11-11 â€” 0.5.11 RELEASED; remaining features moved to 0.5.12
+## 2026-11-11 Ã¢â‚¬â€ 0.5.11 RELEASED; remaining features moved to 0.5.12
 
 Owner approved freezing 0.5.11 scope in ROADMAP.md and deferring automatic
 Fusion-style body-edge hover referencing and independently editable sketch-pattern
@@ -1533,7 +1533,7 @@ center cues and deliberate associative link without P. Test native FreeCAD
 geometry and Windows patch only once the 0.5.12 feature batch is ready.
 
 
-## 2026-11-12 â€” 0.5.12 development: constraint ownership increment
+## 2026-11-12 Ã¢â‚¬â€ 0.5.12 development: constraint ownership increment
 
 Owner confirms installed 0.5.11 works. Work remains scoped to codex/az-design-workbench; do not alter or republish 0.5.11.
 
@@ -1548,7 +1548,7 @@ NEXT EXACT ACTIONS:
 6. Only then run native geometry, Windows 0.5.11-to-0.5.12 patch install, Qt startup, rollback and checksum gates; publish only after all pass.
 
 
-## 2026-11-12 â€” autonomous 0.5.12 execution: real constraint index capture
+## 2026-11-12 Ã¢â‚¬â€ autonomous 0.5.12 execution: real constraint index capture
 
 Read AGENTS.md and four continuity files from development branch. Confirmed preceding 0.5.12 commits 31c7aa2, 617887b0, ea81aeb7; commit-workflow lookup for 617887b0 returned no PR-triggered runs (this API filters to PR runs, so this is NOT proof CI failed or passed). No local working tree/FreeCAD runtime is available via GitHub file tools.
 
@@ -1556,19 +1556,19 @@ Committed da197370: SketchPatternDraft now snapshots Sketcher.ConstraintCount be
 
 Committed 310ae090: updated stale fast contract that required the previous geometry-only guard, added contract for captured real Sketcher constraint indices. Do not claim these tests ran locally. Check CI and repair any failures before release.
 
-NEXT: 1) inspect add-on Actions for 310ae090 and fix failures; 2) add executable fake/native Sketcher tests for repeated preview, generated constraints, safe cancel/accept and Undo/Redo; 3) implement independently editable per-record pattern with strict validation of generated geometry AND constraints, including protection against deletion/reindexing of other patterns; 4) route Design-owned timeline icons and double-click edit to specific pattern; 5) passive nonmutating edge/midpoint/circle cues; 6) native FCStd save/reopen and Windows 0.5.11â†’0.5.12 patch/Qt/rollback/checksum gates. Do not republish 0.5.11.
+NEXT: 1) inspect add-on Actions for 310ae090 and fix failures; 2) add executable fake/native Sketcher tests for repeated preview, generated constraints, safe cancel/accept and Undo/Redo; 3) implement independently editable per-record pattern with strict validation of generated geometry AND constraints, including protection against deletion/reindexing of other patterns; 4) route Design-owned timeline icons and double-click edit to specific pattern; 5) passive nonmutating edge/midpoint/circle cues; 6) native FCStd save/reopen and Windows 0.5.11Ã¢â€ â€™0.5.12 patch/Qt/rollback/checksum gates. Do not republish 0.5.11.
 
 
-## 2026-11-12 â€” 0.5.12 autonomous pass: stable pattern identity
+## 2026-11-12 Ã¢â‚¬â€ 0.5.12 autonomous pass: stable pattern identity
 
 Read AGENTS.md and all four continuity files on codex/az-design-workbench. The preceding commits da197370/310ae090 were present in SESSION_HANDOFF.md. The GitHub commit workflow lookup for 310ae090 returned no PR-triggered runs; this is inconclusive and does not establish CI status.
 
 Committed 50cf7027: newly created Sketch Pattern records receive stable UUID identities persisted with native sketch metadata. read_records rejects duplicate/invalid identities. find_record resolves by ID (not fragile list position) and fails closed on stale ownership. timeline_records exposes distinct per-pattern labels and editable eligibility; legacy records without IDs remain visible but noneditable. This is a data/model foundation, NOT actual timeline widget insertion or independent geometric editing. Committed 3db7b5d6: pure-Python regressions for unique identities, reorder-stable lookup, duplicate rejection, stale ownership and legacy visibility. Tests have not been executed in a local FreeCAD environment in this execution.
 
-NEXT: 1) inspect current Actions results for 3db7b5d6 and fix any failures; 2) integrate timeline_records into workspace history UI with distinct icon and double-click targeting find_record(sketch, id); 3) implement native transactional in-place pattern editing with precise geometry and constraint ownership and safe rejection of downstream dependencies; 4) run two-pattern undo/redo and FCStd save/reopen tests under actual FreeCAD; 5) implement nonmutating sketch edge/midpoint/circle-center hover cues and deliberate associative linking; 6) validate full 0.5.11â†’0.5.12 Windows patch/Qt/rollback/checksums before publication. No release or Windows install changed.
+NEXT: 1) inspect current Actions results for 3db7b5d6 and fix any failures; 2) integrate timeline_records into workspace history UI with distinct icon and double-click targeting find_record(sketch, id); 3) implement native transactional in-place pattern editing with precise geometry and constraint ownership and safe rejection of downstream dependencies; 4) run two-pattern undo/redo and FCStd save/reopen tests under actual FreeCAD; 5) implement nonmutating sketch edge/midpoint/circle-center hover cues and deliberate associative linking; 6) validate full 0.5.11Ã¢â€ â€™0.5.12 Windows patch/Qt/rollback/checksums before publication. No release or Windows install changed.
 
 
-## 2026-11-12 â€” 0.5.12 autonomous pass: guarded native pitch edit groundwork
+## 2026-11-12 Ã¢â‚¬â€ 0.5.12 autonomous pass: guarded native pitch edit groundwork
 
 Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and SESSION_HANDOFF.md from the development branch. Owner's working 0.5.11 remains untouched. Commits:
 - b91fe333: pattern_records.pitch_edit_plan resolves an individual persistent record by stable ID, validates exact constraint ownership and nonzero pitch, and plans dimension-only edits without changing geometry counts.
@@ -1582,10 +1582,10 @@ CRITICAL NEXT:
 2. Implement Design-owned pattern edit panel for pitch, route each pattern's stable ID from an actual timeline entry and double-click, with correct icon. Current timeline_records is metadata only, not integrated.
 3. Add passive nonmutating body-edge/midpoint/circle-center Sketcher viewport cues; preserve native tool mouse interactions and no implicit geometry mutation.
 4. For changing counts, explicitly design safe geometry/constraint reindexing and downstream dependency handling, or reject unsupported edits.
-5. Only after native geometry and full Windows 0.5.11â†’0.5.12 patch, Qt startup, rollback and checksum gates pass, consider release. Do not republish 0.5.11.
+5. Only after native geometry and full Windows 0.5.11Ã¢â€ â€™0.5.12 patch, Qt startup, rollback and checksum gates pass, consider release. Do not republish 0.5.11.
 
 
-## 2026-11-12 â€” 0.5.12 autonomous pass: first real Sketch Pattern timeline entry
+## 2026-11-12 Ã¢â‚¬â€ 0.5.12 autonomous pass: first real Sketch Pattern timeline entry
 
 Inspected AGENTS.md and all four continuity files from codex/az-design-workbench. The latest handoff before this run ended at 5e592c75; GitHub commit search defaults to main and does not establish the feature branch HEAD. Used fetch_file with the explicit development ref to avoid modifying main.
 
@@ -1598,10 +1598,10 @@ NEXT EXACT ACTIONS:
 2. Verify Qt History icon refresh and click/double-click behavior, edit_pitch setDatum Quantity compatibility, and native two-pattern edit/cancel/Undo/Redo/FCStd reopen; strengthen the editor with a single nonmodal Design panel if two QInputDialogs are awkward.
 3. Add safe nonmutating passive body-edge/midpoint/circle-center cues while Sketcher drawing; ensure no accidental addExternal until deliberate selection and no native event interception.
 4. Investigate reindexing-safe count changes or keep count editing explicitly unsupported.
-5. Validate native geometry, 0.5.11â†’0.5.12 Windows patch install, Qt startup, rollback and SHA256 before release. Keep v0.5.11 immutable and user's installed 0.5.11 untouched.
+5. Validate native geometry, 0.5.11Ã¢â€ â€™0.5.12 Windows patch install, Qt startup, rollback and SHA256 before release. Keep v0.5.11 immutable and user's installed 0.5.11 untouched.
 
 
-## 2026-11-12 â€” 0.5.12 autonomous pass: read-only sketch snap candidates
+## 2026-11-12 Ã¢â‚¬â€ 0.5.12 autonomous pass: read-only sketch snap candidates
 
 Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and this handoff on codex/az-design-workbench. The latest prior 0.5.12 handoff described timeline icon/edit routing in 066de7b2 and 28d30321. GitHub search_commits returns default-branch commits, NOT the development branch HEAD; file fetches used explicit development ref. A local working tree and native FreeCAD runtime were not available in this GitHub-connector session. CI status remains unverified; commit-workflow lookup is PR-trigger limited.
 
@@ -1615,7 +1615,7 @@ NEXT EXACT ACTIONS:
 5. Only after passing geometry and fast CI, build hash-checked 0.5.11-to-0.5.12 Windows patch and verify Qt startup, rollback and checksums. Do not publish until gates pass; keep owner's working 0.5.11 intact.
 
 
-## 2026-11-12 â€” 0.5.12 autonomous pass: pixel-space snap candidate resolver
+## 2026-11-12 Ã¢â‚¬â€ 0.5.12 autonomous pass: pixel-space snap candidate resolver
 
 Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and this handoff from the explicit development branch. Prior c87f48e7 provided read-only local-plane candidates but no screen-space proximity resolver. GitHub search_commits lists default-branch commits, not the active development branch HEAD; branch-specific fetch_file used for all changes.
 
@@ -1629,7 +1629,7 @@ NEXT EXACT ACTIONS:
 5. Build and validate unique 0.5.11-to-0.5.12 Windows patch after native tests, Qt startup, rollback, hashes and CI pass. Do not publish or modify 0.5.11.
 
 
-## 2026-11-12 â€” 0.5.12 autonomous pass: fail-safe passive hover
+## 2026-11-12 Ã¢â‚¬â€ 0.5.12 autonomous pass: fail-safe passive hover
 
 Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and this handoff on explicit codex/az-design-workbench. GitHub search_commits returned default-branch history, not development HEAD. Branch-specific file fetches verified snap_targets.py and its test contract before editing.
 
@@ -1639,10 +1639,10 @@ NEXT EXACT STEPS:
 1. Run focused test_snap_targets_contracts.py plus native geometry tests in an actual Python/FreeCAD environment; fix failures. Inspect push Actions through a workflow-runs API/UI, not the PR-only commit-workflow endpoint.
 2. Integrate the passive candidate provider and nearest resolver with actual Qt6 FreeCAD 1.1 Sketcher viewport hover/projection, nonintercepting native drawing; show small visible endpoint/midpoint/center indicators. Test enter/leave/edit mode cleanup and high-DPI scaling.
 3. Run native two-pattern editing, constraint ownership, timeline double-click, Undo/Redo, save/reopen and stale-ownership rejection; fix errors. Keep unsupported count editing disabled.
-4. Only after fast/native checks pass, validate 0.5.11â†’0.5.12 Windows incremental patch, Qt startup, rollback and hashes. Preserve immutable v0.5.11 and do not publish prematurely.
+4. Only after fast/native checks pass, validate 0.5.11Ã¢â€ â€™0.5.12 Windows incremental patch, Qt startup, rollback and hashes. Preserve immutable v0.5.11 and do not publish prematurely.
 
 
-## 2026-11-12 â€” 0.5.12 viewport coordinate adapter checkpoint
+## 2026-11-12 Ã¢â‚¬â€ 0.5.12 viewport coordinate adapter checkpoint
 
 Reviewed AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and current SESSION_HANDOFF.md on codex/az-design-workbench. Latest previous checkpoint was cd4b7d3. This run committed 49edd5e2 (snap_targets.viewport_passive_cue) and 2c612261 (focused adapter regressions). The new adapter transforms sketch-local candidate coordinates back through sketch.Placement into global FreeCAD vectors before viewport projection. It delegates ambiguity/radius filtering to nearest_passive_cue and never changes geometry or transactions. Tests cover offset sketch placement, correct midpoint selection, and read-only behavior. This is NOT live Qt hover drawing or automatic constraint insertion.
 
@@ -1656,7 +1656,7 @@ NEXT EXACT ACTIONS:
 5. Only after fast/native checks pass, run 0.5.11-to-0.5.12 Windows hash-guarded patch, Qt startup, rollback and checksum verification, then consider release. Never overwrite immutable 0.5.11.
 
 
-## 2026-11-12 â€” 0.5.12 live hover integration checkpoint
+## 2026-11-12 Ã¢â‚¬â€ 0.5.12 live hover integration checkpoint
 
 Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md, SESSION_HANDOFF.md and inspected snap_targets.py, snap_overlay.py, session.py and existing tests on branch codex/az-design-workbench. GitHub search_commits lists default-branch commits, not development HEAD; branch file fetches were authoritative. No local worktree available through GitHub connector.
 
@@ -1666,10 +1666,10 @@ NEXT EXACT ACTIONS:
 1. Run focused Python tests including test_snap_overlay_body_contract.py and test_snap_targets_contracts.py; register new test in CI workflow if not automatically discovered. Fix failures.
 2. Verify FreeCAD 1.1 Qt6 getPreselection() shape and viewport coordinate origins with a real installed GUI. Adjust projection and DPI as necessary; test native Rectangle/Line clicks, enter/leave, edit exit and workbench deactivation.
 3. Native FreeCAD tests for two independently owned sketch patterns, timeline double-click pitch edit, Cancel, Undo/Redo and FCStd save/reopen. Fix ownership corruption/stale references; keep unsupported count editing disabled.
-4. Inspect push CI via actual Actions runs (PR-only commit lookup cannot establish push status). Once fast/native tests pass, run guarded unique 0.5.11â†’0.5.12 Windows patch, Qt smoke, rollback and SHA256 checks.
+4. Inspect push CI via actual Actions runs (PR-only commit lookup cannot establish push status). Once fast/native tests pass, run guarded unique 0.5.11Ã¢â€ â€™0.5.12 Windows patch, Qt smoke, rollback and SHA256 checks.
 5. Never overwrite or republish 0.5.11; publish 0.5.12 only after verified gates.
 
-## 2026-11-12 â€” Direct Windows 0.5.12 development test (laptop)
+## 2026-11-12 Ã¢â‚¬â€ Direct Windows 0.5.12 development test (laptop)
 
 Connected LAPTOP-O8QBOF2P through Desktop Commander. Installed Az Design Native 0.5.11 was confirmed by AZ Native Version.json and remains unchanged at %LOCALAPPDATA%\Programs\Az Design Native; original FreeCAD process continued running. Cloned branch codex/az-design-workbench at af266d7 to %USERPROFILE%\AzDesign-Dev-0512. Created independent 8.43 GB copy at %LOCALAPPDATA%\Programs\Az Design Native 0.5.12 TEST and mirrored only development addons/AzDesign to its Mod/AzDesign. Created Az Design 0512 DEV.cmd with separate profile %LOCALAPPDATA%\AzDesign\Native-1.1-0512DEV, labeled its copied version metadata 0.5.12-dev, and created desktop shortcut AZ Design 0.5.12 DEV.lnk. Verified both FreeCAD processes running concurrently (original PID 15832, dev PID 17080). GUI launch alone does NOT establish interactive feature acceptance.
 
@@ -1679,13 +1679,13 @@ Added tests/native_0512_smoke.py, ran real FreeCAD Sketcher 2x2 circle pattern a
 
 NEXT: user hands-on dev GUI validation of body edge/midpoint/center passive hover and timeline pitch controls; capture errors precisely. Resolve remaining native workflow suite failures, add two-pattern undo/redo native tests, and only afterward prepare signed-off guarded 0.5.11-to-0.5.12 update. Never alter user's 0.5.11 baseline. Local development test copy is experimental and NOT a released installer.
 
-## 2026-11-12 â€” Native two-pattern undo/redo validation (Windows dev copy)
+## 2026-11-12 Ã¢â‚¬â€ Native two-pattern undo/redo validation (Windows dev copy)
 
 Recovered branch codex/az-design-workbench at 5bf4d75 on LAPTOP-O8QBOF2P; clean tracked worktree before this test. Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and handoff, inspected native pattern_records.py and prior smoke test. Added addons/AzDesign/tests/native_0512_two_patterns.py. Ran it with the bundled Windows FreeCAD 1.1 Python in the independent 0.5.12 TEST installation. PASS: two separately owned 2x2 native circle patterns, edit A without changing B, persist both stable IDs and pitch values across FCStd save/reopen, edit B after reopen, then Undo and Redo its native dimension/metadata transaction. Headless FreeCAD defaults UndoMode=0; the test explicitly enables doc.UndoMode=1 after reopen. No GUI timeline double-click or viewport hover was tested. Initial test runs identified the headless UndoMode prerequisite and the interpreter's preload of another azdesign package; test now resolves source package from its own file path. Tests were executed, not merely authored. CI and Windows patch/Qt/rollback/checksums remain unverified; no release or 0.5.11 changes.
 
-NEXT EXACT: (1) rerun full native test_workflow.py and resolve the two known failures (disconnected Join error wording and old Source property after Cancel); (2) validate timeline pattern editor double-click and passive snap hover in real Qt FreeCAD 1.1 UI with high-DPI, enter/exit and tool click checks; (3) wire two-pattern native test into CI and check actual push Actions; (4) validate guarded 0.5.11â†’0.5.12 patch, Qt startup, rollback and SHA256 before release. Local run_native_0512.ps1 is untracked test launcher, not for release. Do not modify the installed 0.5.11 baseline.
+NEXT EXACT: (1) rerun full native test_workflow.py and resolve the two known failures (disconnected Join error wording and old Source property after Cancel); (2) validate timeline pattern editor double-click and passive snap hover in real Qt FreeCAD 1.1 UI with high-DPI, enter/exit and tool click checks; (3) wire two-pattern native test into CI and check actual push Actions; (4) validate guarded 0.5.11Ã¢â€ â€™0.5.12 patch, Qt startup, rollback and SHA256 before release. Local run_native_0512.ps1 is untracked test launcher, not for release. Do not modify the installed 0.5.11 baseline.
 
-## 2026-11-12 â€” 0.5.12 CI contract integration checkpoint
+## 2026-11-12 Ã¢â‚¬â€ 0.5.12 CI contract integration checkpoint
 
 Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and this handoff on the development branch. Prior Windows native two-pattern validation remains the latest recorded native evidence; it was not rerun in this execution. Connected LAPTOP-O8QBOF2P was online, but Desktop Commander command execution returned internal errors twice, so no local worktree status, FreeCAD test, or Qt inspection could be verified. The separate 0.5.11 installation was not touched.
 
@@ -1698,7 +1698,7 @@ NEXT EXACT ACTIONS:
 4. Validate guarded Windows 0.5.11-to-0.5.12 patch, Qt startup, rollback and SHA256 on disposable test copy only. Keep working 0.5.11 immutable; do not release until all gates pass.
 
 
-## 2026-11-12 â€” 0.5.12 CI failure triage (11:18 EST)
+## 2026-11-12 Ã¢â‚¬â€ 0.5.12 CI failure triage (11:18 EST)
 
 Reviewed AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and current handoff on codex/az-design-workbench. Confirmed GitHub branch HEAD 0e3afc80 before editing. Inspected real push Actions run 43252319034: native modeling job succeeded, package job failed in tools/verify_native_workflows.py because the verifier still required the obsolete native-0.5.10.txt marker while az-native-patch.yml deliberately triggers only on native-0.5.11.txt. This is a real CI failure, not an absent PR workflow. Committed 45598e70 to align only that batch-trigger assertion, retaining the expensive Windows validation guard. No Windows/Qt test or release performed here. Package workflow may expose additional stale 0.5.10 assertions on rerun; do not claim green until checked.
 
@@ -1706,23 +1706,23 @@ NEXT EXACT STEPS:
 1. Inspect new push Actions for 45598e70 and this documentation commit. If package job fails again, fetch job logs and reconcile other obsolete verifier expectations against the actual guarded az-native-patch.yml without weakening cache, rollback, or publishing gates. Confirm modeling and package both green.
 2. Recover Windows dev shell, check checkout branch/HEAD/status/diff, run test_workflow.py and fix disconnected Join wording and cancelled Source regression. Preserve the independent 0.5.11 installation.
 3. Verify real FreeCAD 1.1 Qt timeline double-click, passive edge/midpoint/center hover and DPI/teardown/click-through. Rerun two-pattern Undo/Redo/save/reopen and ownership rejection.
-4. Only after these gates, test unique 0.5.11â†’0.5.12 patch on disposable Windows baseline, startup, rollback and SHA256; no release before evidence. GitHub connector cannot inspect local uncommitted Windows changes.
+4. Only after these gates, test unique 0.5.11Ã¢â€ â€™0.5.12 patch on disposable Windows baseline, startup, rollback and SHA256; no release before evidence. GitHub connector cannot inspect local uncommitted Windows changes.
 
 
-## 2026-11-12 â€” 0.5.12 CI verifier and publication safety correction (11:49 EST)
+## 2026-11-12 Ã¢â‚¬â€ 0.5.12 CI verifier and publication safety correction (11:49 EST)
 
-Inspected branch HEAD 4ab62d24 and current push Actions run 43257440813: modeling passed; package failed at the native workflow verifier. Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and handoff, plus actual az-native-patch.yml and verifier. The previous single-marker correction was insufficient: verifier still expected a 0.5.9â†’0.5.10 candidate and omitted the published 0.5.10 baseline reconstruction, while the actual Windows workflow builds a 0.5.10â†’0.5.11 patch. This mismatch prevented fast CI from passing.
+Inspected branch HEAD 4ab62d24 and current push Actions run 43257440813: modeling passed; package failed at the native workflow verifier. Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and handoff, plus actual az-native-patch.yml and verifier. The previous single-marker correction was insufficient: verifier still expected a 0.5.9Ã¢â€ â€™0.5.10 candidate and omitted the published 0.5.10 baseline reconstruction, while the actual Windows workflow builds a 0.5.10Ã¢â€ â€™0.5.11 patch. This mismatch prevented fast CI from passing.
 
-Commits cd58e169 and 2929d2f5: added an explicit main-only condition to the native patch publication step (feature branch must never release), and updated verifier stage ordering, pinned historical artifact IDs, checksums, cache integrity, 0.5.10 reconstruction, candidate 0.5.11 patch, Qt smoke, rollback and publication guard. These are safety/CI repairs; NOT a 0.5.12 package or native geometry implementation. No tests executed locally; new push Actions must be inspected for results. No Windows baseline was modified. NOTE: the existing native patch workflow is still a historical 0.5.10â†’0.5.11 pipeline, NOT the requested 0.5.11â†’0.5.12 pipeline; do not trigger it as a 0.5.12 test or publish.
+Commits cd58e169 and 2929d2f5: added an explicit main-only condition to the native patch publication step (feature branch must never release), and updated verifier stage ordering, pinned historical artifact IDs, checksums, cache integrity, 0.5.10 reconstruction, candidate 0.5.11 patch, Qt smoke, rollback and publication guard. These are safety/CI repairs; NOT a 0.5.12 package or native geometry implementation. No tests executed locally; new push Actions must be inspected for results. No Windows baseline was modified. NOTE: the existing native patch workflow is still a historical 0.5.10Ã¢â€ â€™0.5.11 pipeline, NOT the requested 0.5.11Ã¢â€ â€™0.5.12 pipeline; do not trigger it as a 0.5.12 test or publish.
 
 NEXT EXACT STEPS:
 1. Check Actions for 2929d2f5 and this handoff. If verifier fails, inspect failed step and correct actual structure without removing checksum, cache, rollback, Qt, or main-only publication checks. Verify both fast jobs green.
 2. Recover Windows dev shell; inspect checkout HEAD/status and run full test_workflow.py. Fix the disconnected Join wording and cancelled Source property failures with regression tests.
 3. Exercise native FreeCAD 1.1 Qt timeline double-click and passive body-edge/midpoint/center hover, DPI, teardown, drawing click-through; rerun two-pattern ownership/Undo/Redo/FCStd save/reopen.
-4. Design a NEW guarded 0.5.11â†’0.5.12 candidate patch workflow using immutable published 0.5.11 baseline and isolated test copy. Validate geometry, Qt startup, rollback, SHA256, and package identity before any release; keep 0.5.11 untouched. Do not enable automatic feature-branch publication.
+4. Design a NEW guarded 0.5.11Ã¢â€ â€™0.5.12 candidate patch workflow using immutable published 0.5.11 baseline and isolated test copy. Validate geometry, Qt startup, rollback, SHA256, and package identity before any release; keep 0.5.11 untouched. Do not enable automatic feature-branch publication.
 
 
-## 2026-11-12 â€” Windows native regression rerun (13:24 EST)
+## 2026-11-12 Ã¢â‚¬â€ Windows native regression rerun (13:24 EST)
 
 Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and the branch handoff. Connected LAPTOP-O8QBOF2P; its independent C:\\Users\\matto\\AzDesign-Dev-0512 snapshot has no .git directory, so do not mistake that snapshot for a current Git checkout. The isolated native 0.5.12 TEST FreeCAD copy remains separate from installed 0.5.11. Executed run_native_0512.ps1 with PowerShell -ExecutionPolicy Bypass (default execution policy blocked scripts): actual output `UNDO AVAILABLE 1`, `AFTER UNDO [12.0, 15.0]`, `PASS two independent patterns, save/reopen, undo/redo`. This reconfirms headless native pattern ownership/edit/persistence/transaction behavior; it does NOT verify Qt timeline double-click or live hover. A separate ad-hoc workflow test command failed at PowerShell quoting before any tests executed, so no claim of full suite success. No release, installation modification, or patch validation.
 
@@ -1735,7 +1735,7 @@ On LAPTOP-O8QBOF2P, checked codex/az-design-workbench and preserved untracked ru
 Additional verification on same Windows isolated DEV: full unittest discovery test_*.py executed with bundled FreeCAD 1.1 interpreter and explicitly loaded DEV azdesign package: PASS 195/195 in 13.459 seconds, test exit 0. This includes previously failing native test_workflow.py. This does not replace actual Qt GUI interaction, hover/DPI, or installer patch verification.
 
 
-## 2026-11-12 â€” Native two-pattern CI gate added (13:49 EST)
+## 2026-11-12 Ã¢â‚¬â€ Native two-pattern CI gate added (13:49 EST)
 
 Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and this handoff from the development branch. Connected Windows laptop LAPTOP-O8QBOF2P; local HEAD was 98e8b287 and `git fetch origin codex/az-design-workbench` showed no divergence, with only pre-existing untracked `run_native_0512.ps1`. The latest documented Windows isolated FreeCAD 1.1 native suite passed 195/195 and the two-pattern native script passed, but those are prior-session evidence, NOT tests rerun in this execution. Confirmed the Linux native modeling workflow previously ran `run_workflow.py` only. Commit a20d4246 adds `native_0512_two_patterns.py` as a separate offscreen FreeCAD-native modeling CI step, covering independent pattern records, edit isolation, FCStd save/reopen, and Undo/Redo. This CI job has NOT yet been observed passing; FreeCAD Linux runtime differences may require fixes. An initial local PowerShell edit command failed at parsing and changed no files; GitHub Contents API was used for the actual committed workflow edit. No release, installer, or production 0.5.11 changes.
 
@@ -1746,24 +1746,24 @@ On laptop isolated DEV checkout, added single Home (cube only) by removing botto
 
 
 
-## 2026-11-12 â€” 0.5.12 CI failures identified and test bootstrap repaired (16:38 EST)
+## 2026-11-12 Ã¢â‚¬â€ 0.5.12 CI failures identified and test bootstrap repaired (16:38 EST)
 
 Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and this handoff on GitHub branch codex/az-design-workbench. Starting remote HEAD e011aa19606e7c5c63f8d141d1834a86d165179a. Actual push Actions run 43289257222 failed in BOTH jobs, despite the native workflow's 57 test_workflow tests passing. Package test_snap_overlay.py imported snap_targets.py which imports FreeCAD on a plain Python runner, yielding ModuleNotFoundError. Modeling native_0512_two_patterns.py directly imported FreeCAD without the /usr/lib/freecad*/lib discovery already used by run_workflow.py, also yielding ModuleNotFoundError.
 
 Committed 1e67bfee3c28e29a0542d144cf75460e82886caf: isolate plain-Python sketch overlay tests using a stub for the separately covered native body-edge adapter. Committed b764cb6ba4784681053dcca4790134602f626624: discover native FreeCAD library and Mod paths in two-pattern script before importing FreeCAD, matching run_workflow.py. These are focused test harness fixes, not claims of new GUI functionality. Both commits are pushed through GitHub API; resulting CI has NOT yet been verified. Windows LAPTOP-O8QBOF2P was online but remote start_process returned internal error, so no Windows test or worktree verification this execution. Production 0.5.11 untouched; no release.
 
-NEXT EXACT: (1) inspect fresh push Actions on b764cb6 and this handoff; if failing fetch failed job logs and fix root cause without weakening native assertions. (2) Recover Windows isolated DEV shell and inspect git status/HEAD; rerun 195 native tests, two-pattern script, and live Qt 1.1 timeline double-click and hover midpoint/center, DPI, teardown, native click-through. (3) Implement distinct guarded Windows 0.5.11â†’0.5.12 patch workflow on immutable baseline and disposable copy; validate Qt startup, native geometry, rollback, SHA256 before release. (4) Keep SESSION_HANDOFF.md current and do not publish or alter working 0.5.11.
+NEXT EXACT: (1) inspect fresh push Actions on b764cb6 and this handoff; if failing fetch failed job logs and fix root cause without weakening native assertions. (2) Recover Windows isolated DEV shell and inspect git status/HEAD; rerun 195 native tests, two-pattern script, and live Qt 1.1 timeline double-click and hover midpoint/center, DPI, teardown, native click-through. (3) Implement distinct guarded Windows 0.5.11Ã¢â€ â€™0.5.12 patch workflow on immutable baseline and disposable copy; validate Qt startup, native geometry, rollback, SHA256 before release. (4) Keep SESSION_HANDOFF.md current and do not publish or alter working 0.5.11.
 
-## 2026-11-12 â€” 0.5.12 source-index ownership hardening (17:25 EST)
+## 2026-11-12 Ã¢â‚¬â€ 0.5.12 source-index ownership hardening (17:25 EST)
 
 Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and SESSION_HANDOFF.md on the requested branch. The Windows native test laptop LAPTOP-O8QBOF2P was offline at inspection; DESKTOP-9R8AKVU was online but is not the verified isolated Windows FreeCAD 1.1 test environment. Do not substitute that device or touch installed 0.5.11. GitHub API access was available, but its commit workflow lookup only covers pull_request runs, not all push Actions, so latest CI status is not verified in this execution.
 
 Committed 0ecff177: read_records now rejects malformed pattern source identities (negative, bool, noninteger) before editing, and validate_ownership rejects negative/out-of-range source and generated geometry indices. Committed c9bf5b73: pure-Python regression for malformed source and out-of-range native source. These are narrowly scoped safety improvements for independently editable sketch history; they do not establish live GUI acceptance. No native or local tests were executed in this run; new CI results remain unverified. No release or production install changes.
 
-NEXT EXACT STEPS: (1) inspect push Actions for c9bf5b73 and this handoff; run test_pattern_records.py and both native pattern/workflow suites; repair any regression without weakening ownership rejection. (2) Reconnect isolated LAPTOP-O8QBOF2P, inspect branch HEAD/status/diff and preserve local launcher, rerun 195-test suite and two-pattern FCStd/Undo/Redo. (3) Exercise actual FreeCAD 1.1 Qt timeline double-click, nonmutating body-edge/midpoint/center cues, high-DPI projection, teardown, and drawing click-through. (4) Build separate guarded 0.5.11â†’0.5.12 patch against immutable 0.5.11 baseline on disposable Windows copy; validate native geometry, Qt startup, rollback and SHA256 before publication. Never modify the working 0.5.11 install.
+NEXT EXACT STEPS: (1) inspect push Actions for c9bf5b73 and this handoff; run test_pattern_records.py and both native pattern/workflow suites; repair any regression without weakening ownership rejection. (2) Reconnect isolated LAPTOP-O8QBOF2P, inspect branch HEAD/status/diff and preserve local launcher, rerun 195-test suite and two-pattern FCStd/Undo/Redo. (3) Exercise actual FreeCAD 1.1 Qt timeline double-click, nonmutating body-edge/midpoint/center cues, high-DPI projection, teardown, and drawing click-through. (4) Build separate guarded 0.5.11Ã¢â€ â€™0.5.12 patch against immutable 0.5.11 baseline on disposable Windows copy; validate native geometry, Qt startup, rollback and SHA256 before publication. Never modify the working 0.5.11 install.
 
 
-## 2026-11-12 â€” 0.5.12 source ownership creation guard (18:xx EST)
+## 2026-11-12 Ã¢â‚¬â€ 0.5.12 source ownership creation guard (18:xx EST)
 
 Read all five continuity documents on codex/az-design-workbench, inspected pattern_records.py and test_pattern_records.py. The verified Windows FreeCAD 1.1 DEV laptop LAPTOP-O8QBOF2P was OFFLINE (last seen 21 minutes earlier); DESKTOP-9R8AKVU online is not a substitute for its isolated test installation. GitHub commit search does not reliably identify development branch HEAD and the available commit-run lookup excludes push Actions, so current push CI remains unverified.
 
@@ -1776,14 +1776,14 @@ Owner supplied ~70 second Windows DEV GUI video showing timeline double-click su
 
 
 
-## 2026-11-12 19:xx EST â€” isolated Windows regression checkpoint
+## 2026-11-12 19:xx EST Ã¢â‚¬â€ isolated Windows regression checkpoint
 
 Connected LAPTOP-O8QBOF2P, fetched development branch, and observed concurrent commits 4be48ac and 87179e8. Did not overwrite or duplicate their implementation. Personally executed `test_pattern_records.py`: PASS 12/12; `test_extrude_preview_ui.py`: PASS 6/6; isolated FreeCAD 1.1 `run_native_0512.ps1`: PASS two independent patterns, FCStd save/reopen and Undo/Redo. The full native unittest discovery attempt failed at PowerShell argument parsing before running tests; do not count it. The untracked launcher was preserved. No live Qt hover/timeline/DPI or guarded patch/startup/rollback/checksum acceptance was performed; installed 0.5.11 untouched, no release.
 
 NEXT EXACT STEPS: (1) inspect latest branch HEAD, CI push jobs, and concurrent working-tree changes before editing; (2) run full native FreeCAD 1.1 unittest discovery through a correctly quoted test launcher and fix failures; (3) validate actual Qt passive edge/midpoint/center hover, nonmutating click-through, DPI and teardown, timeline double-click, independently editable pattern history, save/reopen and Undo/Redo; (4) build a separate immutable 0.5.11 baseline to 0.5.12 disposable Windows patch, verify native geometry, Qt startup, rollback and SHA256 before release. Do not touch installed 0.5.11 or publish early.
 
 
-## 2026-11-12 20:26 EST â€” fail-closed generated-index guard
+## 2026-11-12 20:26 EST Ã¢â‚¬â€ fail-closed generated-index guard
 
 Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and SESSION_HANDOFF.md on the development branch. Inspected pattern_records.py and test_pattern_records.py. LAPTOP-O8QBOF2P (the isolated Windows FreeCAD 1.1 DEV machine) was offline; DESKTOP-9R8AKVU was online but is not the validated isolated test environment. Did not touch either production 0.5.11 or a release. The GitHub commit-search endpoint returned old default-branch commits rather than a reliable branch HEAD, and the available workflow lookup excludes push runs; do not claim CI green.
 
@@ -1795,7 +1795,7 @@ NEXT EXACT: (1) inspect current branch HEAD and push Actions run for a75ec99b; e
 Owner confirmed no snapping/midpoint indicators on existing solids in 0.5.12 DEV. The actual snap_overlay.py relied on Gui.Selection.getPreselection with Object/SubElementNames; native Sketcher may offer no such preselection. Also passive_sketch_cues rejected an upstream dependent source, incorrectly for purely read-only display. Commit 3a6ea75: add bounded visible_body_cue fallback over up to 4 visible Body Tips / 120 edges, with fallback to previous solid when active sketch is Tip, exact planar midpoint and circular center detection and screen-space radius filtering. The hover indicator does NOT modify sketch geometry, mouse events, or create associative constraints. Add regression tests for missing preselection / midpoint / center, upstream hover while link safety still enforced. Bundled Windows FreeCAD 1.1 full unittest discovery PASS 201/201. Copied snap_targets.py and snap_overlay.py to isolated Az Design Native 0.5.12 TEST only, both SHA256 matches confirmed. Existing 0.5.11 not modified. GUI runtime has not been restarted or visually verified; production release, real snapping constraints and patch gates remain pending. NEXT: save and restart 0.5.12 DEV, test midpoint over top-face line and hole center in Sketcher. If visual indicator appears but clicking does not create usable constrained geometry, develop native associative external geometry workflow with GUI tests, not fake mouse snapping.
 
 
-## 2026-11-12 21:xx EST â€” persisted pitch metadata validation
+## 2026-11-12 21:xx EST Ã¢â‚¬â€ persisted pitch metadata validation
 
 Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and SESSION_HANDOFF.md on codex/az-design-workbench. Inspected pattern_records.py and test_pattern_records.py. Committed 7650f05ad34a5ed047e5a11242958b8f4dcc0396 to reject bool dimensions and nonnumeric/nonfinite/out-of-range persisted pitches before producing a pitch-edit plan; committed 1b6febea4e5115b46591b581b5baf70696f0996d with corruption regressions asserting the serialized record is unchanged after rejection. These are source/test commits through the GitHub API, NOT executed test passes. No local worktree was inspected, no Windows/Qt/native tests ran, and push CI status is not verified. Production 0.5.11 and release artifacts untouched.
 
@@ -1819,28 +1819,28 @@ Owner explicitly confirmed that after restarting isolated 0.5.12 DEV, activating
 Owner replied "everything looks good there" following native solid-edge snapping and upstream constraint-check guidance; treat this as general positive GUI feedback, not a rigorous quantified dependency-mutation acceptance. On LAPTOP-O8QBOF2P isolated Windows 0.5.12 DEV, fetched codex/az-design-workbench at 77822f4, with only preexisting untracked run_native_0512.ps1. Personally executed complete native FreeCAD 1.1 unittest discovery PASS 203/203, and native_0512_two_patterns.py PASS (two independent patterns, pitch edits, FCStd save/reopen, Undo/Redo). Also executed native-core/windows/test_apply_patch.ps1 in temporary synthetic install roots (RUNNER_TEMP set) PASS: changed files, adds, deletes, version, rollback and baseline mismatch protection. Verified installed production Az Design Native has version 0.5.11; separate isolated Az Design Native 0.5.12 TEST has product AzDesignNative-TEST/version 0.5.12-dev. These are ~8.44 GB / 8.43 GB installations. Did NOT run a real 0.5.11->0.5.12 full app patch, copy production installation, alter production 0.5.11, perform GUI timeline double-click live automation, or publish release. The full native installed-baseline batch gate is explicitly controlled by .github/validation-requests/native-0.5.11.txt or workflow_dispatch in az-native-patch.yml and remains pending. NEXT: build disposable real-baseline patch with matching product markers outside running app, validate hash/rollback and Qt launch; ensure GUI pattern double-click and dependency edit after upstream change. Keep 0.5.11 safe and avoid claiming release ready.
 
 
-## 2026-11-12 23:xx EST — package CI BOM repair
+## 2026-11-12 23:xx EST â€” package CI BOM repair
 
 Inspected branch codex/az-design-workbench at 90ec328 and push Actions run 43352956951. Modeling job PASSED including native two-pattern geometry, while package job FAILED in tools/package_azdesign.py AST parse of tests/test_solid_edge_snapping_native.py: UTF-8 BOM U+FEFF at line 1. Removed only the BOM in commit d4d52c6, preserving test semantics. On LAPTOP-O8QBOF2P, python tools/package_azdesign.py now PASSES and produces a local untracked dist ZIP (NOT a release); test_pattern_records.py PASSES 13/13; isolated FreeCAD 1.1 native_0512_two_patterns.py PASSES independent patterns, FCStd save/reopen and Undo/Redo. Direct system Python invocation of test_solid_edge_snapping_native.py cannot import FreeCAD; rerun under bundled native Python before claiming it passed. d4d52c6 pushed to feature branch. Preserve untracked dist/ and run_native_0512.ps1; production 0.5.11 unchanged.
 
 NEXT EXACT: (1) Check fresh push CI for d4d52c6 and this handoff; fix any further package or modeling failure without relaxing tests. (2) Run full 203+ native suite and test_solid_edge_snapping_native.py with isolated bundled FreeCAD 1.1 Python. (3) Complete interactive Qt passive edge/midpoint/center hover, click-through, teardown, DPI and timeline double-click pattern editing, Undo/Redo and FCStd persistence. (4) Validate guarded immutable 0.5.11-to-0.5.12 Windows patch on disposable copy, native geometry, Qt startup, rollback and SHA256. Do not publish until all gates pass; keep original installed 0.5.11 untouched.
 
 
-## 2026-11-13 00:45 EST — remote execution unavailable; release gates remain open
+## 2026-11-13 00:45 EST â€” remote execution unavailable; release gates remain open
 
 Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and SESSION_HANDOFF.md from codex/az-design-workbench. PR #1 reports head 56d86a84ff8bce46165281c5facf40537bf007cd and remains draft. The commit combined-status endpoint returned no statuses; this is NOT a CI pass or a CI failure. Both Desktop Commander machines were offline (LAPTOP-O8QBOF2P last seen 1 hour ago, DESKTOP-9R8AKVU last seen 4 hours ago). Thus no local git status, full Windows native suite, interactive Qt, or real-baseline patch verification could be performed. No source/test edits were made or asserted tested; no release and no production 0.5.11 modification. The previously documented d4d52c6 BOM repair and earlier 203/203 Windows run are prior-session evidence only.
 
 NEXT EXACT: (1) Reconnect isolated LAPTOP-O8QBOF2P; inspect git remote, branch, HEAD, status, untracked run_native_0512.ps1 and dist before any edits; fetch and reconcile current origin branch. (2) Inspect push Actions jobs for current HEAD, not merely empty combined statuses; fix any packaging/modeling failures. (3) Execute full bundled FreeCAD 1.1 Python discovery (203+ expected), native_0512_two_patterns.py, and test_solid_edge_snapping_native.py; record exact results. (4) Validate live Qt passive hover edge/midpoint/center cues without mutation, native snapping click-through, high-DPI/teardown, timeline double-click isolated pattern pitch/constraints, FCStd save/reopen, undo/redo and upstream edits. (5) Build 0.5.11-to-0.5.12 patch from immutable baseline on a disposable full Windows install copy; validate native geometry, Qt startup, rollback, exact file hashes and checksum manifest. Do not publish until every gate passes; do not touch production 0.5.11.
 
 
-## 2026-11-13 01:35 EST — branch/CI recheck, Windows agents offline
+## 2026-11-13 01:35 EST â€” branch/CI recheck, Windows agents offline
 
 Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md, SESSION_HANDOFF.md directly from development branch. Latest inspected commit a521c8180090c60ef09d41e6e865330acb679916 is the prior handoff-only checkpoint; no new implementation or test evidence was produced in this execution. GitHub commit-scoped PR workflow runs for a521c818 returned an empty list, and combined commit statuses were empty. These endpoints do NOT prove CI success; inspect Actions runs/jobs when available. Desktop Commander reports LAPTOP-O8QBOF2P offline (last seen 2h) and DESKTOP-9R8AKVU offline (last seen 5h). Local git status, untracked artifacts, native FreeCAD 1.1 tests, live Qt, and disposable Windows full-baseline patch cannot be inspected/executed while offline. Previous 203/203 and two-pattern PASS remain earlier-session evidence, not rerun now. No release; installed production 0.5.11 untouched.
 
 NEXT EXACT: (1) Reconnect LAPTOP-O8QBOF2P; inspect git status, remote/branch/HEAD, local untracked run_native_0512.ps1 and dist, then fetch and reconcile without reset. (2) Inspect Actions push/PR job results for current source HEAD and resolve any failed package/native jobs. (3) Rerun isolated FreeCAD 1.1 full native discovery, test_solid_edge_snapping_native.py and native_0512_two_patterns.py; record counts and native version. (4) Exercise real Qt hover midpoint/center/body-edge nonmutating cues, DPI, teardown, sketch snapping click-through and timeline double-click isolated pattern edits with constraints, upstream edit, FCStd save/reopen and Undo/Redo. (5) Create immutable 0.5.11 baseline disposable full Windows install, apply 0.5.12 patch, test Qt startup/native geometry, checksum manifest and rollback to byte-identical 0.5.11. Do not publish or alter production installation until all pass.
 
 
-## 2026-11-13 01:57 EST — development environment connectivity check
+## 2026-11-13 01:57 EST â€” development environment connectivity check
 
 Read all five required continuity documents from the development branch. Verified prior handoff commit 1f35ac009e0037ab9e022e11891cb3f2cb9b3d6d exists. Its commit-scoped PR workflow query and combined status both returned empty results; neither establishes CI pass/fail. Desktop Commander listed LAPTOP-O8QBOF2P offline (last seen 2h) and DESKTOP-9R8AKVU offline (last seen 5h). Consequently no local checkout inspection, native FreeCAD test, Qt GUI exercise, or disposable Windows installed-baseline patch validation was possible in this execution. No implementation/test edits or new test passes are claimed; 0.5.11 production and release channel remain untouched.
 
@@ -1848,7 +1848,7 @@ NEXT EXACT: (1) On laptop reconnection, inspect branch, origin HEAD, git status 
 
 Assisted-by: ChatGPT (OpenAI)
 
-## 2026-11-13 02:53 EST — remote-only recovery checkpoint
+## 2026-11-13 02:53 EST â€” remote-only recovery checkpoint
 
 Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md and SESSION_HANDOFF.md on codex/az-design-workbench. Desktop Commander reports LAPTOP-O8QBOF2P offline (last seen 3h) and DESKTOP-9R8AKVU offline (last seen 6h). GitHub combined statuses for previous 1989f80a are empty; do not infer green CI. Remote checkout and native FreeCAD/Qt/Windows full-install validation are unavailable. No new source or test pass is claimed. No release, no change to production 0.5.11.
 
@@ -1856,18 +1856,27 @@ NEXT EXACT: (1) Reconnect isolated LAPTOP-O8QBOF2P; inspect git status, branch, 
 
 Assisted-by: ChatGPT (OpenAI)
 
-## 2026-11-13 04:41 EST — verified remote execution checkpoint
+## 2026-11-13 04:41 EST â€” verified remote execution checkpoint
 
 Verified branch tip `e1612a686ba96a98d656e3d71728b87050c91d5a` by GitHub commit fetch, and read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md, and this handoff from the development branch. GitHub commit-scoped PR workflow runs and combined statuses both returned empty collections, which is **not** proof of passing CI. Desktop Commander reports isolated Windows LAPTOP-O8QBOF2P offline (last seen approximately 1 hour ago) and sorter DESKTOP-9R8AKVU offline. No checkout was available to inspect local uncommitted files, and no new implementation, native, Qt or Windows tests were executed. Production 0.5.11 was not changed; 0.5.12 was not published.
 
-NEXT EXACT: (1) On laptop reconnection, inspect `git status --short`, `git rev-parse HEAD`, `git fetch origin`, branch tip and untracked launcher/dist; preserve all local edits. (2) Inspect push-triggered Actions runs and job conclusions independently of empty commit-scoped PR workflow results. (3) Execute full 203+ Python regression suite plus `test_solid_edge_snapping_native.py` and `native_0512_two_patterns.py` under FreeCAD 1.1; add and commit focused failures/fixes for passive body-edge/midpoint/center cues and independently owned pattern constraints. (4) Live-test Qt sketch hover (no geometry mutation), midpoint/center snap click-through, timeline double-click pattern edit, two-pattern save/reopen, Undo/Redo and teardown. (5) Apply 0.5.11→0.5.12 patch only to a disposable byte-pinned Windows installation; verify native geometry, Qt startup, rollback and SHA256 manifest against baseline. Keep draft PR unmerged and do not release until all gates pass.
+NEXT EXACT: (1) On laptop reconnection, inspect `git status --short`, `git rev-parse HEAD`, `git fetch origin`, branch tip and untracked launcher/dist; preserve all local edits. (2) Inspect push-triggered Actions runs and job conclusions independently of empty commit-scoped PR workflow results. (3) Execute full 203+ Python regression suite plus `test_solid_edge_snapping_native.py` and `native_0512_two_patterns.py` under FreeCAD 1.1; add and commit focused failures/fixes for passive body-edge/midpoint/center cues and independently owned pattern constraints. (4) Live-test Qt sketch hover (no geometry mutation), midpoint/center snap click-through, timeline double-click pattern edit, two-pattern save/reopen, Undo/Redo and teardown. (5) Apply 0.5.11â†’0.5.12 patch only to a disposable byte-pinned Windows installation; verify native geometry, Qt startup, rollback and SHA256 manifest against baseline. Keep draft PR unmerged and do not release until all gates pass.
 
 Assisted-by: ChatGPT (OpenAI)
 
-## 2026-11-13 05:22 EST � connected Windows implementation checkpoint
+## 2026-11-13 05:22 EST — connected Windows implementation checkpoint
 
 Recovered LAPTOP-O8QBOF2P online, inspected branch and untracked `dist/` and `run_native_0512.ps1` (both preserved), fetched and fast-forwarded to origin HEAD `92130318`. Read all five required continuity files. Push Actions run 43362425475 on source `d4d52c6` was successful (package/native); it does NOT validate current tip. Executed isolated FreeCAD 1.1 `native_0512_two_patterns.py`: PASS independent patterns, FCStd save/reopen, Undo/Redo. Added strict append-time finite, magnitude and nonzero pitch validation in `pattern_records.py`, plus nonmutation regression, committed/pushed as `6e7d15b`. Focused 14/14 tests passed. Running generic system Python discovery fails two imports because FreeCAD is unavailable there; reran discovery using isolated FreeCAD native Python with proper PYTHONPATH: **204 tests, OK**. PowerShell emitted a NativeCommandError wrapper because unittest writes its summary to stderr, causing pipeline exit 1 despite explicit `Ran 204 tests ... OK`; use direct stdout/stderr redirection and inspect native exit code on next run. No Qt manual hover/timeline exercise or Windows patch/startup/rollback/checksum acceptance was performed. No release, no production 0.5.11 change.
 
 NEXT EXACT: (1) Inspect latest Actions push run for `6e7d15b` and any subsequent HEAD; resolve failing jobs. (2) Run isolated native test_solid_edge_snapping_native.py and two-pattern suite, then live Qt passive edge/midpoint/center cue hover, native snapping click-through, DPI, teardown, and timeline double-click independent pattern pitch editing with constraints; capture evidence. (3) Test upstream edits and FCStd reopen/Undo/Redo after both pattern edits. (4) Construct unique 0.5.11?0.5.12 patch only against pinned immutable installed baseline in disposable Windows copy; verify native geometry, Qt startup, SHA256 manifest, rollback to byte-identical baseline. (5) Keep PR draft and production 0.5.11 untouched until every gate passes. Preserve untracked `dist/` and `run_native_0512.ps1`.
+
+Assisted-by: OpenAI GPT-6
+
+
+## 2026-11-13 06:31 EST — remote checkpoint; Windows development laptop disconnected
+
+Read AGENTS.md, PROJECT_STATE.md, DECISIONS.md, ROADMAP.md, and SESSION_HANDOFF.md from branch `codex/az-design-workbench`. GitHub branch HEAD is `86bd3f45cac5a12a01c9ef23c8af8110cc8f6575`, following the previously verified `6e7d15b` pitch-validation implementation and 204/204 isolated FreeCAD Python regressions (prior execution, **not rerun now**). GitHub commit-scoped PR workflow runs and combined statuses returned empty collections; no current CI conclusion is established. Desktop Commander reports LAPTOP-O8QBOF2P offline (last seen 50 minutes ago) and DESKTOP-9R8AKVU offline (last seen 10 hours ago). Therefore no local git working-tree inspection, source editing with native verification, Qt hover/timeline exercise, or Windows patch/startup/rollback/checksum validation was possible. No new implementation/test pass is claimed; production 0.5.11 and release channel remain untouched.
+
+NEXT EXACT: (1) Reconnect isolated LAPTOP-O8QBOF2P and inspect `git status --short`, branch, local and remote HEAD; preserve untracked `dist/` and `run_native_0512.ps1`. (2) Inspect push-triggered Actions runs/jobs for `6e7d15b` and current HEAD; empty commit-scoped statuses are inconclusive. (3) Run isolated FreeCAD 1.1 `test_solid_edge_snapping_native.py`, `native_0512_two_patterns.py`, and full 204+ regression discovery with process exit codes and stderr captured; fix failures in focused implementation/test commits. (4) Exercise live Qt passive nonmutating body-edge/midpoint/center cues, snap click-through, high-DPI and teardown; verify timeline double-click edit of independently owned pattern constraints, upstream edits, save/reopen, Undo/Redo. (5) Apply 0.5.11-to-0.5.12 patch to a disposable byte-pinned Windows installation only; validate native geometry, Qt startup, checksums, rollback and baseline SHA256 identity before any publication. Keep PR draft and installed 0.5.11 untouched.
 
 Assisted-by: OpenAI GPT-6
