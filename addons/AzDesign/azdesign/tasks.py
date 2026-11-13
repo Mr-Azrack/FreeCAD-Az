@@ -295,6 +295,19 @@ class ExtrudeTask:
                     overlay.ViewObject.DisplayMode = "Flat Lines"
                     overlay.ViewObject.Visibility = False
                     self.overlay_names.append(overlay.Name)
+                    # Lift only the rendered fill in depth. Geometry and ray
+                    # picks stay on the sketch plane, including on solid faces.
+                    from pivy import coin
+                    root = overlay.ViewObject.RootNode
+                    offsets = coin.SoSearchAction()
+                    offsets.setType(coin.SoPolygonOffset.getClassTypeId())
+                    offsets.setInterest(coin.SoSearchAction.ALL)
+                    offsets.setSearchingAll(True)
+                    offsets.apply(root)
+                    for path in offsets.getPaths():
+                        depth = path.getTail()
+                        depth.factor = -1
+                        depth.units = -4
                 if source[0]:
                     target = default_target(source, self.doc)
                     if target:

@@ -294,6 +294,7 @@ class Operation:
                     taper=taper,
                     taper2=taper2,
                     start=offset,
+                    allow_disconnected_tool=True,
                 )
                 base_shape = features.shape_in_body(base, target)
                 overlap = base_shape.common(tool).Volume

@@ -188,6 +188,7 @@ def native_extrusion(
     taper=0.0,
     taper2=0.0,
     start=0.0,
+    allow_disconnected_tool=False,
 ):
     if profile.isNull() or not profile.Faces or not profile.isValid():
         raise DesignError("The selected profiles do not form a valid planar face.")
@@ -210,6 +211,8 @@ def native_extrusion(
         transient.removeObject(existing.Name)
     try:
         body = transient.addObject("PartDesign::Body", "Body")
+        if allow_disconnected_tool:
+            body.AllowCompound = True
         base_feature = None
         if base is not None and operation in ("Join", "Cut"):
             base_feature = body.newObject("PartDesign::Feature", "Base")
@@ -251,7 +254,9 @@ def native_extrusion(
         result = native.Shape.copy()
         if operation == "Intersect":
             result = base.common(result).removeSplitter()
-        if result.isNull() or not result.isValid() or len(result.Solids) != 1:
+        solid_count = len(result.Solids)
+        if (result.isNull() or not result.isValid() or not solid_count
+                or (solid_count != 1 and not allow_disconnected_tool)):
             raise DesignError(
                 "This operation must produce one connected solid per body. Check profiles, direction and extent."
             )

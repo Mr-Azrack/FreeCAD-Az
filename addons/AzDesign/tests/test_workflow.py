@@ -882,6 +882,33 @@ class WorkflowTest(unittest.TestCase):
         self.assertAlmostEqual(result.Shape.Volume, 400)
         op.cancel()
 
+    def test_auto_extrude_two_separate_profiles_on_a_solid(self):
+        body, _, base = self.base()
+        loops = [(1, 1, 3, 3), (6, 6, 8, 8)]
+        edges = []
+        for x0, y0, x1, y1 in loops:
+            edges.extend([(x0, y0, x1, y0), (x1, y0, x1, y1),
+                          (x1, y1, x0, y1), (x0, y1, x0, y0)])
+        source = sketch(self.doc, edges, body=body, z=6)
+        self.doc.recompute()
+        spec = {
+            "source": (source, []),
+            "regions": [r.descriptor() for r in profiles.regions(source)],
+            "target": body,
+            "operation": "Auto",
+            "distance": "2 mm",
+        }
+        op = operations.Operation(self.doc)
+        try:
+            for distance, operation, volume in (("2 mm", "Join", 616), ("-2 mm", "Cut", 584)):
+                result, = op.update(dict(spec, distance=distance))
+                self.assertEqual(result.Operation, operation)
+                self.assertEqual(len(result.Shape.Solids), 1)
+                self.assertAlmostEqual(result.Shape.Volume, volume)
+        finally:
+            op.cancel()
+        self.assertAlmostEqual(base.Shape.Volume, 600)
+
     def test_undo_redo_and_cancel_are_atomic(self):
         source = sketch(self.doc)
         before = [o.Name for o in self.doc.Objects]

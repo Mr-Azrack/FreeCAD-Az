@@ -1905,3 +1905,12 @@ The owner reported a clipped startup card, faint geometry, missing profile check
 Validated on a second isolated Windows copy on LAPTOP-O8QBOF2P. Live Qt clicks selected inner and outer regions and toggled their checks, previewed and canceled Extrude, and placed a native Sketcher point at each of the three snap target types. The cue cleared on exit. The 205-test native suite, two-pattern regression and Qt startup smoke passed. The owner-facing desktop shortcut is FreeCAD-Az 0.5.12 DEV - Snap and Profiles. It uses a dedicated profile. The earlier DEV instance was left open with unsaved work and production remains 0.5.11. The revised source is staged in DEV only. The previously built patch predates these changes.
 
 Next step is owner acceptance in the revised DEV shortcut with the original sketch workflow, followed by rebuilding and validating the incremental patch from 0.5.11 for the updater.
+
+
+## 2026-11-13 — Two-profile Auto Extrude on an existing solid
+
+Owner confirmed the revised snapping works and reported Auto Extrude rejecting two selected regions with the single-solid error. The Auto classifier now permits multiple solids in its temporary probe only. Final output still validates one connected solid per Body. Extrude selection overlays apply a render-only Coin depth bias so coplanar shading does not fight with the model face. Snap code was untouched.
+
+Linux native modeling: 58 tests passed. Windows live Qt exercised two real viewport selections on a solid, checked the overlay depth bias and unchanged plane, verified positive Auto Join and negative Auto Cut by volume, accepted Cut, and confirmed overlay cleanup. The updated isolated desktop shortcut is FreeCAD-Az 0.5.12 DEV - Extrude Fix. The prior DEV build and production 0.5.11 are preserved. The release patch must be rebuilt after acceptance.
+
+Windows native discovery passed 206 tests, plus the independent two-pattern regression.
