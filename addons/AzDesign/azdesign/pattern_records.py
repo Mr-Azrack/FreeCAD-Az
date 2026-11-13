@@ -156,14 +156,19 @@ def pitch_edit_plan(sketch, record_id, pitch_x, pitch_y):
     import math
     record = find_record(sketch, record_id)
     columns, rows = record["columns"], record["rows"]
-    if not (isinstance(columns, int) and isinstance(rows, int)
+    if not (type(columns) is int and type(rows) is int
             and columns >= 1 and rows >= 1
             and len(record["created"]) == columns * rows - 1):
         raise ValueError("Invalid persisted pattern dimensions")
     if not record.get("constraints") or len(record["constraints"]) != 3 * len(record["created"]):
         raise ValueError("Pattern constraint ownership is incomplete")
-    if any(not math.isfinite(float(p)) or abs(float(p)) > 100000
-           for p in (pitch_x, pitch_y)):
+    try:
+        old_pitches = (float(record["pitch_x"]), float(record["pitch_y"]))
+        new_pitches = (float(pitch_x), float(pitch_y))
+    except (TypeError, ValueError, KeyError, OverflowError):
+        raise ValueError("Invalid pattern pitch") from None
+    if any(not math.isfinite(p) or abs(p) > 100000
+           for p in old_pitches + new_pitches):
         raise ValueError("Invalid pattern pitch")
     pitch_x, pitch_y = float(pitch_x), float(pitch_y)
     if (columns > 1 and abs(pitch_x) < 0.001) or (rows > 1 and abs(pitch_y) < 0.001):
