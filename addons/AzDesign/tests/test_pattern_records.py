@@ -85,6 +85,21 @@ class PatternRecordsTests(unittest.TestCase):
             pitch_edit_plan(sketch, first["id"], 0, 24)
         self.assertEqual(find_record(sketch, first["id"])["pitch_x"], 10)
 
+    def test_pitch_plan_rejects_corrupt_persisted_dimensions_without_mutation(self):
+        sketch = FakeSketch()
+        record = append_record(sketch, (0, 2, 2, 10, 20), (1, 2, 3),
+                               tuple(range(9)))
+        for field, invalid in (("columns", True), ("rows", False),
+                               ("pitch_x", "not-a-number"),
+                               ("pitch_y", float("nan")),
+                               ("pitch_x", float("inf"))):
+            damaged = dict(record, **{field: invalid})
+            sketch.AzSketchPatternRecords = json.dumps([damaged])
+            before = sketch.AzSketchPatternRecords
+            with self.subTest(field=field, invalid=invalid), self.assertRaises(ValueError):
+                pitch_edit_plan(sketch, record["id"], 12, 24)
+            self.assertEqual(sketch.AzSketchPatternRecords, before)
+
     def test_pitch_edit_rejects_legacy_missing_constraints(self):
         sketch = FakeSketch()
         record = append_record(sketch, (0, 2, 2, 10, 20), (1, 2, 3))
