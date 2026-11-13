@@ -369,7 +369,7 @@ class Session:
         self.sketch_dock.setWidget(self.sketch_palette)
         self.sketch_dock.setMinimumWidth(215)
         self.sketch_dock.setMinimumHeight(110)
-        self.sketch_dock.setMaximumHeight(210)
+        self.sketch_dock.setMaximumHeight(265)
         self.main.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.sketch_dock)
         self.sketch_dock.hide()
         from .home import DesignHome
@@ -565,7 +565,7 @@ QWidget#AzHoleForm QPushButton:hover, QWidget#AzExtrudeForm QPushButton:hover {
         try:
             self.main.resizeDocks(
                 [self.sketch_dock, self.tasks_dock],
-                [185, max(260, self.main.height() - 350)],
+                [225, max(260, self.main.height() - 390)],
                 QtCore.Qt.Vertical,
             )
         except (RuntimeError, ValueError):

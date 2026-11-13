@@ -143,6 +143,78 @@ def link_body_edge(sketch, source, edge_name):
         raise
 
 
+def enable_solid_edge_snapping(sketch, max_edges=80, plane_tolerance=1e-5):
+    """Make in-plane upstream solid edges native Sketcher snap targets.
+
+    This is an explicit, undoable user action, never a mutation on hover.
+    Only the nearest earlier solid in this sketch's Body is referenced.
+    Existing links are skipped; invalid, off-plane or excessive geometry is
+    rejected rather than producing unbounded dependencies.
+    """
+    if sketch is None or not sketch.isDerivedFrom("Sketcher::SketchObject"):
+        raise DesignError("Edit a sketch to enable solid-edge snapping.")
+    body = getattr(sketch, "getParentGeoFeatureGroup", lambda: None)()
+    if body is None or not body.isDerivedFrom("PartDesign::Body"):
+        raise DesignError("The sketch must belong to a PartDesign Body.")
+    members = list(body.Group)
+    if sketch not in members:
+        raise DesignError("Sketch is not in its expected Body history.")
+    if not 1 <= int(max_edges) <= 200:
+        raise DesignError("Invalid solid-edge reference limit.")
+    source = next((obj for obj in reversed(members[:members.index(sketch)])
+                   if obj.isDerivedFrom("PartDesign::Feature")
+                   and hasattr(obj, "Shape") and not obj.Shape.isNull()
+                   and obj.Shape.isValid() and bool(obj.Shape.Edges)), None)
+    if source is None:
+        raise DesignError("No earlier solid exists in this Body to reference.")
+    if sketch in getattr(source, "OutListRecursive", ()):
+        raise DesignError("A solid reference would create a dependency cycle.")
+    edges = source.Shape.Edges
+    if len(edges) > max_edges:
+        raise DesignError("Solid has too many edges for automatic projection; select individual edges.")
+    inverse = sketch.Placement.inverse()
+    existing = set()
+    for linked, names in getattr(sketch, "ExternalGeometry", ()):
+        if linked == source:
+            existing.update(str(name) for name in names)
+    eligible = []
+    for index, edge in enumerate(edges, 1):
+        name = "Edge" + str(index)
+        if name in existing:
+            continue
+        try:
+            if edge.isNull() or not edge.isValid():
+                continue
+            first, last = edge.FirstParameter, edge.LastParameter
+            # Check more than one point so tilted or crossing curves do not
+            # masquerade as geometry lying in the active sketch plane.
+            for fraction in (0.0, 0.25, 0.5, 0.75, 1.0):
+                parameter = first + (last - first) * fraction
+                point = inverse.multVec(edge.valueAt(parameter))
+                if abs(point.z) > plane_tolerance:
+                    break
+            else:
+                eligible.append(name)
+        except (AttributeError, RuntimeError, ValueError, TypeError):
+            continue
+    if not eligible:
+        return 0
+    doc = sketch.Document
+    doc.openTransaction("Az: Enable solid-edge snapping")
+    try:
+        for name in eligible:
+            sketch.addExternal(source.Name, name)
+        doc.recompute()
+        if "Invalid" in tuple(str(state) for state in sketch.State):
+            raise DesignError("Sketcher rejected the projected solid edges.")
+        doc.commitTransaction()
+    except Exception:
+        doc.abortTransaction()
+        doc.recompute()
+        raise
+    return len(eligible)
+
+
 def link_selected_body_edges(sketch):
     """Link uniquely selected model edges into the active sketch.
 

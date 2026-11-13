@@ -115,10 +115,44 @@ class SketchPalette(QtWidgets.QWidget):
         self.flags["snap"] = snap
         layout.addWidget(snap)
 
+        # One explicit action projects the preceding solid's in-plane edges
+        # into native, associative Sketcher geometry. Unlike a decorative
+        # hover marker, these are usable by FreeCAD's real snap manager.
+        self.solid_snap = QtWidgets.QPushButton("Use solid edges for snapping")
+        self.solid_snap.setObjectName("AzSketchSolidSnap")
+        self.solid_snap.setToolTip(
+            "Reference coplanar edges from the preceding Body feature. "
+            "Undoable; repeated clicks do not duplicate references. "
+            "Solid topology changes may require repairing references."
+        )
+        self.solid_snap.clicked.connect(self.enable_solid_snap)
+        layout.addWidget(self.solid_snap)
+
         # No second Rectangle/Circle/Finish Sketch palette: those already
         # occupy the ribbon. This dock MUST NOT grow beyond the viewport.
         self.setMinimumWidth(215)
-        self.setMaximumHeight(234)
+        self.setMaximumHeight(270)
+
+    def enable_solid_snap(self):
+        if self.sketch is None:
+            return
+        try:
+            import FreeCAD as App
+            from .snap_targets import enable_solid_edge_snapping
+            count = enable_solid_edge_snapping(self.sketch)
+            self.solid_snap.setText("Solid edges ready ({} linked)".format(count)
+                                    if count else "Solid edges ready (existing links)")
+            snap = App.ParamGet("User parameter:BaseApp/Preferences/Mod/Sketcher/Snap")
+            snap.SetBool("Snap", True)
+            snap.SetBool("SnapToObjects", True)
+            self.sketch.ViewObject.Autoconstraints = True
+            self.summary.setText(
+                "{} solid-edge reference(s) ready; native object snapping enabled".format(count)
+                if count else "Existing solid references retained; native object snapping enabled"
+            )
+        except Exception as exc:
+            self.summary.setText("Cannot enable solid snapping: " + str(exc))
+            App.Console.PrintWarning("Az solid-edge snapping: " + str(exc) + "\n")
 
     def set_flag(self, key, checked):
         if not self.sketch:

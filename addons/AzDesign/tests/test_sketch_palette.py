@@ -36,6 +36,7 @@ class FakeWidget:
         self.blocked = False
         self.max_height = None
         self.toggled = Signal()
+        self.clicked = Signal()
         self.children = []
 
     def setObjectName(self, name):
@@ -101,10 +102,9 @@ class SketchPaletteTest(unittest.TestCase):
         self.qt.QtWidgets = types.SimpleNamespace(
             QWidget=FakeWidget, QLabel=FakeWidget,
             QVBoxLayout=FakeWidget, QCheckBox=FakeWidget,
-            # If this constructs another drawing button, the regression fails.
-            QPushButton=lambda *args: self.fail(
-                "The sketch palette must not duplicate top ribbon drawing tools"
-            ),
+            # The sole button projects native solid-edge references, not
+            # another copy of the sketch drawing controls.
+            QPushButton=FakeWidget,
         )
         self.patch = patch.dict(sys.modules, {
             "FreeCADGui": self.gui,
@@ -136,7 +136,8 @@ class SketchPaletteTest(unittest.TestCase):
 
     def test_compact_real_controls_and_native_refresh(self):
         panel = self.module.SketchPalette(self.appearance)
-        self.assertLessEqual(panel.max_height, 240)
+        self.assertLessEqual(panel.max_height, 270)
+        self.assertEqual(panel.solid_snap.text, "Use solid edges for snapping")
         self.assertEqual(
             set(panel.flags), {
                 "grid", "auto_grid", "auto_constraints",
