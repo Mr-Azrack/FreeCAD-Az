@@ -1925,3 +1925,11 @@ The active desktop entries are Az Design Native (production 0.5.11) and FreeCAD-
 ## 2026-11-14 — Cut to face from the viewport
 
 Owner's recording showed Cut → To face losing its target body and exposing a Python unpacking error. The task now defaults to the sole solid when the sketch is in an empty Body, prompts for a planar end face, and accepts nested Body face selections. Unset links are handled before geometry is changed. Windows live Qt selected the bottom face with a viewport click and accepted a two-profile cut, yielding the expected 3500 mm³. Linux native modeling passed 59 tests. Existing DEV window and production 0.5.11 were preserved. The desktop DEV shortcut points to the verified test copy. Next is owner verification and rebuilding the incremental updater patch.
+
+## 2026-11-14 — Confirmed 0.5.12 Windows updater candidate
+
+Owner confirmed Cut to face in the DEV build. On LAPTOP-O8QBOF2P, validation of source c3bddb59631d587c87b5071f3f352b11a833da67 completed after reconnecting. The published 0.5.11 baseline passed its 64 payload hashes. The Windows-built 0.5.11-to-0.5.12 patch applied with all 35 payload hashes verified and no deletions. Design Home, all 207 native tests, independent pattern history with save/reopen and Undo/Redo, exact six-face flush Join, and the two-profile viewport Cut to face passed. The updater accepted this exact candidate using offline release metadata.
+
+Rollback on the disposable install restored 29,345 original files byte-for-byte. The only differences were 18 regenerated Python cache files. The test redirected updater state to its own folder; production 0.5.11 and shared updater state were untouched.
+
+The verified Windows artifact and SHA-256 sidecar are staged under the development checkout dist/validated-0.5.12-c3bddb5. The patch is 126258 bytes with SHA-256 e5bf67de2621de9e1befbe2816c2d8bf9ee3ebeed55043bc97c574b7363aa7a5. The earlier Linux-built candidate has a different hash; use the verified Windows artifact. No release was published. Next step is to publish that artifact and verify live Update-button delivery against a disposable 0.5.11 install.
