@@ -47,16 +47,19 @@ def selected_source():
 def default_target(source, doc):
     if source and source[0]:
         owner = features.owner_body(source[0])
-        if owner:
+        if owner and features.body_tip(owner):
             return owner
     gui_doc = Gui.activeDocument()
     view = gui_doc.activeView() if gui_doc else None
     if view and hasattr(view, "getActiveObject"):
         body = view.getActiveObject("pdbody")
-        if body:
+        if body and features.body_tip(body):
             return body
-    candidates = [o for o in doc.Objects if o.isDerivedFrom("PartDesign::Body")]
-    return candidates[0] if len(candidates) == 1 else None
+    candidates = [o for o in doc.Objects
+                  if o.isDerivedFrom("PartDesign::Body") and features.body_tip(o)]
+    if len(candidates) == 1:
+        return candidates[0]
+    return features.owner_body(source[0]) if source and source[0] else None
 
 
 class ExtrudeTask:
@@ -183,6 +186,7 @@ class ExtrudeTask:
         for control in (self.distance, self.distance2, self.offset, self.taper, self.taper2):
             control.textChanged.connect(self.schedule)
         self.flip.toggled.connect(self.schedule)
+        self.extent.currentIndexChanged.connect(self.update_limit_prompt)
         Gui.Selection.addObserver(self)
         initial = operations.spec_for(editing) if editing else None
         self.busy = True
@@ -438,6 +442,14 @@ class ExtrudeTask:
         else:
             self.timer.start(160)
 
+    def update_limit_prompt(self):
+        if self.busy:
+            return
+        if self.extent.currentText() == "To face" and not self.limit:
+            self.begin_face_pick("limit")
+        elif self.picking == "limit" and self.extent.currentText() != "To face":
+            self.end_pick()
+
     def message(self, message, error=False):
         self.status.setText(message)
         self.status.setStyleSheet(
@@ -574,9 +586,17 @@ class ExtrudeTask:
         if self.closed or document != self.doc.Name:
             return
         obj = self.doc.getObject(name)
-        if self.picking in ("source", "limit") and obj and sub.startswith("Face"):
-            if obj.isDerivedFrom("PartDesign::Body"):
+        if self.picking in ("source", "limit") and obj:
+            prefix, _, face_name = sub.rpartition(".")
+            if not face_name.startswith("Face") or not face_name[4:].isdigit():
+                return
+            if prefix:
+                obj = obj.getSubObject(prefix + ".", 1)
+            if obj and obj.isDerivedFrom("PartDesign::Body"):
                 obj = features.body_tip(obj)
+            if not obj:
+                return
+            sub = face_name
             if obj in self.operation.outputs or any(
                 operations.depends_on(obj, feature) for feature in self.operation.editing
             ):
@@ -584,6 +604,11 @@ class ExtrudeTask:
                 return
             link = (obj, [sub])
             if self.picking == "limit":
+                try:
+                    features.face_in_body(link, None)
+                except (ValueError, RuntimeError) as exc:
+                    self.message(str(exc), True)
+                    return
                 self.limit = link
                 self.pick_limit.setText(obj.Label + " · " + sub)
             else:

@@ -124,10 +124,12 @@ def shape_in_body(obj, target_body):
 
 
 def face_in_body(link, target_body, signature=""):
-    obj, names = link
-    if not obj or len(names) != 1:
+    if not link or not link[0] or len(link[1]) != 1:
         raise DesignError("Pick a target face for the To Face extent.")
+    obj, names = link
     face = references.resolve_face(obj, names[0], signature)[0].copy()
+    if not isinstance(face.Surface, Part.Plane):
+        raise DesignError("Pick a planar end face for the To Face extent.")
     parent = obj.getGlobalPlacement().multiply(obj.Placement.inverse())
     face.Placement = body_frame(target_body).inverse().multiply(parent).multiply(face.Placement)
     return face

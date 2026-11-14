@@ -866,6 +866,24 @@ class WorkflowTest(unittest.TestCase):
         self.doc.recompute()
         self.assertAlmostEqual(result.Shape.Volume, 1000)
 
+    def test_cut_to_bottom_face_preserves_body_until_face_is_picked(self):
+        body, _, base = self.base()
+        source = sketch(self.doc, [(2, 2, 4, 2), (4, 2, 4, 4),
+                                   (4, 4, 2, 4), (2, 4, 2, 2)], body=body, z=6)
+        bottom = next(f"Face{i}" for i, face in enumerate(base.Shape.Faces, 1)
+                      if face.normalAt(0, 0).z < -0.99)
+        spec = {"source": (source, []), "whole": True, "operation": "Cut",
+                "target": body, "extent": "To face"}
+        op = operations.Operation(self.doc)
+        try:
+            with self.assertRaisesRegex(features.DesignError, "Pick a target face"):
+                op.update(spec)
+            self.assertAlmostEqual(base.Shape.Volume, 600)
+            result, = op.update(dict(spec, to_face=(base, [bottom])))
+            self.assertAlmostEqual(result.Shape.Volume, 576)
+        finally:
+            op.cancel()
+
     def test_automatic_inward_cut_and_outward_join(self):
         body, source, base = self.base()
         op = operations.Operation(self.doc)

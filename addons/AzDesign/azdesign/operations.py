@@ -245,6 +245,9 @@ class Operation:
                 "A feature cannot use its own result or a downstream feature as its profile."
             )
         limit = spec.get("to_face")
+        extent = spec.get("extent", "Distance")
+        if extent == "To face" and (not limit or not limit[0] or len(limit[1]) != 1):
+            raise DesignError("Pick a target face for the To Face extent.")
         if limit and limit[0] and any(depends_on(limit[0], obj) for obj in self.editing):
             raise DesignError("The end face cannot depend on this feature.")
         context = self.editing[0] if self.editing else source[0]
@@ -291,6 +294,8 @@ class Operation:
                     distance2=distance2,
                     direction=spec.get("direction", "One side"),
                     reversed=reverse,
+                    extent=extent if extent == "To face" else "Distance",
+                    to_face=features.face_in_body(limit, target) if extent == "To face" else None,
                     taper=taper,
                     taper2=taper2,
                     start=offset,
@@ -372,12 +377,12 @@ class Operation:
             if source[1] and str(source[1][0]).lstrip("?").startswith("Face"):
                 old_element = (
                     previous_source[1][0].lstrip("?")
-                    if previous_source[0] and previous_source[1]
+                    if previous_source and previous_source[0] and previous_source[1]
                     else ""
                 )
                 if (
                     not obj.SourceFaceSignature
-                    or previous_source[0] != source[0]
+                    or not previous_source or previous_source[0] != source[0]
                     or old_element != source[1][0].lstrip("?")
                 ):
                     obj.SourceFaceSignature = references.face_signature(source[0], source[1][0])
@@ -398,12 +403,12 @@ class Operation:
             if limit and limit[0] and limit[1]:
                 old_element = (
                     previous_limit[1][0].lstrip("?")
-                    if previous_limit[0] and previous_limit[1]
+                    if previous_limit and previous_limit[0] and previous_limit[1]
                     else ""
                 )
                 if (
                     not obj.LimitFaceSignature
-                    or previous_limit[0] != limit[0]
+                    or not previous_limit or previous_limit[0] != limit[0]
                     or old_element != limit[1][0].lstrip("?")
                 ):
                     obj.LimitFaceSignature = references.face_signature(limit[0], limit[1][0])
